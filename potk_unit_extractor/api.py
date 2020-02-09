@@ -39,7 +39,8 @@ def download_asset_bundle(
         raise ValueError(ab_name + " has empty bundle")
 
     download_fn = bundle[0]
-    target_fn = ab_name.replace('/', '_') + '_' + download_fn
+    target_fn = '_'.join(ab_name.split('/')[1:])
+    target_fn = target_fn + '.' + download_fn.split('.')[-1]
     target_fp = target / target_fn
 
     print(f'Saving "{ab_name}" to "{target_fp}"...')

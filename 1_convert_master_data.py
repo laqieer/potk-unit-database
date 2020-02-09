@@ -8,6 +8,12 @@ import json
 import unitypack  # Tested with UnityPack 0.9.0
 
 
+def run_conversions(conversions):
+    for name, parser in conversions:
+        source_fp = src / f'{name}.unity3d'
+        convert_asset_bundle(source_fp, parser, output_dir, name)
+
+
 def convert_asset_bundle(
         source_fp: Path, parser: callable, target_dir: Path, output_fn: str):
     print(f'Converting {source_fp.name}...')
@@ -30,53 +36,16 @@ if __name__ == "__main__":
     output_dir = Path('masterdata')
     output_dir.mkdir(exist_ok=True)
 
-    conversions = [
-        (
-            "MasterData_UnitUnit_*.unity3d",
-            'UnitUnit',
-            parse_unit_unit
-        ),
-        (
-            "MasterData_UnitUnitParameter_*.unity3d",
-            'UnitUnitParameter',
-            parse_unit_parameters
-        ),
-        (
-            "MasterData_UnitInitialParam_*.unity3d",
-            'UnitInitialParam',
-            parse_unit_initial_parameters
-        ),
-        (
-            "MasterData_UnitTypeParameter_*.unity3d",
-            'UnitTypeParameter',
-            parse_unit_type_parameter
-        ),
-        (
-            "MasterData_UnitJob_*.unity3d",
-            'UnitJob',
-            parse_unit_job
-        ),
-        (
-            "MasterData_UnitEvolutionPattern_*.unity3d",
-            'UnitEvolutionPattern',
-            parse_unit_evolution_pattern
-        ),
-        (
-            "MasterData_ComposeMaxUnityValueSetting_*.unity3d",
-            'ComposeMaxUnityValueSetting',
-            parse_unit_compose_setting
-        ),
-        (
-            "MasterData_UnitRarity_*.unity3d",
-            'UnitRarity',
-            parse_unit_rarity
-        ),
-        (
-            "MasterData_GearKind_*.unity3d",
-            'GearKind',
-            parse_gear_kind
-        ),
-    ]
-    for glob, ofn, parser in conversions:
-        source_fp = src.glob(glob).__next__()
-        convert_asset_bundle(source_fp, parser, output_dir, ofn)
+    run_conversions([
+        ('UnitUnit', parse_unit_unit),
+        ('UnitUnitParameter', parse_unit_parameters),
+        ('UnitInitialParam', parse_unit_initial_parameters),
+        ('UnitTypeParameter', parse_unit_type_parameter),
+        ('UnitJob', parse_unit_job),
+        ('UnitEvolutionPattern', parse_unit_evolution_pattern),
+        ('ComposeMaxUnityValueSetting', parse_unit_compose_setting),
+        ('UnitRarity', parse_unit_rarity),
+        ('GearKind', parse_gear_kind),
+        ('UnitSkill', parse_unit_skill),
+        ('BattleskillSkill', parse_battle_skill),
+    ])
