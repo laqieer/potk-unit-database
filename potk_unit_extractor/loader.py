@@ -108,31 +108,36 @@ class Loader:
             })
         return raw
 
-    def load_normal_units(self):
+    def load_playable_units(self):
         """
         Loads all units with IsNormalUnit=True (game code).
 
         :return: Generator of all loaded units, in no particular order.
         """
-        check_keys = [
-            'is_consume_only',
-            'is_evolution_only',
-            'skillup_type',
-            'is_breakthrough_only',
-            'is_buildup_only',
-            'is_appendedskill_only',
-            'is_unity_value_up',
+        excludes = [
+            range(700000, 999999),      # 700k, OG Misc
+            range(1000000, 1999999),    # 1m, Earth Males
+            range(2700000, 2999999),    # 2m, PoL Misc
+            range(3700000, 3999999),    # 3m, LR Misc
+            range(4700000, 4999999),    # 4m, Extra Art Misc
+            range(5700000, 5999999),    # 5m, IN Misc
+            range(7000000, 7999999),    # 7m, Taga Enemies?
+            range(10000000, 19999999),  # 10m, Laev Enemies?
+            range(30000000, 39999999),  # 30m, Guild Structures
+            range(70000000, 79999999),  # 70m, Memories, Cards, etc
+            range(80000000, 89999999),  # 80m, Innocents
+            range(700000000, 799999999),  # 700m, Male Memories
+            range(800000000, 899999999),  # 800m, Male Innocents
         ]
         generator = (
             unit['ID'] for unit in self.units.values()
-            # This will match all units the game considers normal units.
-            # i.e. Ignores evo mats and similar.
-            # It *does* include enemies and misc stuff like Black Jack Cards.
-            # TODO Filter this list down to only playable units.
-            if not any(unit[k] for k in check_keys)
+            if not any(unit['ID'] in r for r in excludes)
         )
         for unit_id in generator:
-            yield self.load_unit(unit_id)
+            unit = self.load_unit(unit_id)
+            # Some weird tyr versions are mixed in the fatom range.
+            if unit.element != Element.NONE:
+                yield unit
 
     def load_unit(self, unit_id: int) -> UnitData:
         """

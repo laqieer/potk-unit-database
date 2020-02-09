@@ -32,7 +32,7 @@ def main(unit_ids: list):
     if unit_ids:
         generator = (loader.load_unit(int(u)) for u in unit_ids)
     else:
-        generator = loader.load_normal_units()
+        generator = loader.load_playable_units()
 
     units = []
     for unit in generator:
