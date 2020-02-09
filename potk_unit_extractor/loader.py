@@ -101,6 +101,7 @@ class Loader:
         jp_name: str = data.unit['name']
         eng_name: str = data.unit['english_name']
         level: Level = self._load_level(data.params)
+        gear_kind = GearKind(data.unit['kind_GearKind'])
         rarity = UnitRarityStars(data.unit['rarity_UnitRarity'])
         job = self._load_job(data.job)
         cost: int = data.unit['cost']
@@ -111,6 +112,7 @@ class Loader:
             resource_id=resource_id,
             jp_name=jp_name,
             eng_name=eng_name,
+            gear_kind=gear_kind,
             level=level,
             rarity=rarity,
             job=job,

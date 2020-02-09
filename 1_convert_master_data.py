@@ -71,6 +71,11 @@ if __name__ == "__main__":
             'UnitRarity',
             parse_unit_rarity
         ),
+        (
+            "MasterData_GearKind_*.unity3d",
+            'GearKind',
+            parse_gear_kind
+        ),
     ]
     for glob, ofn, parser in conversions:
         source_fp = src.glob(glob).__next__()

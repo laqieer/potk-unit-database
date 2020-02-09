@@ -197,3 +197,13 @@ def parse_unit_rarity(reader: MasterDataReader, item: dict):
     item['indicator_level_rate'] = reader.ReadFloat()
     item['reincarnation_level'] = reader.ReadInt()
     item['trust_rate'] = reader.ReadFloat()
+
+
+def parse_gear_kind(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['name'] = reader.ReadString(True)
+    item['can_equip'] = reader.ReadInt()
+    item['same_element'] = reader.ReadInt()
+    item['is_attack'] = reader.ReadBool()
+    item['is_composite'] = reader.ReadBool()
+    item['colosseum_preempt_coefficient'] = reader.ReadInt()

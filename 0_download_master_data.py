@@ -59,6 +59,7 @@ def main(paths_fp):
         'MasterData/p0/UnitUnitParameter',
         'MasterData/p0/UnitUnitSupplement',
         'MasterData/p0/UnitVoicePattern',
+        'MasterData/GearKind',
         'MasterData/ShopTopUnit',
         'MasterData/UnitAffiliationIcon',
         'MasterData/UnitAwakeningEffect',

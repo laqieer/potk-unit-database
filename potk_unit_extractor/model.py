@@ -130,6 +130,28 @@ class UnitRarityStars(IntEnum):
     six = 991
 
 
+class GearKind(IntEnum):
+    """Yet another dirty shortcut.
+    This one actually maps to a Enum on the game side, so it's less risky.
+    """
+    sword = 1
+    axe = 2
+    spear = 3
+    bow = 4
+    gun = 5
+    staff = 6
+    shield = 7
+    unique_weapon = 8
+    smith = 9
+    accessories = 10
+    drilling = 11
+    special_drilling = 12
+    sea_present = 13
+    magic = 14
+    dummy = 1001
+    none = 9999
+
+
 @dataclass
 class UnitJob:
     ID: int
@@ -145,6 +167,7 @@ class UnitData:
     resource_id: int
     jp_name: str
     eng_name: str
+    gear_kind: GearKind
     level: Level
     rarity: UnitRarityStars
     job: UnitJob
