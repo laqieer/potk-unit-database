@@ -186,3 +186,14 @@ def parse_unit_compose_setting(reader: MasterDataReader, item: dict):
     item['lucky_compose_add_max'] = reader.ReadStringOrNull(True)
     item['name'] = reader.ReadString(True)
     item['description'] = reader.ReadString(True)
+
+
+def parse_unit_rarity(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['name'] = reader.ReadString(True)
+    item['index'] = reader.ReadInt()
+    item['sell_rarity_medal'] = reader.ReadInt()
+    item['skill_levelup_rate'] = reader.ReadInt()
+    item['indicator_level_rate'] = reader.ReadFloat()
+    item['reincarnation_level'] = reader.ReadInt()
+    item['trust_rate'] = reader.ReadFloat()

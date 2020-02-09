@@ -115,6 +115,21 @@ class Level:
         return f'{self.ini}-{self.max}'
 
 
+class UnitRarityStars(IntEnum):
+    """Dirty shortcut to deal with unit rarities.
+    For whatever reason they're loaded as entities with IDs all over the place,
+    but in fact they're only 6 values, from 1-6 starts.
+
+    This may come back to bite us if new unit rarities are added to the game.
+    """
+    one = 138
+    two = 167
+    three = 383
+    four = 642
+    five = 803
+    six = 991
+
+
 @dataclass
 class UnitData:
     ID: int
@@ -123,4 +138,5 @@ class UnitData:
     jp_name: str
     eng_name: str
     level: Level
+    rarity: UnitRarityStars
     stats: UnitStats

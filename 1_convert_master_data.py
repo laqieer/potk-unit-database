@@ -66,6 +66,11 @@ if __name__ == "__main__":
             'ComposeMaxUnityValueSetting',
             parse_unit_compose_setting
         ),
+        (
+            "MasterData_UnitRarity_*.unity3d",
+            'UnitRarity',
+            parse_unit_rarity
+        ),
     ]
     for glob, ofn, parser in conversions:
         source_fp = src.glob(glob).__next__()
