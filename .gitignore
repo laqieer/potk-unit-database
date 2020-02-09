@@ -1,0 +1,5 @@
+**/.idea/
+**/*.pyc
+paths.json
+*.unity3d
+*.json
