@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet"
+		  href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+		  integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+		  crossorigin="anonymous">
+	<title>PotK Unit Database (WIP)</title>
+</head>
+<body>
+<div class="container">
+	<h1>
+		PotK Unit Database <br/>
+		<small><i>(WIP: {{ total }} units)</i></small>
+	</h1>
+	<div id="unit-list" class="list-group">
+		{% for unit in units %}
+		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item">
+			<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
+			<small class="label label-default">{{ unit.ID }}</small>
+			{{ unit.any_name | title }} {{ stars[unit.rarity] }}
+		</a>
+		{% endfor %}
+	</div>
+</div>
+</body>
+</html>

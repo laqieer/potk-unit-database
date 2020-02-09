@@ -1,73 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
-          crossorigin="anonymous">
-    <title>{{ unit.eng_name | title }}</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet"
+		  href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+		  integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+		  crossorigin="anonymous">
+	<title>{{ unit.eng_name | title }}</title>
 </head>
 <body>
 <div class="container">
-    <h1>
-        {{ unit.eng_name | title }} <small>{{ stars[unit.rarity] }}</small><br/>
-        <small>{{ unit.jp_name }}</small>
-    </h1>
-    <div id="unit-info">
-        <img class="img-responsive"
-             src="images/units/{{unit.resource_id}}/2D/unit_hires.png"/>
-        <h2>Unit Information</h2>
-        <dl>
-            <dt>Weapon Type</dt>
-            <dd>{{ unit.gear_kind.name | title }}</dd>
-            <dt>Rarity</dt>
-            <dd>{{ stars[unit.rarity] }}</dd>
-            <dt>Cost</dt>
-            <dd>{{ unit.cost }}</dd>
-            <dt>Level</dt>
-            <dd>
-                {{ unit.level.ini }} - {{ unit.level.max }}
-                (Limit Breaks: {{ unit.level.mlb_c }})
-            </dd>
-            <dt>Job</dt>
-            <dd>{{ unit.job.name }}</dd>
-            <dt>Movement</dt>
-            <dd>{{ unit.job.movement }}</dd>
-        </dl>
-    </div>
-    <div id="stats-caps">
-        <h2>Stats Caps</h2>
-        {% for type in UnitType %}
-        <h3>{{ type.name }}</h3>
-        <table class="table table-bordered table-hover table-condensed">
-            <thead>
-            <tr>
-                <td>&nbsp;</td>
-                <th scope="col">Max</th>
-                <th scope="col">Initial</th>
-                <th scope="col">Evo</th>
-                <th scope="col">Growth</th>
-                <th scope="col">Fusion</th>
-                <th scope="col">UD</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for stat in StatType %}
-            <tr>
-                <th scope="row">{{ stat.name }}</th>
-                <td>{{ unit.stats.of(type).of(stat).max }}</td>
-                <td>{{ unit.stats.of(type).of(stat).initial }}</td>
-                <td>{{ unit.stats.of(type).of(stat).evo_bonus }}</td>
-                <td>{{ unit.stats.of(type).of(stat).growth }}</td>
-                <td>{{ unit.stats.of(type).of(stat).compose }}</td>
-                <td>{{ unit.stats.of(type).of(stat).ud }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% endfor %}
-    </div>
+	<h1>
+		{{ unit.eng_name | title }} <small>{{ stars[unit.rarity] }}</small><br/>
+		<small>{{ unit.jp_name }}</small>
+	</h1>
+	<div id="unit-info">
+		<img class="img-responsive"
+			 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
+		<h2>Unit Information</h2>
+		<dl>
+			<dt>Weapon Type</dt>
+			<dd>{{ unit.gear_kind.name | title }}</dd>
+			<dt>Rarity</dt>
+			<dd>{{ stars[unit.rarity] }}</dd>
+			<dt>Cost</dt>
+			<dd>{{ unit.cost }}</dd>
+			<dt>Level</dt>
+			<dd>
+				{{ unit.level.ini }} - {{ unit.level.max }}
+				(Limit Breaks: {{ unit.level.mlb_c }})
+			</dd>
+			<dt>Job</dt>
+			<dd>{{ unit.job.name }}</dd>
+			<dt>Movement</dt>
+			<dd>{{ unit.job.movement }}</dd>
+		</dl>
+	</div>
+	<div id="stats-caps">
+		<h2>Stats Caps</h2>
+		{% for type in UnitType %}
+		<h3>{{ type.name }}</h3>
+		<table class="table table-bordered table-hover table-condensed">
+			<thead>
+			<tr>
+				<td>&nbsp;</td>
+				<th scope="col">Max</th>
+				<th scope="col">Initial</th>
+				<th scope="col">Evo</th>
+				<th scope="col">Growth</th>
+				<th scope="col">Fusion</th>
+				<th scope="col">UD</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for stat in StatType %}
+			<tr>
+				<th scope="row">{{ stat.name }}</th>
+				<td>{{ unit.stats.of(type).of(stat).max }}</td>
+				<td>{{ unit.stats.of(type).of(stat).initial }}</td>
+				<td>{{ unit.stats.of(type).of(stat).evo_bonus }}</td>
+				<td>{{ unit.stats.of(type).of(stat).growth }}</td>
+				<td>{{ unit.stats.of(type).of(stat).compose }}</td>
+				<td>{{ unit.stats.of(type).of(stat).ud }}</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		{% endfor %}
+	</div>
 </div>
 </body>
 </html>

@@ -163,7 +163,8 @@ class UnitJob:
 @dataclass
 class UnitData:
     ID: int
-    same_character_id: int
+    same_character_id: int  # Only the same for different rarities / artworks.
+    character_id: int  # Same for different versions of the same character.
     resource_id: int
     jp_name: str
     eng_name: str
@@ -173,3 +174,7 @@ class UnitData:
     job: UnitJob
     cost: int
     stats: UnitStats
+
+    @property
+    def any_name(self) -> str:
+        return self.eng_name if self.eng_name else self.jp_name

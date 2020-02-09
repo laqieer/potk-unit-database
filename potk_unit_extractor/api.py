@@ -40,7 +40,23 @@ def download_asset_bundle(
 
     download_fn = bundle[0]
     target_fn = ab_name.replace('/', '_') + '_' + download_fn
+    target_fp = target / target_fn
 
-    print(f'Saving "{ab_name}" to "{target/target_fn}"...')
-    with (target/target_fn).open(mode='wb') as fd:
+    print(f'Saving "{ab_name}" to "{target_fp}"...')
+    with target_fp.open(mode='wb') as fd:
         fd.write(env.download_asset('ab', download_fn))
+
+
+def download_streaming_asset(
+        env: Environment, asset: dict, key: str, target: Path):
+    if not asset:
+        raise ValueError(key + " has empty bundle")
+
+    download_fn = asset[0]
+    target_fn = key.split('/')[-1]
+    ext = asset[1]
+    target_fp = target / f'{target_fn}{ext}'
+
+    print(f'Saving "{key}" to "{target_fp}"...')
+    with target_fp.open(mode='wb') as fd:
+        fd.write(env.download_asset('sa', download_fn))

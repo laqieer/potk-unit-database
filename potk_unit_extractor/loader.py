@@ -82,6 +82,32 @@ class Loader:
             })
         return raw
 
+    def load_normal_units(self):
+        """
+        Loads all units with IsNormalUnit=True (game code).
+
+        :return: Generator of all loaded units, in no particular order.
+        """
+        check_keys = [
+            'is_consume_only',
+            'is_evolution_only',
+            'skillup_type',
+            'is_breakthrough_only',
+            'is_buildup_only',
+            'is_appendedskill_only',
+            'is_unity_value_up',
+        ]
+        generator = (
+            unit['ID'] for unit in self.units.values()
+            # This will match all units the game considers normal units.
+            # i.e. Ignores evo mats and similar.
+            # It *does* include enemies and misc stuff like Black Jack Cards.
+            # TODO Filter this list down to only playable units.
+            if not any(unit[k] for k in check_keys)
+        )
+        for unit_id in generator:
+            yield self.load_unit(unit_id)
+
     def load_unit(self, unit_id: int) -> UnitData:
         """
         Loads a single unit given their ID.
@@ -96,28 +122,19 @@ class Loader:
         if data.evo_from:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
-        same_ch_id = data.unit['same_character_id']
-        resource_id = data.unit['resource_reference_unit_id_UnitUnit']
-        jp_name: str = data.unit['name']
-        eng_name: str = data.unit['english_name']
-        level: Level = self._load_level(data.params)
-        gear_kind = GearKind(data.unit['kind_GearKind'])
-        rarity = UnitRarityStars(data.unit['rarity_UnitRarity'])
-        job = self._load_job(data.job)
-        cost: int = data.unit['cost']
-        stats: UnitStats = self._load_unit_stats(data)
         return UnitData(
             ID=unit_id,
-            same_character_id=same_ch_id,
-            resource_id=resource_id,
-            jp_name=jp_name,
-            eng_name=eng_name,
-            gear_kind=gear_kind,
-            level=level,
-            rarity=rarity,
-            job=job,
-            cost=cost,
-            stats=stats,
+            same_character_id=data.unit['same_character_id'],
+            character_id=data.unit['character_UnitCharacter'],
+            resource_id=data.unit['resource_reference_unit_id_UnitUnit'],
+            jp_name=data.unit['name'],
+            eng_name=data.unit['english_name'],
+            gear_kind=GearKind(data.unit['kind_GearKind']),
+            level=self._load_level(data.params),
+            rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
+            job=self._load_job(data.job),
+            cost=data.unit['cost'],
+            stats=self._load_unit_stats(data),
         )
 
     def _load_unit_stats(self, data: _RawUnitData) -> UnitStats:
