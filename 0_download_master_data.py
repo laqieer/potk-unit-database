@@ -8,6 +8,7 @@
 from pathlib import Path
 from potk_unit_extractor.api import Environment, download_asset_bundle
 import json
+import shutil
 
 
 def main(paths_fp):
@@ -18,7 +19,8 @@ def main(paths_fp):
     asset_bundle: dict = paths['AssetBundle']
     env = Environment(True)
     target = Path('.', 'bundles')
-    target.mkdir(exist_ok=True)
+    shutil.rmtree(target, ignore_errors=True)
+    target.mkdir()
 
     names = [
         'MasterData/BattleUnitLandformFootstep',
