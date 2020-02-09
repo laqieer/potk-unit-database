@@ -5,9 +5,9 @@
 # Takes the paths.json file as an argument.
 # Saves all files to the current working directory.
 
+from potk_unit_extractor.loader import load_folder
+from potk_unit_extractor.api import Environment, download_streaming_asset
 from pathlib import Path
-from potk_unit_extractor.api import Environment, download_asset_bundle, \
-    download_streaming_asset
 import json
 
 
@@ -18,28 +18,28 @@ def main(paths_fp):
     print("File loaded successfully")
     streaming_assets: dict = paths['StreamingAssets']
     env = Environment(True)
+
     target = Path('.', 'site', 'images', 'units')
     target.mkdir(exist_ok=True, parents=True)
 
-    with open('masterdata/UnitUnit.json', mode='r', encoding='utf8') as fd:
-        units = json.load(fd)
+    loader = load_folder(Path('masterdata'))
+    assets = [unit.resource_id for unit in loader.load_playable_units()]
 
     seen = set()
-    for unit in units:
-        unit_id = unit['resource_reference_unit_id_UnitUnit']
-        if unit_id in seen:
+    for asset_id in assets:
+        if asset_id in seen:
             continue
-        seen.add(unit_id)
+        seen.add(asset_id)
 
-        unit_asset_path = target / str(unit_id)
+        unit_asset_path = target / str(asset_id)
         unit_asset_path.mkdir(exist_ok=True, parents=True)
 
-        thumb_key = f'AssetBundle/Resources/Units/{unit_id}/2D/c_thum'
+        thumb_key = f'AssetBundle/Resources/Units/{asset_id}/2D/c_thum'
         if thumb_key in streaming_assets:
             download_streaming_asset(
                 env, streaming_assets[thumb_key], thumb_key, unit_asset_path)
 
-        hires_key = f'AssetBundle/Resources/Units/{unit_id}/2D/unit_hires'
+        hires_key = f'AssetBundle/Resources/Units/{asset_id}/2D/unit_hires'
         if hires_key in streaming_assets:
             download_streaming_asset(
                 env, streaming_assets[hires_key], hires_key, unit_asset_path)
