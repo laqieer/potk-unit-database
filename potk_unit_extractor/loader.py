@@ -97,11 +97,20 @@ class Loader:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
         same_ch_id = data.unit['same_character_id']
+        resource_id = data.unit['resource_reference_unit_id_UnitUnit']
         jp_name: str = data.unit['name']
         eng_name: str = data.unit['english_name']
         level: Level = self._load_level(data.params)
         stats: UnitStats = self._load_unit_stats(data)
-        return UnitData(unit_id, same_ch_id, jp_name, eng_name, level, stats)
+        return UnitData(
+            ID=unit_id,
+            same_character_id=same_ch_id,
+            resource_id=resource_id,
+            jp_name=jp_name,
+            eng_name=eng_name,
+            level=level,
+            stats=stats
+        )
 
     def _load_unit_stats(self, data: _RawUnitData) -> UnitStats:
         """

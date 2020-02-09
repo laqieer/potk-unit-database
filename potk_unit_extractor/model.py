@@ -119,6 +119,7 @@ class Level:
 class UnitData:
     ID: int
     same_character_id: int
+    resource_id: int
     jp_name: str
     eng_name: str
     level: Level
