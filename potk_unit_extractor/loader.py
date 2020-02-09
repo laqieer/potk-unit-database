@@ -102,6 +102,7 @@ class Loader:
         eng_name: str = data.unit['english_name']
         level: Level = self._load_level(data.params)
         rarity = UnitRarityStars(data.unit['rarity_UnitRarity'])
+        cost: int = data.unit['cost']
         stats: UnitStats = self._load_unit_stats(data)
         return UnitData(
             ID=unit_id,
@@ -111,6 +112,7 @@ class Loader:
             eng_name=eng_name,
             level=level,
             rarity=rarity,
+            cost=cost,
             stats=stats,
         )
 

@@ -139,4 +139,5 @@ class UnitData:
     eng_name: str
     level: Level
     rarity: UnitRarityStars
+    cost: int
     stats: UnitStats
