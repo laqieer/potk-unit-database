@@ -47,6 +47,11 @@ if __name__ == "__main__":
             parse_unit_initial_parameters
         ),
         (
+            "MasterData_UnitTypeParameter_*.unity3d",
+            'UnitTypeParameter',
+            parse_unit_type_parameter
+        ),
+        (
             "MasterData_UnitJob_*.unity3d",
             'UnitJob',
             parse_unit_job
