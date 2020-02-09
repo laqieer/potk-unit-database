@@ -10,6 +10,11 @@
 </head>
 <body>
 <div class="container">
+	<div class="breadcrumb">
+                <a class="breadcrumb-link" href="https://potk-fan-database.neocities.org/}">Main</a>
+                <span class="breadcrumb-gt">&gt;</span>
+                <span class="breadcrumb-child">{{ unit.eng_name | title }}</span>
+        </div>
 	<h1>
 		{{ unit.eng_name | title }} <small>{{ stars[unit.rarity] }}</small><br/>
 		<small>{{ unit.jp_name }}</small>
