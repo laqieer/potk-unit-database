@@ -1,43 +1,27 @@
 # -*- coding:utf-8 -*-
-
+from potk_unit_extractor.loader import Loader
 import json
 
 
-def main():
-    units = {
-        it['ID']: it for it in load('masterdata/UnitUnit.json')
-    }
-    parameters = {
-        it['ID']: it for it in load('masterdata/UnitUnitParameter.json')
-    }
-    initial = {
-        it['ID']: it for it in load('masterdata/UnitInitialParam.json')
-    }
-    jobs = {
-        it['ID']: it for it in load('masterdata/UnitJob.json')
-    }
-    # TODO Fix when my brain starts working again
-    types = {}
-    for it in load('masterdata/UnitTypeParameter.json'):
-        key = it['rarity_UnitRarity']
-        if key not in types:
-            types[key] = []
-        types[key].append(it)
+def main(unit_ids: list):
+    loader = Loader(
+        units=load('masterdata/UnitUnit.json'),
+        parameters=load('masterdata/UnitUnitParameter.json'),
+        initials=load('masterdata/UnitInitialParam.json'),
+        jobs=load('masterdata/UnitJob.json'),
+        types_data=load('masterdata/UnitTypeParameter.json'),
+        evos=load('masterdata/UnitEvolutionPattern.json'),
+    )
 
-    output = []
-    for ID, it in units.items():
-        print(ID)
-        item = {
-            'unit':       it,
-            'parameters': parameters[it['parameter_data_UnitUnitParameter']],
-            'initial':    initial[ID],
-            'job':        jobs[it['job_UnitJob']],
-            'types':      types[it['rarity_UnitRarity']]
-        }
-        output.append(item)
-
-    with open('composed.json', mode='w', encoding='utf8') as fd:
-        json.dump(output, fd, indent='\t', ensure_ascii=False)
+    if not unit_ids:
+        print('dumping to composed.json')
+        output = loader.dump_raw()
+        with open('composed.json', mode='w', encoding='utf8') as fd:
+            json.dump(output, fd, indent='\t', ensure_ascii=False)
+    else:
+        for unit_id in unit_ids:
+            unit = loader.load_unit(int(unit_id))
+            print(unit)
 
 
 def load(fn: str) -> list:
@@ -46,4 +30,5 @@ def load(fn: str) -> list:
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    main(sys.argv[1:])

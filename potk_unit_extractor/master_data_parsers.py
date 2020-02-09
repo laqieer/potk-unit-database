@@ -164,3 +164,11 @@ def parse_unit_type_parameter(reader: MasterDataReader, item: dict):
     item['agility_compose_max'] = reader.ReadInt()
     item['dexterity_compose_max'] = reader.ReadInt()
     item['lucky_compose_max'] = reader.ReadInt()
+
+
+def parse_unit_evolution_pattern(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['target_unit_UnitUnit'] = reader.ReadInt()
+    item['threshold_level'] = reader.ReadInt()
+    item['money'] = reader.ReadInt()

@@ -56,6 +56,11 @@ if __name__ == "__main__":
             'UnitJob',
             parse_unit_job
         ),
+        (
+            "MasterData_UnitEvolutionPattern_*.unity3d",
+            'UnitEvolutionPattern',
+            parse_unit_evolution_pattern
+        ),
     ]
     for glob, ofn, parser in conversions:
         source_fp = src.glob(glob).__next__()
