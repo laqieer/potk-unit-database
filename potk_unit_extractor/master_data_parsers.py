@@ -105,3 +105,16 @@ def parse_unit_parameters(reader: MasterDataReader, item: dict):
     item['buildup_limit'] = reader.ReadInt()
     item['default_weapon_proficiency_UnitProficiency'] = reader.ReadInt()
     item['default_shield_proficiency_UnitProficiency'] = reader.ReadInt()
+
+
+def parse_unit_initial_parameters(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['hp_initial'] = reader.ReadInt()
+    item['strength_initial'] = reader.ReadInt()
+    item['vitality_initial'] = reader.ReadInt()
+    item['intelligence_initial'] = reader.ReadInt()
+    item['mind_initial'] = reader.ReadInt()
+    item['agility_initial'] = reader.ReadInt()
+    item['dexterity_initial'] = reader.ReadInt()
+    item['lucky_initial'] = reader.ReadInt()
+    item['level_max'] = reader.ReadInt()

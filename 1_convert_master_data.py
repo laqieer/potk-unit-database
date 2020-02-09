@@ -41,6 +41,11 @@ if __name__ == "__main__":
             'UnitUnitParameter',
             parse_unit_parameters
         ),
+        (
+            "MasterData_UnitInitialParam_*.unity3d",
+            'UnitInitialParam',
+            parse_unit_initial_parameters
+        ),
     ]
     for glob, ofn, parser in conversions:
         source_fp = src.glob(glob).__next__()
