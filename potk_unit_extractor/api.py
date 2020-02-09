@@ -38,7 +38,7 @@ def download_asset_bundle(
     if not bundle:
         raise ValueError(ab_name + " has empty bundle")
 
-    download_fn = bundle['FileName']
+    download_fn = bundle[0]
     target_fn = ab_name.replace('/', '_') + '_' + download_fn
 
     print(f'Saving "{ab_name}" to "{target/target_fn}"...')
