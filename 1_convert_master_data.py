@@ -61,6 +61,11 @@ if __name__ == "__main__":
             'UnitEvolutionPattern',
             parse_unit_evolution_pattern
         ),
+        (
+            "MasterData_ComposeMaxUnityValueSetting_*.unity3d",
+            'ComposeMaxUnityValueSetting',
+            parse_unit_compose_setting
+        ),
     ]
     for glob, ofn, parser in conversions:
         source_fp = src.glob(glob).__next__()

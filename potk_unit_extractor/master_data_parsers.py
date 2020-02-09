@@ -172,3 +172,17 @@ def parse_unit_evolution_pattern(reader: MasterDataReader, item: dict):
     item['target_unit_UnitUnit'] = reader.ReadInt()
     item['threshold_level'] = reader.ReadInt()
     item['money'] = reader.ReadInt()
+
+
+def parse_unit_compose_setting(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['hp_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['strength_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['vitality_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['intelligence_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['mind_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['agility_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['dexterity_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['lucky_compose_add_max'] = reader.ReadStringOrNull(True)
+    item['name'] = reader.ReadString(True)
+    item['description'] = reader.ReadString(True)

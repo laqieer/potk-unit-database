@@ -59,6 +59,10 @@ class StatType(Enum):
     def correction_key(self) -> str:
         return self.value + '_levelup_max_correction'
 
+    @property
+    def ud_key(self) -> str:
+        return self.value + '_compose_add_max'
+
 
 @dataclass
 class Stats:

@@ -11,6 +11,7 @@ def main(unit_ids: list):
         jobs=load('masterdata/UnitJob.json'),
         types_data=load('masterdata/UnitTypeParameter.json'),
         evos=load('masterdata/UnitEvolutionPattern.json'),
+        ud=load('masterdata/ComposeMaxUnityValueSetting.json'),
     )
 
     if not unit_ids:

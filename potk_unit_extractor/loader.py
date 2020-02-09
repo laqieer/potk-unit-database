@@ -14,6 +14,7 @@ class _RawUnitData:
     job: dict
     types: dict
     evo_from: dict
+    ud: dict
     source_unit: UnitData = None
 
     @property
@@ -27,7 +28,8 @@ class _RawUnitData:
 class Loader:
     """OOP Based loader for unit data based on raw lists-of-dicts.
     """
-    def __init__(self, units, parameters, initials, jobs, types_data, evos):
+
+    def __init__(self, units, parameters, initials, jobs, types_data, evos, ud):
         """
         :param units: List of unit info (UnitUnit).
         :param parameters: List of parameters info (UnitUnitParameter)
@@ -35,6 +37,7 @@ class Loader:
         :param jobs: List of jobs (UnitJob)
         :param types_data: List of param data by unit type (UnitTypeParameter)
         :param evos: List of evolution patterns (UnitEvolutionPattern)
+        :param ud: List of Unleashed Domain Data (ComposeMaxUnityValueSetting)
         """
         # Converts the lists into dicts indexed by ID for fast access.
         self.units = {int(it['ID']): it for it in units}
@@ -51,6 +54,7 @@ class Loader:
             self.types_data[rarity][type_] = data
         # Evolutions are reverse-mapped for evo bonus lookup.
         self.evos = {int(it['target_unit_UnitUnit']): it for it in evos}
+        self.ud = {int(it['ID']): it for it in ud}
 
     def dump_raw(self) -> list:
         """
@@ -71,6 +75,7 @@ class Loader:
                 'job':        data.job,
                 'types':      data.types,
                 'evo_from':   data.evo_from,
+                'ud':         data.ud,
             })
         return raw
 
@@ -145,8 +150,10 @@ class Loader:
         gr = gr + math.floor(gr * type_data[stat.correction_key])
         compose: int = type_data[stat.compose_key]
         evo: int = _calc_evo_bonus(data.source_unit, stat, t)
+        ud_str: str = data.ud[stat.ud_key]
+        ud: int = len(ud_str.split(',')) if len(ud_str) > 0 else 0
         return Stat(
-            initial=ini, evo_bonus=evo, growth=gr, compose=compose, ud=0)
+            initial=ini, evo_bonus=evo, growth=gr, compose=compose, ud=ud)
 
     @staticmethod
     def _load_level(params: dict) -> Level:
@@ -175,7 +182,9 @@ class Loader:
             initial=self.initials[unit_id],
             job=self.jobs[unit['job_UnitJob']],
             types=self.types_data[unit['rarity_UnitRarity']],
-            evo_from=self.evos[unit_id] if unit_id in self.evos else None
+            evo_from=_get_or_def(self.evos, unit_id),
+            ud=_get_or_def(self.ud, unit[
+                'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting']),
         )
 
 
@@ -192,3 +201,7 @@ def _calc_evo_bonus(unit: UnitData, stat: StatType, t: UnitType) -> int:
     if not unit:
         return 0
     return unit.stats.of(t).of(stat).provided_evo_bonus
+
+
+def _get_or_def(src: dict, key: any, def_val: any = None) -> any:
+    return src[key] if key in src else def_val
