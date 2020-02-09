@@ -19,7 +19,7 @@
 		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item">
 			<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
 			<small class="label label-default">{{ unit.ID }}</small>
-			{{ unit.any_name | title }} {{ stars[unit.rarity] }}
+			{{ unit.any_name | title }} ({{ unit.element.name | title }}) {{ stars[unit.rarity] }}
 		</a>
 		{% endfor %}
 	</div>

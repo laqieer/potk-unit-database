@@ -5,6 +5,11 @@ from dataclasses import dataclass
 from pathlib import Path
 import math
 
+# From game. Yes, it's hardcoded there too.
+ELEMENTAL_SKILLS_IDS = [
+    490000010, 490000013, 490000015, 490000017, 490000019, 490000021, 490000173
+]
+
 
 @dataclass()
 class _RawUnitData:
@@ -18,6 +23,7 @@ class _RawUnitData:
     types: dict
     evo_from: dict
     ud: dict
+    skills: list
     source_unit: UnitData = None
 
     @property
@@ -27,12 +33,29 @@ class _RawUnitData:
     def type_data(self, unit_type: UnitType):
         return self.types[unit_type.value]
 
+    def compute_element(self):
+        for skill in self.skills:
+            if skill['ID'] in ELEMENTAL_SKILLS_IDS:
+                return Element(skill['element_CommonElement'])
+        return Element.NONE
+
 
 class Loader:
     """OOP Based loader for unit data based on raw lists-of-dicts.
     """
 
-    def __init__(self, units, parameters, initials, jobs, types_data, evos, ud):
+    def __init__(
+            self,
+            units: list,
+            parameters: list,
+            initials: list,
+            jobs: list,
+            types_data: list,
+            evos: list,
+            ud: list,
+            unit_skill: list,
+            skills: list
+    ):
         """
         :param units: List of unit info (UnitUnit).
         :param parameters: List of parameters info (UnitUnitParameter)
@@ -41,12 +64,14 @@ class Loader:
         :param types_data: List of param data by unit type (UnitTypeParameter)
         :param evos: List of evolution patterns (UnitEvolutionPattern)
         :param ud: List of Unleashed Domain Data (ComposeMaxUnityValueSetting)
+        :param unit_skill: List of Unit and Skills associations (UnitSkill)
+        :param skills: List of Battle Skill data (BattleskillSkill)
         """
         # Converts the lists into dicts indexed by ID for fast access.
-        self.units = {int(it['ID']): it for it in units}
-        self.parameters = {int(it['ID']): it for it in parameters}
-        self.initials = {int(it['ID']): it for it in initials}
-        self.jobs = {int(it['ID']): it for it in jobs}
+        self.units = _index('ID', units)
+        self.parameters = _index('ID', parameters)
+        self.initials = _index('ID', initials)
+        self.jobs = _index('ID', jobs)
         # Type data is actually a two level index by rarity and typing.
         self.types_data = {}
         for data in types_data:
@@ -56,8 +81,10 @@ class Loader:
             type_ = data['unit_type_UnitType']
             self.types_data[rarity][type_] = data
         # Evolutions are reverse-mapped for evo bonus lookup.
-        self.evos = {int(it['target_unit_UnitUnit']): it for it in evos}
-        self.ud = {int(it['ID']): it for it in ud}
+        self.evos = _index('target_unit_UnitUnit', evos)
+        self.ud = _index('ID', ud)
+        self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
+        self.skills = _index('ID', skills)
 
     def dump_raw(self) -> list:
         """
@@ -129,6 +156,7 @@ class Loader:
             resource_id=data.unit['resource_reference_unit_id_UnitUnit'],
             jp_name=data.unit['name'],
             eng_name=data.unit['english_name'],
+            element=data.compute_element(),
             gear_kind=GearKind(data.unit['kind_GearKind']),
             level=self._load_level(data.params),
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
@@ -228,6 +256,11 @@ class Loader:
         :return: Raw data for the unit.
         """
         unit = self.units[unit_id]
+        if unit_id in self.unit_skill:
+            skills = [self.skills[link['skill_BattleskillSkill']]
+                      for link in self.unit_skill[unit_id]]
+        else:
+            skills = []
         return _RawUnitData(
             unit=unit,
             params=self.parameters[unit['parameter_data_UnitUnitParameter']],
@@ -236,7 +269,9 @@ class Loader:
             types=self.types_data[unit['rarity_UnitRarity']],
             evo_from=_get_or_def(self.evos, unit_id),
             ud=_get_or_def(self.ud, unit[
-                'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting']),
+                'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'
+            ]),
+            skills=skills,
         )
 
 
@@ -275,9 +310,26 @@ def load_folder(path: Path) -> Loader:
         types_data=_load_file(path / 'UnitTypeParameter.json'),
         evos=_load_file(path / 'UnitEvolutionPattern.json'),
         ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
+        unit_skill=_load_file(path / 'UnitSkill.json'),
+        skills=_load_file(path / 'BattleskillSkill.json'),
     )
 
 
 def _load_file(fp: Path) -> list:
     with fp.open(mode='r', encoding='utf8') as fd:
         return json.load(fd)
+
+
+def _index(key: any, items: list) -> dict:
+    return {it[key]: it for it in items}
+
+
+def _group_by(key: any, items: list) -> dict:
+    result = {}
+    for item in items:
+        key_val = item[key]
+        if key_val not in result:
+            result[key_val] = [item]
+        else:
+            result[key_val].append(item)
+    return result

@@ -19,6 +19,8 @@
 			 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
 		<h2>Unit Information</h2>
 		<dl>
+			<dt>Element</dt>
+			<dd>{{ unit.element.name | title }}</dd>
 			<dt>Weapon Type</dt>
 			<dd>{{ unit.gear_kind.name | title }}</dd>
 			<dt>Rarity</dt>

@@ -152,6 +152,28 @@ class GearKind(IntEnum):
     NONE = 9999
 
 
+class Element(IntEnum):
+    """List of all possible elements of a unit / skill.
+    """
+    NONE = 1
+    FIRE = 2
+    WIND = 3
+    THUNDER = 4
+    ICE = 5
+    EARTH = 6
+    LIGHT = 7
+    DARK = 8
+    # ??? Monster Elements?
+    SAINT = 9
+    DEMON = 10
+    DRAGON = 11
+    ANGEL = 12
+    DEVIL = 13
+    BEAST = 14
+    FAIRY = 15
+    PRINCESS = 16
+
+
 @dataclass
 class UnitJob:
     ID: int
@@ -168,6 +190,7 @@ class UnitData:
     resource_id: int
     jp_name: str
     eng_name: str
+    element: Element
     gear_kind: GearKind
     level: Level
     rarity: UnitRarityStars
