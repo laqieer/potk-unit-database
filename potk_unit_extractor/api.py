@@ -1,3 +1,4 @@
+from pathlib import Path
 import urllib.request
 
 GAME = 'punk.gu3.jp'
@@ -30,3 +31,16 @@ class Environment:
     def download_asset(self, asset_type, asset_id):
         url = f"{self.dlc_path}{asset_type}/{asset_id}"
         return urllib.request.urlopen(url).read()
+
+
+def download_asset_bundle(
+        env: Environment, bundle: dict, ab_name: str, target: Path):
+    if not bundle:
+        raise ValueError(ab_name + " has empty bundle")
+
+    download_fn = bundle['FileName']
+    target_fn = ab_name.replace('/', '_') + '_' + download_fn
+
+    print(f'Saving "{ab_name}" to "{target/target_fn}"...')
+    with (target/target_fn).open(mode='wb') as fd:
+        fd.write(env.download_asset('ab', download_fn))

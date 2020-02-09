@@ -8,14 +8,15 @@ import json
 import unitypack  # Tested with UnityPack 0.9.0
 
 
-def convert_asset_bundle(fp: Path, parser: callable, output_fn: str):
-    print(f'Converting {fp.name}...')
-    raw_data = read_raw_asset_data(fp)
+def convert_asset_bundle(
+        source_fp: Path, parser: callable, target_dir: Path, output_fn: str):
+    print(f'Converting {source_fp.name}...')
+    raw_data = read_raw_asset_data(source_fp)
     parsed_data = MasterDataReader(raw_data).read_all(len(raw_data), parser)
-    target = f'{output_fn}.json'
-    with open(target, mode='w', encoding='utf8') as fd:
+    target_fp = target_dir / f'{output_fn}.json'
+    with target_fp.open(mode='w', encoding='utf8') as fd:
         json.dump(parsed_data, fd, indent='\t', ensure_ascii=False)
-    print(f'{fp.name} saved to {target}')
+    print(f'{source_fp.name} saved to {target_fp}')
 
 
 def read_raw_asset_data(fp: Path):
@@ -25,14 +26,22 @@ def read_raw_asset_data(fp: Path):
 
 
 if __name__ == "__main__":
-    wd = Path('.')
-    convert_asset_bundle(
-        fp=wd.glob("MasterData_UnitUnit_*.unity3d").__next__(),
-        parser=parse_unit_unit,
-        output_fn='UnitUnit'
-    )
-    convert_asset_bundle(
-        fp=wd.glob("MasterData_UnitUnitParameter_*.unity3d").__next__(),
-        parser=parse_unit_parameters,
-        output_fn='UnitUnitParameter'
-    )
+    src = Path('bundles')
+    output_dir = Path('masterdata')
+    output_dir.mkdir(exist_ok=True)
+
+    conversions = [
+        (
+            "MasterData_UnitUnit_*.unity3d",
+            'UnitUnit',
+            parse_unit_unit
+        ),
+        (
+            "MasterData_UnitUnitParameter_*.unity3d",
+            'UnitUnitParameter',
+            parse_unit_parameters
+        ),
+    ]
+    for glob, ofn, parser in conversions:
+        source_fp = src.glob(glob).__next__()
+        convert_asset_bundle(source_fp, parser, output_dir, ofn)

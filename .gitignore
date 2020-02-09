@@ -1,5 +1,5 @@
 **/.idea/
 **/*.pyc
+bundles/
+masterdata/
 paths.json
-*.unity3d
-*.json
