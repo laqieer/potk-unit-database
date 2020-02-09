@@ -115,17 +115,17 @@ class Loader:
         :return: Generator of all loaded units, in no particular order.
         """
         excludes = [
-            range(700000, 999999),      # 700k, OG Misc
-            range(1000000, 1999999),    # 1m, Earth Males
-            range(2700000, 2999999),    # 2m, PoL Misc
-            range(3700000, 3999999),    # 3m, LR Misc
-            range(4700000, 4999999),    # 4m, Extra Art Misc
-            range(5700000, 5999999),    # 5m, IN Misc
-            range(7000000, 7999999),    # 7m, Taga Enemies?
-            range(10000000, 19999999),  # 10m, Laev Enemies?
-            range(30000000, 39999999),  # 30m, Guild Structures
-            range(70000000, 79999999),  # 70m, Memories, Cards, etc
-            range(80000000, 89999999),  # 80m, Innocents
+            range(700000, 999999),  # .     700k, OG Misc
+            range(1000000, 1999999),  # .     1m, Earth Males
+            range(2700000, 2999999),  # .     2m, PoL Misc
+            range(3700000, 3999999),  # .     3m, LR Misc
+            range(4700000, 4999999),  # .     4m, Extra Art Misc
+            range(5700000, 5999999),  # .     5m, IN Misc
+            range(7000000, 7999999),  # .     7m, Taga Enemies?
+            range(10000000, 19999999),  # .  10m, Laev Enemies?
+            range(30000000, 39999999),  # .  30m, Guild Structures
+            range(70000000, 79999999),  # .  70m, Memories, Cards, etc
+            range(80000000, 89999999),  # .  80m, Innocents
             range(700000000, 799999999),  # 700m, Male Memories
             range(800000000, 899999999),  # 800m, Male Innocents
         ]
