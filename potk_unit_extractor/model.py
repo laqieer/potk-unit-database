@@ -131,6 +131,14 @@ class UnitRarityStars(IntEnum):
 
 
 @dataclass
+class UnitJob:
+    ID: int
+    name: str
+    movement: int
+    new_cost: int = 0
+
+
+@dataclass
 class UnitData:
     ID: int
     same_character_id: int
@@ -139,5 +147,6 @@ class UnitData:
     eng_name: str
     level: Level
     rarity: UnitRarityStars
+    job: UnitJob
     cost: int
     stats: UnitStats

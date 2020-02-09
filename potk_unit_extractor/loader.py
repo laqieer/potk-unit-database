@@ -102,6 +102,7 @@ class Loader:
         eng_name: str = data.unit['english_name']
         level: Level = self._load_level(data.params)
         rarity = UnitRarityStars(data.unit['rarity_UnitRarity'])
+        job = self._load_job(data.job)
         cost: int = data.unit['cost']
         stats: UnitStats = self._load_unit_stats(data)
         return UnitData(
@@ -112,6 +113,7 @@ class Loader:
             eng_name=eng_name,
             level=level,
             rarity=rarity,
+            job=job,
             cost=cost,
             stats=stats,
         )
@@ -183,6 +185,21 @@ class Loader:
         inc: int = params['_level_per_breakthrough']
         mlb_c: int = params['breakthrough_limit']
         return Level(ini=ini, inc=inc, mlb_c=mlb_c)
+
+    @staticmethod
+    def _load_job(job: dict) -> UnitJob:
+        """
+        Loads job information.
+
+        :param job: Job information raw data.
+        :return: Job Info.
+        """
+        return UnitJob(
+            ID=job['ID'],
+            name=job['name'],
+            movement=job['movement'],
+            new_cost=job['new_cost'],
+        )
 
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
