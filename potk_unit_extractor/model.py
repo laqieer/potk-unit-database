@@ -122,34 +122,34 @@ class UnitRarityStars(IntEnum):
 
     This may come back to bite us if new unit rarities are added to the game.
     """
-    one = 138
-    two = 167
-    three = 383
-    four = 642
-    five = 803
-    six = 991
+    ONE = 138
+    TWO = 167
+    THREE = 383
+    FOUR = 642
+    FIVE = 803
+    SIX = 991
 
 
 class GearKind(IntEnum):
     """Yet another dirty shortcut.
     This one actually maps to a Enum on the game side, so it's less risky.
     """
-    sword = 1
-    axe = 2
-    spear = 3
-    bow = 4
-    gun = 5
-    staff = 6
-    shield = 7
-    unique_weapon = 8
-    smith = 9
-    accessories = 10
-    drilling = 11
-    special_drilling = 12
-    sea_present = 13
-    magic = 14
-    dummy = 1001
-    none = 9999
+    SWORD = 1
+    AXE = 2
+    SPEAR = 3
+    BOW = 4
+    GUN = 5
+    STAFF = 6
+    SHIELD = 7
+    UNIQUE_WEAPON = 8
+    SMITH = 9
+    ACCESSORIES = 10
+    DRILLING = 11
+    SPECIAL_DRILLING = 12
+    SEA_PRESENT = 13
+    MAGIC = 14
+    DUMMY = 1001
+    NONE = 9999
 
 
 @dataclass
