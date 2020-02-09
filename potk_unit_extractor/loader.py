@@ -85,29 +85,6 @@ class Loader:
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
         self.skills = _index('ID', skills)
 
-    def dump_raw(self) -> list:
-        """
-        Produces a raw, json-like representation of unit data, grouped by unit.
-
-        Does not calculate stats maximums or evo bonuses.
-        Unsuitable for anything but debug. Remove-me ASAP.
-
-        :return: Raw internal data.
-        """
-        raw = []
-        for unit_id in self.units.keys():
-            data = self._raw_unit(unit_id)
-            raw.append({
-                'unit':       data.unit,
-                'parameters': data.params,
-                'initial':    data.initial,
-                'job':        data.job,
-                'types':      data.types,
-                'evo_from':   data.evo_from,
-                'ud':         data.ud,
-            })
-        return raw
-
     def load_playable_units(self):
         """
         Loads all units with IsNormalUnit=True (game code).
@@ -212,16 +189,19 @@ class Loader:
         :return: A single stat of the unit.
         """
         type_data = data.type_data(t)
-        ini: int = data.initial[stat.ini_key] + data.job[stat.ini_key]
-        gr: int = data.params[stat.max_key]
-        gr = _calc_gr(gr, type_data[stat.correction_key])
-        compose: int = type_data[stat.compose_key]
-        evo: int = _calc_evo_bonus(data.source_unit, stat, t)
+        is_awake = 1 == data.unit['awake_unit_flag']
         ud_str: str = data.ud[stat.ud_key]
-        ud: int = len(ud_str.split(',')) if len(ud_str) > 0 else 0
+        ud = len(ud_str.split(',')) if len(ud_str) > 0 else 0
+
         return Stat(
             base=data.params[stat.max_key],
-            initial=ini, evo_bonus=evo, growth=gr, compose=compose, ud=ud)
+            initial=data.initial[stat.ini_key] + data.job[stat.ini_key],
+            evo_bonus=_calc_evo_bonus(data.source_unit, stat, t, is_awake),
+            growth=_calc_gr(
+                data.params[stat.max_key], type_data[stat.correction_key]),
+            compose=type_data[stat.compose_key],
+            ud=ud,
+        )
 
     @staticmethod
     def _load_level(params: dict) -> Level:
@@ -278,10 +258,11 @@ class Loader:
         )
 
 
-def _calc_evo_bonus(unit: UnitData, stat: StatType, t: UnitType) -> int:
+def _calc_evo_bonus(
+        unit: UnitData, stat: StatType, t: UnitType, for_awakened: bool) -> int:
     """Internal shortcut to calculate evo bonuses.
 
-    Deal with the special case for base units.
+    Deal with the special case for base units and awakened units.
 
     :param unit: Source unit data.
     :param stat: Desired stat.
@@ -290,7 +271,8 @@ def _calc_evo_bonus(unit: UnitData, stat: StatType, t: UnitType) -> int:
     """
     if not unit:
         return 0
-    return unit.stats.of(t).of(stat).provided_evo_bonus
+    s = unit.stats.of(t).of(stat)
+    return s.evo_bonus if for_awakened else s.provided_evo_bonus
 
 
 def _get_or_def(src: dict, key: any, def_val: any = None) -> any:
