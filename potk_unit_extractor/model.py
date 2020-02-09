@@ -16,6 +16,7 @@ class Stat:
     growth: int  # Maximum growth value from level up. May be impossible.
     compose: int  # Maximum fusion value without UD.
     ud: int  # Extra fusion value obtained from max UD.
+    base: int  # for debug
 
     @property
     def max(self) -> int:
@@ -30,7 +31,7 @@ class Stat:
         return math.ceil(self.max / 10)
 
     def __repr__(self) -> str:
-        return str(self.max)
+        return f'{self.max}({self.base};{self.growth})'
 
 
 class StatType(Enum):
@@ -129,6 +130,21 @@ class UnitRarityStars(IntEnum):
     FIVE = 803
     SIX = 991
 
+    @property
+    def stars(self) -> str:
+        if self == self.ONE:
+            return '1★'
+        elif self == self.TWO:
+            return '2★'
+        elif self == self.THREE:
+            return '3★'
+        elif self == self.FOUR:
+            return '4★'
+        elif self == self.FIVE:
+            return '5★'
+        elif self == self.SIX:
+            return '6★'
+
 
 class GearKind(IntEnum):
     """Yet another dirty shortcut.
@@ -201,3 +217,7 @@ class UnitData:
     @property
     def any_name(self) -> str:
         return self.eng_name if self.eng_name else self.jp_name
+
+    @property
+    def h_id(self) -> str:
+        return f'<{self.ID} {self.rarity.stars} {self.any_name}>'

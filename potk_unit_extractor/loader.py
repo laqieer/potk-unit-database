@@ -1,9 +1,8 @@
-import json
-
 from potk_unit_extractor.model import *
 from dataclasses import dataclass
 from pathlib import Path
 import math
+import json
 
 # From game. Yes, it's hardcoded there too.
 ELEMENTAL_SKILLS_IDS = [
@@ -212,12 +211,13 @@ class Loader:
         gr: int = data.params[stat.max_key]
         # FIXME float problems may result in different values for some units!
         # Validate against all owned units? Crowd source?
-        gr = gr + math.floor(gr * type_data[stat.correction_key])
+        gr = _calc_gr(gr, type_data[stat.correction_key])
         compose: int = type_data[stat.compose_key]
         evo: int = _calc_evo_bonus(data.source_unit, stat, t)
         ud_str: str = data.ud[stat.ud_key]
         ud: int = len(ud_str.split(',')) if len(ud_str) > 0 else 0
         return Stat(
+            base=data.params[stat.max_key],
             initial=ini, evo_bonus=evo, growth=gr, compose=compose, ud=ud)
 
     @staticmethod
@@ -333,3 +333,7 @@ def _group_by(key: any, items: list) -> dict:
         else:
             result[key_val].append(item)
     return result
+
+
+def _calc_gr(base: int, adjust: float) -> int:
+    return base + round(base * adjust)
