@@ -19,6 +19,14 @@ class MasterDataReader:
         self.length = self.ReadInt()
         self.ReadInt()
 
+    def read_all(self, size: int, item_parser: callable):
+        result = []
+        while self.buf.tell() < size:
+            item = {}
+            item_parser(self, item)
+            result.append(item)
+        return result
+
     def Length(self):
         return self.length
 

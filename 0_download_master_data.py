@@ -17,6 +17,7 @@ def main(paths_fp):
     asset_bundle: dict = paths['AssetBundle']
     env = Environment(True)
     download_asset_bundle(env, asset_bundle, 'MasterData/UnitUnit')
+    download_asset_bundle(env, asset_bundle, 'MasterData/UnitUnitParameter')
     print('All files downloaded')
 
 
