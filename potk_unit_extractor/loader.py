@@ -1,5 +1,8 @@
+import json
+
 from potk_unit_extractor.model import *
 from dataclasses import dataclass
+from pathlib import Path
 import math
 
 
@@ -205,3 +208,27 @@ def _calc_evo_bonus(unit: UnitData, stat: StatType, t: UnitType) -> int:
 
 def _get_or_def(src: dict, key: any, def_val: any = None) -> any:
     return src[key] if key in src else def_val
+
+
+def load_folder(path: Path) -> Loader:
+    """
+    Loads unit data from a folder containing json files in a predefined
+    structure.
+
+    :param path: Path of the folder containing the files.
+    :return: Populated loader.
+    """
+    return Loader(
+        units=_load_file(path / 'UnitUnit.json'),
+        parameters=_load_file(path / 'UnitUnitParameter.json'),
+        initials=_load_file(path / 'UnitInitialParam.json'),
+        jobs=_load_file(path / 'UnitJob.json'),
+        types_data=_load_file(path / 'UnitTypeParameter.json'),
+        evos=_load_file(path / 'UnitEvolutionPattern.json'),
+        ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
+    )
+
+
+def _load_file(fp: Path) -> list:
+    with fp.open(mode='r', encoding='utf8') as fd:
+        return json.load(fd)
