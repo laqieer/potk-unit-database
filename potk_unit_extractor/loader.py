@@ -9,6 +9,71 @@ ELEMENTAL_SKILLS_IDS = [
     490000010, 490000013, 490000015, 490000017, 490000019, 490000021, 490000173
 ]
 
+# HELP! I can't find authoritative data.
+DEX_ADJUST_BASE = 0.0417  # -0.0583
+GROWTH_ADJUST = {
+    UnitType.BAL: {
+        StatType.HP: 0.0,
+        StatType.STR: 0.0,
+        StatType.MGC: 0.0,
+        StatType.GRD: 0.0,
+        StatType.SPR: 0.0,
+        StatType.SPD: 0.0,
+        StatType.TEC: 0.0,
+        StatType.LCK: 0.025,
+    },
+    UnitType.VIT: {
+        StatType.HP: 0.09,
+        StatType.STR: 0.0,
+        StatType.MGC: 0.0,
+        StatType.GRD: 0.0,
+        StatType.SPR: 0.0,
+        StatType.SPD: -0.05,
+        StatType.TEC: -0.05,
+        StatType.LCK: 0.0,
+    },
+    UnitType.STR: {
+        StatType.HP: 0.0,
+        StatType.STR: 0.1,
+        StatType.MGC: 0.0,
+        StatType.GRD: -0.1,
+        StatType.SPR: 0.0,
+        StatType.SPD: 0.0,
+        StatType.TEC: 0.0,
+        StatType.LCK: 0.0,
+    },
+    UnitType.MGC: {
+        StatType.HP: 0.0,
+        StatType.STR: 0.0,
+        StatType.MGC: 0.1,
+        StatType.GRD: 0.0,
+        StatType.SPR: -0.1,
+        StatType.SPD: 0.0,
+        StatType.TEC: 0.0,
+        StatType.LCK: 0.0,
+    },
+    UnitType.GRD: {
+        StatType.HP: 0.0,
+        StatType.STR: -0.05,
+        StatType.MGC: -0.05,
+        StatType.GRD: 0.05,
+        StatType.SPR: 0.05,
+        StatType.SPD: 0.0,
+        StatType.TEC: 0.0,
+        StatType.LCK: 0.0,
+    },
+    UnitType.DEX: {
+        StatType.HP: 0.0,
+        StatType.STR: 0.0,
+        StatType.MGC: 0.0,
+        StatType.GRD: -0.1 + DEX_ADJUST_BASE,
+        StatType.SPR: -0.1 + DEX_ADJUST_BASE,
+        StatType.SPD: DEX_ADJUST_BASE,
+        StatType.TEC: DEX_ADJUST_BASE,
+        StatType.LCK: 0.0,
+    },
+}
+
 
 @dataclass()
 class _RawUnitData:
@@ -209,9 +274,7 @@ class Loader:
         type_data = data.type_data(t)
         ini: int = data.initial[stat.ini_key] + data.job[stat.ini_key]
         gr: int = data.params[stat.max_key]
-        # FIXME float problems may result in different values for some units!
-        # Validate against all owned units? Crowd source?
-        gr = _calc_gr(gr, type_data[stat.correction_key])
+        gr = _calc_gr(gr, GROWTH_ADJUST[t][stat])
         compose: int = type_data[stat.compose_key]
         evo: int = _calc_evo_bonus(data.source_unit, stat, t)
         ud_str: str = data.ud[stat.ud_key]

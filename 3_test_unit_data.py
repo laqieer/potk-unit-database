@@ -27,6 +27,48 @@ class UnitGrTest(unittest.TestCase):
             StatType.SPD: 91,
             StatType.TEC: 91,
         }),
+        # 6* LR Naegling
+        (3100613, UnitType.DEX, {
+            StatType.GRD: 57,
+            StatType.SPR: 33,
+            StatType.SPD: 97,
+            StatType.TEC: 98,
+        }),
+        # 6* OG Naegling
+        (100624, UnitType.DEX, {
+            StatType.GRD: 69,
+            StatType.SPR: 31,
+            StatType.SPD: 74,
+            StatType.TEC: 58,
+        }),
+        # 6* Gaku Naegling
+        (100653, UnitType.DEX, {
+            StatType.GRD: 54,
+            StatType.SPR: 29,
+            StatType.SPD: 97,
+            StatType.TEC: 99,
+        }),
+        # 6* SS Naegling
+        (2100613, UnitType.DEX, {
+            StatType.GRD: 58,
+            StatType.SPR: 29,
+            StatType.SPD: 99,
+            StatType.TEC: 99,
+        }),
+        # 6* CCS Naegling
+        (100663, UnitType.DEX, {
+            StatType.GRD: 50,
+            StatType.SPR: 34,
+            StatType.SPD: 93,
+            StatType.TEC: 95,
+        }),
+        # 6* SS Chalice
+        (2602513, UnitType.DEX, {
+            StatType.GRD: 35,
+            StatType.SPR: 69,
+            StatType.SPD: 101,
+            StatType.TEC: 101,
+        }),
     ]
 
     @classmethod
