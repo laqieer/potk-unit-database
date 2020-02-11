@@ -2,10 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<link rel="stylesheet"
-		  href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-		  integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
-		  crossorigin="anonymous">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<title>{{ unit.eng_name | title }}</title>
 </head>
 <body>
@@ -17,30 +14,27 @@
 	</div>
 	<h1>
 		{{ unit.eng_name | title }} <small>{{ stars[unit.rarity] }}</small><br/>
-		<small>{{ unit.jp_name }}</small>
+		<small class="text-muted">{{ unit.jp_name }}</small>
 	</h1>
 	<div id="unit-info">
 		<img class="img-responsive"
 			 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
 		<h2>Unit Information</h2>
-		<dl>
-			<dt>Element</dt>
-			<dd>{{ unit.element.name | title }}</dd>
-			<dt>Weapon Type</dt>
-			<dd>{{ unit.gear_kind.name | title }}</dd>
-			<dt>Rarity</dt>
-			<dd>{{ stars[unit.rarity] }}</dd>
-			<dt>Cost</dt>
-			<dd>{{ unit.cost }}</dd>
-			<dt>Level</dt>
-			<dd>
-				{{ unit.level.ini }} - {{ unit.level.max }}
-				(Limit Breaks: {{ unit.level.mlb_c }})
-			</dd>
-			<dt>Job</dt>
-			<dd>{{ unit.job.name }}</dd>
-			<dt>Movement</dt>
-			<dd>{{ unit.job.movement }}</dd>
+		<dl class="row">
+			<dt class="col-sm-3">Element</dt>
+			<dd class="col-sm-9">{{ unit.element.name | title }}</dd>
+			<dt class="col-sm-3">Weapon Type</dt>
+			<dd class="col-sm-9">{{ unit.gear_kind.name | title }}</dd>
+			<dt class="col-sm-3">Rarity</dt>
+			<dd class="col-sm-9">{{ stars[unit.rarity] }}</dd>
+			<dt class="col-sm-3">Cost</dt>
+			<dd class="col-sm-9">{{ unit.cost }}</dd>
+			<dt class="col-sm-3">Level</dt>
+			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}</dd>
+			<dt class="col-sm-3">Job</dt>
+			<dd class="col-sm-9">{{ unit.job.name }}</dd>
+			<dt class="col-sm-3">Movement</dt>
+			<dd class="col-sm-9">{{ unit.job.movement }}</dd>
 		</dl>
 	</div>
 	<div id="stats-caps">
