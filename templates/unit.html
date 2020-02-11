@@ -30,7 +30,8 @@
 			<dt class="col-sm-3">Cost</dt>
 			<dd class="col-sm-9">{{ unit.cost }}</dd>
 			<dt class="col-sm-3">Level</dt>
-			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}</dd>
+			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}
+			</dd>
 			<dt class="col-sm-3">Job</dt>
 			<dd class="col-sm-9">{{ unit.job.name }}</dd>
 			<dt class="col-sm-3">Movement</dt>
@@ -45,24 +46,23 @@
 			<thead>
 			<tr>
 				<td>&nbsp;</td>
-				<th scope="col">Max</th>
-				<th scope="col">Initial</th>
-				<th scope="col">Evo</th>
-				<th scope="col">Growth</th>
-				<th scope="col">Fusion</th>
-				<th scope="col">UD</th>
+				<th scope="col" class="text-right">Max</th>
+				<th scope="col" class="text-right">Base(Evo)</th>
+				<th scope="col" class="text-right">Growth</th>
+				<th scope="col" class="text-right">Fusion(UD)</th>
 			</tr>
 			</thead>
 			<tbody>
 			{% for stat in StatType %}
 			<tr>
-				<th scope="row">{{ stat.name }}</th>
-				<td>{{ unit.stats.of(type).of(stat).max }}</td>
-				<td>{{ unit.stats.of(type).of(stat).initial }}</td>
-				<td>{{ unit.stats.of(type).of(stat).evo_bonus }}</td>
-				<td>{{ unit.stats.of(type).of(stat).growth }}</td>
-				<td>{{ unit.stats.of(type).of(stat).compose }}</td>
-				<td>{{ unit.stats.of(type).of(stat).ud }}</td>
+				{% set s = unit.stats.of(type).of(stat) %}
+				<th scope="row" class="text-right">{{ stat.name }}</th>
+				<td class="text-right">{{ s.max }}</td>
+				<td class="text-right">
+					{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
+				</td>
+				<td class="text-right">{{ s.growth }}</td>
+				<td class="text-right">{{ s.compose + s.ud }}({{ s.ud }})</td>
 			</tr>
 			{% endfor %}
 			</tbody>
