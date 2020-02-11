@@ -221,3 +221,8 @@ class UnitData:
     @property
     def h_id(self) -> str:
         return f'<{self.ID} {self.rarity.stars} {self.any_name}>'
+
+    @property
+    def short_title(self) -> str:
+        return f'{self.rarity.stars} {self.any_name} ({self.element.name}) ' \
+               f'[{self.ID}]'

@@ -5,6 +5,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<title>PotK Unit Database (WIP)</title>
+	<meta property="og:title" content="Phantom of the Kill Fan Database"/>
+	<meta property="og:description"
+		  content="A fan-mantained database of playable units in the Phantom of the Kill Japanese Server. Still a WIP."/>
+	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/3101411/unit_hires.png">
+	<meta property="og:image:width" content="600">
+	<meta property="og:image:height" content="520">
 </head>
 <body>
 <div class="container">
@@ -17,7 +23,8 @@
 		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item list-group-item-action">
 			<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
 			<small class="badge badge-secondary">{{ unit.ID }}</small>
-			{{ unit.any_name | title }} ({{ unit.element.name | title }}) {{ stars[unit.rarity] }}
+			{{ unit.any_name | title }} ({{ unit.element.name | title }})
+			{{stars[unit.rarity] }}
 		</a>
 		{% endfor %}
 	</div>
