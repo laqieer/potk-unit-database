@@ -40,38 +40,59 @@
 	</div>
 	<div id="stats-caps">
 		<h2>Stats Caps</h2>
-		{% for type in UnitType %}
-		<h3>
-			{{ type.name }}
-			<small class="text-muted">{{ jp_types[type] }}</small>
-		</h3>
-		<table class="table table-bordered table-hover table-condensed">
-			<thead>
-			<tr>
-				<td>&nbsp;</td>
-				<th scope="col" class="text-right">Max</th>
-				<th scope="col" class="text-right">Base(Evo)</th>
-				<th scope="col" class="text-right">Growth</th>
-				<th scope="col" class="text-right">Fusion(UD)</th>
-			</tr>
-			</thead>
-			<tbody>
-			{% for stat in StatType %}
-			<tr>
-				{% set s = unit.stats.of(type).of(stat) %}
-				<th scope="row" class="text-right">{{ stat.name }}</th>
-				<td class="text-right">{{ s.max }}</td>
-				<td class="text-right">
-					{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
-				</td>
-				<td class="text-right">{{ s.growth }}</td>
-				<td class="text-right">{{ s.compose + s.ud }}({{ s.ud }})</td>
-			</tr>
+		<ul class="nav nav-pills mb-3" role="tablist">
+			{% for type in UnitType %}
+			<li class="nav-item">
+				<a class="nav-link {% if loop.first %}active{%endif%}"
+				   role="tab"
+				   data-toggle="pill"
+				   href="#tab-{{ type.name | lower }}">
+					<h5>
+						{{ type.name }} <small>{{ jp_types[type] }}</small>
+					</h5>
+				</a>
+			</li>
 			{% endfor %}
-			</tbody>
-		</table>
-		{% endfor %}
+		</ul>
+		<div class="tab-content">
+			{% for type in UnitType %}
+			<div class="tab-pane fade {% if loop.first %}show active{%endif%}"
+				 id="tab-{{ type.name | lower }}"
+				 role="tabpanel">
+				<table class="table table-bordered table-hover table-condensed">
+					<thead>
+					<tr>
+						<td>&nbsp;</td>
+						<th scope="col" class="text-right">Max</th>
+						<th scope="col" class="text-right">Base(Evo)</th>
+						<th scope="col" class="text-right">Growth</th>
+						<th scope="col" class="text-right">Fusion(UD)</th>
+					</tr>
+					</thead>
+					<tbody>
+					{% for stat in StatType %}
+					<tr>
+						{% set s = unit.stats.of(type).of(stat) %}
+						<th scope="row" class="text-right">{{ stat.name }}</th>
+						<td class="text-right">{{ s.max }}</td>
+						<td class="text-right">
+							{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
+						</td>
+						<td class="text-right">{{ s.growth }}</td>
+						<td class="text-right">
+							{{ s.compose + s.ud }}({{ s.ud }})
+						</td>
+					</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			{% endfor %}
+		</div>
 	</div>
 </div>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 </body>
 </html>
