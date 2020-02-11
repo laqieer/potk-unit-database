@@ -2,79 +2,98 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<link rel="stylesheet"
-		  href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-		  integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
-		  crossorigin="anonymous">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<title>{{ unit.eng_name | title }}</title>
 </head>
 <body>
 <div class="container">
 	<div class="breadcrumb">
-		<a class="breadcrumb-link" href="..">Main</a>
-		<span class="breadcrumb-gt">&gt;</span>
-		<span class="breadcrumb-child">{{ unit.eng_name | title }}</span>
+		<h5>
+			<a class="breadcrumb-link" href="..">Main</a>
+			<span class="breadcrumb-gt">&gt;</span>
+			<span class="breadcrumb-child">{{ unit.eng_name | title }}</span>
+		</h5>
 	</div>
 	<h1>
 		{{ unit.eng_name | title }} <small>{{ stars[unit.rarity] }}</small><br/>
-		<small>{{ unit.jp_name }}</small>
+		<small class="text-muted">{{ unit.jp_name }}</small>
 	</h1>
 	<div id="unit-info">
-		<img class="img-responsive"
+		<img class="img-fluid"
 			 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
 		<h2>Unit Information</h2>
-		<dl>
-			<dt>Element</dt>
-			<dd>{{ unit.element.name | title }}</dd>
-			<dt>Weapon Type</dt>
-			<dd>{{ unit.gear_kind.name | title }}</dd>
-			<dt>Rarity</dt>
-			<dd>{{ stars[unit.rarity] }}</dd>
-			<dt>Cost</dt>
-			<dd>{{ unit.cost }}</dd>
-			<dt>Level</dt>
-			<dd>
-				{{ unit.level.ini }} - {{ unit.level.max }}
-				(Limit Breaks: {{ unit.level.mlb_c }})
+		<dl class="row">
+			<dt class="col-sm-3">Element</dt>
+			<dd class="col-sm-9">{{ unit.element.name | title }}</dd>
+			<dt class="col-sm-3">Weapon Type</dt>
+			<dd class="col-sm-9">{{ unit.gear_kind.name | title }}</dd>
+			<dt class="col-sm-3">Rarity</dt>
+			<dd class="col-sm-9">{{ stars[unit.rarity] }}</dd>
+			<dt class="col-sm-3">Cost</dt>
+			<dd class="col-sm-9">{{ unit.cost }}</dd>
+			<dt class="col-sm-3">Level</dt>
+			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}
 			</dd>
-			<dt>Job</dt>
-			<dd>{{ unit.job.name }}</dd>
-			<dt>Movement</dt>
-			<dd>{{ unit.job.movement }}</dd>
+			<dt class="col-sm-3">Job</dt>
+			<dd class="col-sm-9">{{ unit.job.name }}</dd>
+			<dt class="col-sm-3">Movement</dt>
+			<dd class="col-sm-9">{{ unit.job.movement }}</dd>
 		</dl>
 	</div>
 	<div id="stats-caps">
 		<h2>Stats Caps</h2>
-		{% for type in UnitType %}
-		<h3>{{ type.name }}</h3>
-		<table class="table table-bordered table-hover table-condensed">
-			<thead>
-			<tr>
-				<td>&nbsp;</td>
-				<th scope="col">Max</th>
-				<th scope="col">Initial</th>
-				<th scope="col">Evo</th>
-				<th scope="col">Growth</th>
-				<th scope="col">Fusion</th>
-				<th scope="col">UD</th>
-			</tr>
-			</thead>
-			<tbody>
-			{% for stat in StatType %}
-			<tr>
-				<th scope="row">{{ stat.name }}</th>
-				<td>{{ unit.stats.of(type).of(stat).max }}</td>
-				<td>{{ unit.stats.of(type).of(stat).initial }}</td>
-				<td>{{ unit.stats.of(type).of(stat).evo_bonus }}</td>
-				<td>{{ unit.stats.of(type).of(stat).growth }}</td>
-				<td>{{ unit.stats.of(type).of(stat).compose }}</td>
-				<td>{{ unit.stats.of(type).of(stat).ud }}</td>
-			</tr>
+		<ul class="nav nav-pills mb-3" role="tablist">
+			{% for type in UnitType %}
+			<li class="nav-item">
+				<a class="nav-link {% if loop.first %}active{%endif%}"
+				   role="tab"
+				   data-toggle="pill"
+				   href="#tab-{{ type.name | lower }}">
+					<h5>{{ type.name }} {{ jp_types[type] }}</h5>
+				</a>
+			</li>
 			{% endfor %}
-			</tbody>
-		</table>
-		{% endfor %}
+		</ul>
+		<div class="tab-content">
+			{% for type in UnitType %}
+			<div class="tab-pane fade {% if loop.first %}show active{%endif%}"
+				 id="tab-{{ type.name | lower }}"
+				 role="tabpanel">
+				<table class="table table-bordered table-hover table-condensed">
+					<thead>
+					<tr>
+						<td>&nbsp;</td>
+						<th scope="col" class="text-right">Max</th>
+						<th scope="col" class="text-right">Base(Evo)</th>
+						<th scope="col" class="text-right">Growth</th>
+						<th scope="col" class="text-right">Fusion(UD)</th>
+					</tr>
+					</thead>
+					<tbody>
+					{% for stat in StatType %}
+					<tr>
+						{% set s = unit.stats.of(type).of(stat) %}
+						<th scope="row" class="text-right">{{ stat.name }}</th>
+						<td class="text-right">{{ s.max }}</td>
+						<td class="text-right">
+							{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
+						</td>
+						<td class="text-right">{{ s.growth }}</td>
+						<td class="text-right">
+							{{ s.compose + s.ud }}({{ s.ud }})
+						</td>
+					</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			{% endfor %}
+		</div>
 	</div>
 </div>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 </body>
 </html>

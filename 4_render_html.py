@@ -29,6 +29,15 @@ def main(unit_ids: list):
         UnitRarityStars.SIX:   '★★★★★★',
     }
 
+    jp_types = {
+        UnitType.BAL: '王',
+        UnitType.VIT: '命',
+        UnitType.STR: '攻',
+        UnitType.MGC: '魔',
+        UnitType.GRD: '守',
+        UnitType.DEX: '匠',
+    }
+
     if unit_ids:
         generator = (loader.load_unit(int(u)) for u in unit_ids)
     else:
@@ -45,6 +54,7 @@ def main(unit_ids: list):
                 StatType=StatType,
                 UnitType=UnitType,
                 stars=stars,
+                jp_types=jp_types,
             ).dump(fp)
 
     units.sort(key=lambda u: (u.any_name, u.ID))
