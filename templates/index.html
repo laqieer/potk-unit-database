@@ -14,7 +14,7 @@
 	</h1>
 	<div id="unit-list" class="list-group">
 		{% for unit in units %}
-		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item">
+		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item list-group-item-action">
 			<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
 			<small class="badge badge-secondary">{{ unit.ID }}</small>
 			{{ unit.any_name | title }} ({{ unit.element.name | title }}) {{ stars[unit.rarity] }}

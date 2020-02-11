@@ -20,7 +20,7 @@
 		<small class="text-muted">{{ unit.jp_name }}</small>
 	</h1>
 	<div id="unit-info">
-		<img class="img-responsive"
+		<img class="img-fluid"
 			 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
 		<h2>Unit Information</h2>
 		<dl class="row">
@@ -50,9 +50,7 @@
 				   role="tab"
 				   data-toggle="pill"
 				   href="#tab-{{ type.name | lower }}">
-					<h5>
-						{{ type.name }} <small>{{ jp_types[type] }}</small>
-					</h5>
+					<h5>{{ type.name }} {{ jp_types[type] }}</h5>
 				</a>
 			</li>
 			{% endfor %}
