@@ -16,7 +16,6 @@ class Stat:
     growth: int  # Maximum growth value from level up. May be impossible.
     compose: int  # Maximum fusion value without UD.
     ud: int  # Extra fusion value obtained from max UD.
-    base: int  # for debug
 
     @property
     def max(self) -> int:
@@ -29,9 +28,6 @@ class Stat:
     @property
     def provided_evo_bonus(self) -> int:
         return math.ceil(self.max / 10)
-
-    def __repr__(self) -> str:
-        return f'{self.max}({self.base};{self.growth})'
 
 
 class StatType(Enum):
@@ -198,6 +194,20 @@ class UnitJob:
     new_cost: int = 0
 
 
+class ClassChangeType(IntEnum):
+    NORMAL = 1
+    VERTEX1 = 2
+    VERTEX2 = 3
+    VERTEX3 = 4
+
+
+@dataclass
+class UnitCCInfo:
+    c_type: ClassChangeType
+    job: UnitJob
+    stats: UnitStats
+
+
 @dataclass
 class UnitData:
     ID: int
@@ -214,6 +224,10 @@ class UnitData:
     cost: int
     is_awakened: bool
     stats: UnitStats
+    vertex0: UnitCCInfo = None
+    vertex1: UnitCCInfo = None
+    vertex2: UnitCCInfo = None
+    vertex3: UnitCCInfo = None
 
     @property
     def any_name(self) -> str:
@@ -227,3 +241,11 @@ class UnitData:
     def short_title(self) -> str:
         return f'{self.rarity.stars} {self.any_name} ({self.element.name}) ' \
                f'[{self.ID}]'
+
+    def get_cc(self, c_type: ClassChangeType) -> UnitCCInfo:
+        return getattr(self, f'vertex{c_type.value - 1}')
+
+    def has_cc(self, c_type: ClassChangeType = None) -> bool:
+        if not c_type:
+            return any(self.has_cc(c) for c in ClassChangeType)
+        return self.get_cc(c_type) is not None

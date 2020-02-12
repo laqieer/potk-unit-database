@@ -1,0 +1,51 @@
+{% macro unit_stats_tab_pane(prefix, stats) %}
+<div id="{{prefix}}-stat-info">
+	<ul class="nav nav-pills mb-3" role="tablist">
+		{% for type in UnitType %}
+		<li class="nav-item">
+			<a class="nav-link{% if loop.first %} active{% endif %}"
+			   role="tab"
+			   data-toggle="pill"
+			   href="#{{prefix}}-tab-{{ type.name | lower }}">
+				<h5>{{ type.name }} {{ jp_types[type] }}</h5>
+			</a>
+		</li>
+		{% endfor %}
+	</ul>
+	<div class="tab-content">
+		{% for type in UnitType %}
+		<div class="tab-pane fade {% if loop.first %}show active{%endif%}"
+			 id="{{prefix}}-tab-{{ type.name | lower }}"
+			 role="tabpanel">
+			<table class="table table-bordered table-hover table-condensed">
+				<thead>
+				<tr>
+					<td>&nbsp;</td>
+					<th scope="col" class="text-right">Max</th>
+					<th scope="col" class="text-right">Base(Evo)</th>
+					<th scope="col" class="text-right">Growth</th>
+					<th scope="col" class="text-right">Fusion(UD)</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for stat in StatType %}
+				<tr>
+					{% set s = stats.of(type).of(stat) %}
+					<th scope="row" class="text-right">{{ stat.name }}</th>
+					<td class="text-right">{{ s.max }}</td>
+					<td class="text-right">
+						{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
+					</td>
+					<td class="text-right">{{ s.growth }}</td>
+					<td class="text-right">
+						{{ s.compose + s.ud }}({{ s.ud }})
+					</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+{% endmacro %}

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from potk_unit_extractor.model import *
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,7 +20,7 @@ class _RawUnitData:
     unit: dict
     params: dict
     initial: dict
-    job: dict
+    cc_pattern: dict
     types: dict
     evo_from: dict
     ud: dict
@@ -31,6 +33,11 @@ class _RawUnitData:
 
     def type_data(self, unit_type: UnitType):
         return self.types[unit_type.value]
+
+    def job_id(self, cc: ClassChangeType):
+        if not self.cc_pattern:
+            return 0
+        return self.cc_pattern[f'job{cc.value}_UnitJob']
 
     def compute_element(self):
         for skill in self.skills:
@@ -53,7 +60,8 @@ class Loader:
             evos: list,
             ud: list,
             unit_skill: list,
-            skills: list
+            skills: list,
+            cc_patterns: list,
     ):
         """
         :param units: List of unit info (UnitUnit).
@@ -65,6 +73,7 @@ class Loader:
         :param ud: List of Unleashed Domain Data (ComposeMaxUnityValueSetting)
         :param unit_skill: List of Unit and Skills associations (UnitSkill)
         :param skills: List of Battle Skill data (BattleskillSkill)
+        :param cc_patterns: List of Class Changes data (JobChangePatterns)
         """
         # Converts the lists into dicts indexed by ID for fast access.
         self.units = _index('ID', units)
@@ -84,6 +93,7 @@ class Loader:
         self.ud = _index('ID', ud)
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
         self.skills = _index('ID', skills)
+        self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
 
     def load_playable_units(self):
         """
@@ -141,50 +151,83 @@ class Loader:
             gear_kind=GearKind(data.unit['kind_GearKind']),
             level=self._load_level(data.params),
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
-            job=self._load_job(data.job),
+            job=self._load_job(data.unit['job_UnitJob']),
             cost=data.unit['cost'],
             is_awakened=(1 == data.unit['awake_unit_flag']),
             stats=self._load_unit_stats(data),
+            vertex0=self._load_unit_cc(data, ClassChangeType.NORMAL),
+            vertex1=self._load_unit_cc(data, ClassChangeType.VERTEX1),
+            vertex2=self._load_unit_cc(data, ClassChangeType.VERTEX2),
+            vertex3=self._load_unit_cc(data, ClassChangeType.VERTEX3),
         )
 
-    def _load_unit_stats(self, data: _RawUnitData) -> UnitStats:
+    def _load_unit_cc(
+            self,
+            data: _RawUnitData,
+            cc: ClassChangeType
+    ) -> Optional[UnitCCInfo]:
+        """
+        Load class change info for a unit. Returns None if no such CC.
+
+        :param data: Raw unit data.
+        :param cc: Desired class change.
+        :return: CC or None.
+        """
+        job_id = data.job_id(cc)
+        if not job_id:
+            return None
+        job_dict = self.jobs[job_id]
+        return UnitCCInfo(
+            c_type=cc,
+            job=self._load_job(job_id),
+            stats=self._load_unit_stats(data, job_dict)
+        )
+
+    def _load_unit_stats(
+            self, data: _RawUnitData, job: dict = None) -> UnitStats:
         """
         Load all stats for all types of a given unit.
 
         :param data: Raw unit data.
+        :param job: Optional job data. Uses unit default if None.
         :return: UnitStats
         """
+        if not job:
+            job = self.jobs[data.unit['job_UnitJob']]
         stats = {
             t.name.lower():
-                self._load_stats(data, t)
+                self._load_stats(data, job, t)
             for t in UnitType
         }
         return UnitStats(**stats)
 
-    def _load_stats(self, data: _RawUnitData, t: UnitType) -> Stats:
+    def _load_stats(self, data: _RawUnitData, job: dict, t: UnitType) -> Stats:
         """
-        Load all stats for a given unit type.
+        Load all stats for a given unit job and type.
 
         :param data: Raw unit data.
+        :param job: Job data.
         :param t: UnitType
         :return: Stats
         """
         stats = {
-            stat.name.lower(): self._load_stat(data, stat, t)
+            stat.name.lower(): self._load_stat(data, job, stat, t)
             for stat in StatType
         }
         return Stats(**stats)
 
     @staticmethod
-    def _load_stat(data: _RawUnitData, stat: StatType, t: UnitType) -> Stat:
+    def _load_stat(
+            data: _RawUnitData, job: dict, stat: StatType, t: UnitType) -> Stat:
         """
-        Loads a single stat based on raw unit data and type.
+        Loads a single stat based on raw unit data, job and type.
 
         Performs the actual calculations to determine all components of a stat.
         This involves the unit current job and recursive info from previous
         versions (evolutions) to determine evo bonus.
 
         :param data: Raw unit data.
+        :param job: Job data.
         :param stat: The stat type to be loaded.
         :param t: The unit type for adjusting caps and compose (fusion) values.
         :return: A single stat of the unit.
@@ -195,8 +238,7 @@ class Loader:
         ud = len(ud_str.split(',')) if len(ud_str) > 0 else 0
 
         return Stat(
-            base=data.params[stat.max_key],
-            initial=data.initial[stat.ini_key] + data.job[stat.ini_key],
+            initial=data.initial[stat.ini_key] + job[stat.ini_key],
             evo_bonus=_calc_evo_bonus(data.source_unit, stat, t, is_awake),
             growth=_calc_gr(
                 data.params[stat.max_key], type_data[stat.correction_key]),
@@ -217,14 +259,14 @@ class Loader:
         mlb_c: int = params['breakthrough_limit']
         return Level(ini=ini, inc=inc, mlb_c=mlb_c)
 
-    @staticmethod
-    def _load_job(job: dict) -> UnitJob:
+    def _load_job(self, job_id: int) -> UnitJob:
         """
         Loads job information.
 
-        :param job: Job information raw data.
+        :param job_id: ID of the job.
         :return: Job Info.
         """
+        job = self.jobs[job_id]
         return UnitJob(
             ID=job['ID'],
             name=job['name'],
@@ -249,8 +291,8 @@ class Loader:
             unit=unit,
             params=self.parameters[unit['parameter_data_UnitUnitParameter']],
             initial=self.initials[unit_id],
-            job=self.jobs[unit['job_UnitJob']],
             types=self.types_data[unit['rarity_UnitRarity']],
+            cc_pattern=_get_or_def(self.cc_patterns, unit_id),
             evo_from=_get_or_def(self.evos, unit_id),
             ud=_get_or_def(self.ud, unit[
                 'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'
@@ -298,6 +340,7 @@ def load_folder(path: Path) -> Loader:
         ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
         unit_skill=_load_file(path / 'UnitSkill.json'),
         skills=_load_file(path / 'BattleskillSkill.json'),
+        cc_patterns=_load_file(path / 'JobChangePatterns.json'),
     )
 
 

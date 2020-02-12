@@ -48,4 +48,5 @@ if __name__ == "__main__":
         ('GearKind', parse_gear_kind),
         ('UnitSkill', parse_unit_skill),
         ('BattleskillSkill', parse_battle_skill),
+        ('JobChangePatterns', parse_job_change_pattern),
     ])

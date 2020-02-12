@@ -209,6 +209,20 @@ def parse_gear_kind(reader: MasterDataReader, item: dict):
     item['colosseum_preempt_coefficient'] = reader.ReadInt()
 
 
+def parse_job_change_pattern(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['job_UnitJob'] = reader.ReadInt()
+    item['job1_UnitJob'] = reader.ReadInt()
+    item['materials1_JobChangeMaterials'] = reader.ReadIntOrNull()
+    item['job2_UnitJob'] = reader.ReadInt()
+    item['materials2_JobChangeMaterials'] = reader.ReadInt()
+    item['job3_UnitJob'] = reader.ReadIntOrNull()
+    item['materials3_JobChangeMaterials'] = reader.ReadIntOrNull()
+    item['job4_UnitJob'] = reader.ReadIntOrNull()
+    item['materials4_JobChangeMaterials'] = reader.ReadIntOrNull()
+
+
 def parse_unit_skill(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['unit_UnitUnit'] = reader.ReadInt()

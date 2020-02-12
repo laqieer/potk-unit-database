@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars
+from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
+    ClassChangeType
 from potk_unit_extractor.loader import load_folder
 from pathlib import Path
 
@@ -38,6 +39,13 @@ def main(unit_ids: list):
         UnitType.DEX: '匠',
     }
 
+    cc_desc = {
+        ClassChangeType.NORMAL: '6★',
+        ClassChangeType.VERTEX1: 'VERTEX 1',
+        ClassChangeType.VERTEX2: 'VERTEX 2',
+        ClassChangeType.VERTEX3: 'VERTEX 3',
+    }
+
     if unit_ids:
         generator = (loader.load_unit(int(u)) for u in unit_ids)
     else:
@@ -53,8 +61,10 @@ def main(unit_ids: list):
                 unit=unit,
                 StatType=StatType,
                 UnitType=UnitType,
+                ClassChangeType=ClassChangeType,
                 stars=stars,
                 jp_types=jp_types,
+                cc_desc=cc_desc,
             ).dump(fp)
 
     units.sort(key=lambda u: (u.any_name, u.ID))

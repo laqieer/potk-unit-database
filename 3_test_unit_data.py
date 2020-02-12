@@ -23,7 +23,7 @@ class UnitGrTest(unittest.TestCase):
         }),
         # 6* Zwei
         (603013, UnitType.VIT, {
-            StatType.HP: 97,
+            StatType.HP:  97,
             StatType.SPD: 91,
             StatType.TEC: 91,
         }),
@@ -95,6 +95,26 @@ class UnitEvoTest(unittest.TestCase):
                         expected = base.stats.of(t).of(s).evo_bonus
                         actual = awakened.stats.of(t).of(s).evo_bonus
                         self.assertEqual(expected, actual)
+
+
+class UnitCCInitialTest(unittest.TestCase):
+    test_ini_cases = [
+        # 6* Zwei
+        (603013, ClassChangeType.VERTEX1, {
+            StatType.HP: 130,
+            StatType.MGC: 23,
+        }),
+    ]
+
+    def test_expected_ini(self) -> None:
+        # Unit type does not affect base values.
+        t = UnitType.BAL
+        for u_id, u_cc, u_ini in self.test_ini_cases:
+            unit = loader.load_unit(u_id)
+            for stat, ini in u_ini.items():
+                with self.subTest(u=unit.h_id, c=u_cc, s=stat):
+                    actual = unit.get_cc(u_cc).stats.of(t).of(stat).initial
+                    self.assertEqual(ini, actual)
 
 
 if __name__ == '__main__':

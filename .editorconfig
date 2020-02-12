@@ -8,3 +8,4 @@ tab_width = 4
 [*.py]
 indent_style = space
 indent_size = 4
+ij_continuation_indent_size = 8
