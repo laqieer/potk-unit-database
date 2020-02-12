@@ -48,6 +48,16 @@
 	</div>
 	<div id="stats-caps">
 		<h2>Stats Caps</h2>
+		{% if unit.is_awakened %}
+		<div class="alert alert-warning" role="alert">
+			<p><strong>The stats for this unit are incorrect.</strong></p>
+			<p>
+				The growth column value is lower than the actual in-game value.
+				We've been unable to find an authoritative source for the
+				correct values.
+			</p>
+		</div>
+		{% endif %}
 		<ul class="nav nav-pills mb-3" role="tablist">
 			{% for type in UnitType %}
 			<li class="nav-item">

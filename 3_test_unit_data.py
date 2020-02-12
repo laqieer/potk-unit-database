@@ -71,18 +71,32 @@ class UnitGrTest(unittest.TestCase):
         }),
     ]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls._loader = load_folder(Path('masterdata'))
-
     def test_expected_gr(self) -> None:
         for u_id, u_type, u_grs in self.test_gr_cases:
-            unit = self._loader.load_unit(u_id)
+            unit = loader.load_unit(u_id)
             for stat, gr in u_grs.items():
                 with self.subTest(u=unit.h_id, t=u_type, s=stat):
                     actual = unit.stats.of(u_type).of(stat).growth
                     self.assertEqual(gr, actual)
 
 
+class UnitEvoTest(unittest.TestCase):
+    test_evo_cases = [
+        (300435, 300434),
+    ]
+
+    def test_expected_evo(self) -> None:
+        for a_id, b_id in self.test_evo_cases:
+            awakened = loader.load_unit(a_id)
+            base = loader.load_unit(b_id)
+            for t in UnitType:
+                for s in StatType:
+                    with self.subTest(u=awakened.h_id, t=t, s=s):
+                        expected = base.stats.of(t).of(s).evo_bonus
+                        actual = awakened.stats.of(t).of(s).evo_bonus
+                        self.assertEqual(expected, actual)
+
+
 if __name__ == '__main__':
+    loader = load_folder(Path('masterdata'))
     unittest.main()
