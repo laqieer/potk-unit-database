@@ -212,6 +212,7 @@ class UnitData:
     rarity: UnitRarityStars
     job: UnitJob
     cost: int
+    is_awakened: bool
     stats: UnitStats
 
     @property

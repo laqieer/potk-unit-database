@@ -143,6 +143,7 @@ class Loader:
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
             job=self._load_job(data.job),
             cost=data.unit['cost'],
+            is_awakened=(1 == data.unit['awake_unit_flag']),
             stats=self._load_unit_stats(data),
         )
 
