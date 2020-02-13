@@ -41,9 +41,9 @@ def main(unit_ids: list):
 
     cc_desc = {
         ClassChangeType.NORMAL: '6★',
-        ClassChangeType.VERTEX1: 'VERTEX 1',
-        ClassChangeType.VERTEX2: 'VERTEX 2',
-        ClassChangeType.VERTEX3: 'VERTEX 3',
+        ClassChangeType.VERTEX1: 'Vertex 1',
+        ClassChangeType.VERTEX2: 'Vertex 2',
+        ClassChangeType.VERTEX3: 'Vertex 3',
     }
 
     if unit_ids:
