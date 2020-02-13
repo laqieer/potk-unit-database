@@ -117,6 +117,27 @@ class UnitCCInitialTest(unittest.TestCase):
                     self.assertEqual(ini, actual)
 
 
+class UnitCCMasterTest(unittest.TestCase):
+    test_master_cases = [
+        # 6* Zwei
+        (603013, ClassChangeType.VERTEX1, {
+            StatType.HP: 100,
+            StatType.TEC: 10,
+        }),
+    ]
+
+    def test_expected_ini(self) -> None:
+        # Unit type does not affect master values.
+        for t in UnitType:
+            for u_id, u_cc, u_master in self.test_master_cases:
+                unit = loader.load_unit(u_id)
+                for stat, master in u_master.items():
+                    with self.subTest(u=unit.h_id, c=u_cc, s=stat):
+                        stats = unit.get_cc(u_cc).stats.of(t)
+                        actual = stats.of(stat).skill_master
+                        self.assertEqual(master, actual)
+
+
 if __name__ == '__main__':
     loader = load_folder(Path('masterdata'))
     unittest.main()

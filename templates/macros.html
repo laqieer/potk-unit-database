@@ -25,6 +25,7 @@
 					<th scope="col" class="text-right">Base(Evo)</th>
 					<th scope="col" class="text-right">Growth</th>
 					<th scope="col" class="text-right">Fusion(UD)</th>
+					<th scope="col" class="text-right">CC Skill</th>
 				</tr>
 				</thead>
 				<tbody>
@@ -40,6 +41,7 @@
 					<td class="text-right">
 						{{ s.compose + s.ud }}({{ s.ud }})
 					</td>
+					<td class="text-right">{{ s.skill_master }}</td>
 				</tr>
 				{% endfor %}
 				</tbody>

@@ -223,6 +223,15 @@ def parse_job_change_pattern(reader: MasterDataReader, item: dict):
     item['materials4_JobChangeMaterials'] = reader.ReadIntOrNull()
 
 
+def parse_job_characteristics(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
+    item['skill2_BattleskillSkill'] = reader.ReadIntOrNull()
+    item['level_pattern_id'] = reader.ReadStringOrNull(True)
+    item['levelmax_bonus_JobCharacteristicsLevelmaxBonus'] = reader.ReadInt()
+    item['levelmax_bonus_value'] = reader.ReadInt()
+
+
 def parse_unit_skill(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['unit_UnitUnit'] = reader.ReadInt()

@@ -11,6 +11,20 @@ ELEMENTAL_SKILLS_IDS = [
     490000010, 490000013, 490000015, 490000017, 490000019, 490000021, 490000173
 ]
 
+# Based on JobCharacteristicsLevelmaxBonus Enum.
+JOB_CH_BONUS_TO_STAT = {
+    0: None,  # none
+    1: StatType.HP,  # hp_add
+    2: StatType.STR,  # strength_add
+    3: StatType.MGC,  # intelligence_add
+    4: StatType.GRD,  # vitality_add
+    5: StatType.SPR,  # mind_add
+    6: StatType.SPD,  # agility_add
+    7: StatType.TEC,  # dexterity_add
+    8: StatType.LCK,  # lucky_add
+    9: None,  # movement_add
+}
+
 
 @dataclass()
 class _RawUnitData:
@@ -62,6 +76,7 @@ class Loader:
             unit_skill: list,
             skills: list,
             cc_patterns: list,
+            job_characteristics: list,
     ):
         """
         :param units: List of unit info (UnitUnit).
@@ -74,6 +89,7 @@ class Loader:
         :param unit_skill: List of Unit and Skills associations (UnitSkill)
         :param skills: List of Battle Skill data (BattleskillSkill)
         :param cc_patterns: List of Class Changes data (JobChangePatterns)
+        :param job_characteristics: List of JobCharacteristics
         """
         # Converts the lists into dicts indexed by ID for fast access.
         self.units = _index('ID', units)
@@ -94,6 +110,7 @@ class Loader:
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
         self.skills = _index('ID', skills)
         self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
+        self.job_characteristics = _index('ID', job_characteristics)
 
     def load_playable_units(self):
         """
@@ -176,15 +193,15 @@ class Loader:
         job_id = data.job_id(cc)
         if not job_id:
             return None
-        job_dict = self.jobs[job_id]
+        job = self._load_job(job_id)
         return UnitCCInfo(
             c_type=cc,
-            job=self._load_job(job_id),
-            stats=self._load_unit_stats(data, job_dict)
+            job=job,
+            stats=self._load_unit_stats(data, job)
         )
 
     def _load_unit_stats(
-            self, data: _RawUnitData, job: dict = None) -> UnitStats:
+            self, data: _RawUnitData, job: UnitJob = None) -> UnitStats:
         """
         Load all stats for all types of a given unit.
 
@@ -193,7 +210,7 @@ class Loader:
         :return: UnitStats
         """
         if not job:
-            job = self.jobs[data.unit['job_UnitJob']]
+            job: UnitJob = self._load_job(data.unit['job_UnitJob'])
         stats = {
             t.name.lower():
                 self._load_stats(data, job, t)
@@ -201,7 +218,8 @@ class Loader:
         }
         return UnitStats(**stats)
 
-    def _load_stats(self, data: _RawUnitData, job: dict, t: UnitType) -> Stats:
+    def _load_stats(
+            self, data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
         """
         Load all stats for a given unit job and type.
 
@@ -218,7 +236,10 @@ class Loader:
 
     @staticmethod
     def _load_stat(
-            data: _RawUnitData, job: dict, stat: StatType, t: UnitType) -> Stat:
+            data: _RawUnitData,
+            job: UnitJob,
+            stat: StatType,
+            t: UnitType) -> Stat:
         """
         Loads a single stat based on raw unit data, job and type.
 
@@ -238,12 +259,13 @@ class Loader:
         ud = len(ud_str.split(',')) if len(ud_str) > 0 else 0
 
         return Stat(
-            initial=data.initial[stat.ini_key] + job[stat.ini_key],
+            initial=data.initial[stat.ini_key] + job.get_initial(stat),
             evo_bonus=_calc_evo_bonus(data.source_unit, stat, t, is_awake),
             growth=_calc_gr(
                 data.params[stat.max_key], type_data[stat.correction_key]),
             compose=type_data[stat.compose_key],
             ud=ud,
+            skill_master=job.get_skill_master_bonus(stat),
         )
 
     @staticmethod
@@ -267,12 +289,37 @@ class Loader:
         :return: Job Info.
         """
         job = self.jobs[job_id]
+        initials = {f'initial_{s.name.lower()}': job[s.ini_key]
+                    for s in StatType}
         return UnitJob(
             ID=job['ID'],
             name=job['name'],
             movement=job['movement'],
             new_cost=job['new_cost'],
+            mastery_bonuses=self._load_job_bonuses(job),
+            **initials
         )
+
+    def _load_job_bonuses(self, job: dict) -> List[UnitJobSkillMasterBonus]:
+        ids_str = job['job_characteristics_id']
+        if not ids_str:
+            return []
+        result = []
+        chs = (self.job_characteristics[int(i)] for i in ids_str.split(','))
+        for ch in chs:
+            bonus = self._parse_job_bonus(ch)
+            if bonus:
+                result.append(bonus)
+        return result
+
+    @staticmethod
+    def _parse_job_bonus(ch: dict) -> Optional[UnitJobSkillMasterBonus]:
+        raw_stat = ch['levelmax_bonus_JobCharacteristicsLevelmaxBonus']
+        stat = _get_or_def(JOB_CH_BONUS_TO_STAT, raw_stat)
+        if stat is None:
+            return None
+        return UnitJobSkillMasterBonus(
+            stat=stat, plus_value=ch['levelmax_bonus_value'])
 
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
@@ -341,6 +388,7 @@ def load_folder(path: Path) -> Loader:
         unit_skill=_load_file(path / 'UnitSkill.json'),
         skills=_load_file(path / 'BattleskillSkill.json'),
         cc_patterns=_load_file(path / 'JobChangePatterns.json'),
+        job_characteristics=_load_file(path / 'JobCharacteristics.json'),
     )
 
 
