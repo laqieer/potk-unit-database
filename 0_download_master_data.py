@@ -34,6 +34,8 @@ def main(paths_fp):
         "MasterData/GearKind",
         "MasterData/UnitSkill",
         "MasterData/BattleskillSkill",
+        "MasterData/JobChangePatterns",
+        "MasterData/JobCharacteristics",
     ]
     for name in names:
         download_asset_bundle(env, asset_bundle[name], name, target)

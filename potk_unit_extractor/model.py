@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, IntEnum
+from typing import List
 import math
 
 
@@ -16,22 +17,20 @@ class Stat:
     growth: int  # Maximum growth value from level up. May be impossible.
     compose: int  # Maximum fusion value without UD.
     ud: int  # Extra fusion value obtained from max UD.
-    base: int  # for debug
+    skill_master: int  # Extra value from skill mastery.
 
     @property
     def max(self) -> int:
-        return self.initial \
-               + self.evo_bonus \
-               + self.growth \
-               + self.compose \
-               + self.ud
+        return (self.initial
+                + self.evo_bonus
+                + self.growth
+                + self.compose
+                + self.ud
+                + self.skill_master)
 
     @property
     def provided_evo_bonus(self) -> int:
         return math.ceil(self.max / 10)
-
-    def __repr__(self) -> str:
-        return f'{self.max}({self.base};{self.growth})'
 
 
 class StatType(Enum):
@@ -191,11 +190,48 @@ class Element(IntEnum):
 
 
 @dataclass
+class UnitJobSkillMasterBonus:
+    stat: StatType
+    plus_value: int
+
+
+@dataclass
 class UnitJob:
     ID: int
     name: str
     movement: int
+    mastery_bonuses: List[UnitJobSkillMasterBonus]
+    initial_hp: int
+    initial_str: int
+    initial_mgc: int
+    initial_grd: int
+    initial_spr: int
+    initial_spd: int
+    initial_tec: int
+    initial_lck: int
     new_cost: int = 0
+
+    def get_initial(self, stat_type: StatType) -> int:
+        return getattr(self, 'initial_' + stat_type.name.lower())
+
+    def get_skill_master_bonus(self, stat_type: StatType) -> int:
+        return sum(mb.plus_value
+                   for mb in self.mastery_bonuses
+                   if mb.stat == stat_type)
+
+
+class ClassChangeType(IntEnum):
+    NORMAL = 1
+    VERTEX1 = 2
+    VERTEX2 = 3
+    VERTEX3 = 4
+
+
+@dataclass
+class UnitCCInfo:
+    c_type: ClassChangeType
+    job: UnitJob
+    stats: UnitStats
 
 
 @dataclass
@@ -214,6 +250,10 @@ class UnitData:
     cost: int
     is_awakened: bool
     stats: UnitStats
+    vertex0: UnitCCInfo = None
+    vertex1: UnitCCInfo = None
+    vertex2: UnitCCInfo = None
+    vertex3: UnitCCInfo = None
 
     @property
     def any_name(self) -> str:
@@ -227,3 +267,11 @@ class UnitData:
     def short_title(self) -> str:
         return f'{self.rarity.stars} {self.any_name} ({self.element.name}) ' \
                f'[{self.ID}]'
+
+    def get_cc(self, c_type: ClassChangeType) -> UnitCCInfo:
+        return getattr(self, f'vertex{c_type.value - 1}')
+
+    def has_cc(self, c_type: ClassChangeType = None) -> bool:
+        if not c_type:
+            return any(self.has_cc(c) for c in ClassChangeType)
+        return self.get_cc(c_type) is not None

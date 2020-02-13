@@ -12,6 +12,7 @@
 	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/{{unit.resource_id}}/unit_hires.png">
 </head>
 <body>
+{% import 'macros.html' as macros with context %}
 <div class="container">
 	<div class="breadcrumb">
 		<h5>
@@ -58,53 +59,38 @@
 			</p>
 		</div>
 		{% endif %}
-		<ul class="nav nav-pills mb-3" role="tablist">
-			{% for type in UnitType %}
-			<li class="nav-item">
-				<a class="nav-link {% if loop.first %}active{%endif%}"
-				   role="tab"
-				   data-toggle="pill"
-				   href="#tab-{{ type.name | lower }}">
-					<h5>{{ type.name }} {{ jp_types[type] }}</h5>
-				</a>
-			</li>
-			{% endfor %}
-		</ul>
-		<div class="tab-content">
-			{% for type in UnitType %}
-			<div class="tab-pane fade {% if loop.first %}show active{%endif%}"
-				 id="tab-{{ type.name | lower }}"
-				 role="tabpanel">
-				<table class="table table-bordered table-hover table-condensed">
-					<thead>
-					<tr>
-						<td>&nbsp;</td>
-						<th scope="col" class="text-right">Max</th>
-						<th scope="col" class="text-right">Base(Evo)</th>
-						<th scope="col" class="text-right">Growth</th>
-						<th scope="col" class="text-right">Fusion(UD)</th>
-					</tr>
-					</thead>
-					<tbody>
-					{% for stat in StatType %}
-					<tr>
-						{% set s = unit.stats.of(type).of(stat) %}
-						<th scope="row" class="text-right">{{ stat.name }}</th>
-						<td class="text-right">{{ s.max }}</td>
-						<td class="text-right">
-							{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
-						</td>
-						<td class="text-right">{{ s.growth }}</td>
-						<td class="text-right">
-							{{ s.compose + s.ud }}({{ s.ud }})
-						</td>
-					</tr>
-					{% endfor %}
-					</tbody>
-				</table>
+		{% if not unit.has_cc() %}
+		{{- macros.unit_stats_tab_pane('main', unit.stats, False) -}}
+		{% else %}
+		<div id="cc-info">
+			<ul class="nav nav-pills mb-3" role="tablist">
+				{% for cc_type in ClassChangeType %}
+				{% if unit.has_cc(cc_type) %}
+				<li class="nav-item">
+					<a class="nav-link{% if loop.first %} active{% endif %}"
+					   role="tab"
+					   data-toggle="pill"
+					   href="#cc-tab-{{cc_type.name}}">
+						{{ cc_desc[cc_type] }}
+					</a>
+				</li>
+				{% endif %}
+				{% endfor %}
+			</ul>
+			<div class="tab-content">
+				{% for cc_type in ClassChangeType %}
+				{% if unit.has_cc(cc_type) %}
+				<div id="cc-tab-{{cc_type.name}}"
+					 class="tab-pane fade{% if loop.first %} active show{% endif %}"
+					 role="tabpanel">
+					{% set stats = unit.get_cc(cc_type).stats %}
+					{{- macros.unit_stats_tab_pane(cc_type.name, stats, True) -}}
+				</div>
+				{% endif %}
+				{% endfor %}
 			</div>
-			{% endfor %}
 		</div>
+		{% endif %}
 	</div>
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
