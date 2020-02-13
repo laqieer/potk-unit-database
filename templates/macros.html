@@ -1,4 +1,4 @@
-{% macro unit_stats_tab_pane(prefix, stats) %}
+{% macro unit_stats_tab_pane(prefix, stats, has_cc) %}
 <div id="{{prefix}}-stat-info">
 	<ul class="nav nav-pills mb-3" role="tablist">
 		{% for type in UnitType %}
@@ -25,7 +25,9 @@
 					<th scope="col" class="text-right">Base(Evo)</th>
 					<th scope="col" class="text-right">Growth</th>
 					<th scope="col" class="text-right">Fusion(UD)</th>
+					{% if has_cc %}
 					<th scope="col" class="text-right">CC Skill</th>
+					{% endif %}
 				</tr>
 				</thead>
 				<tbody>
@@ -41,7 +43,9 @@
 					<td class="text-right">
 						{{ s.compose + s.ud }}({{ s.ud }})
 					</td>
+					{% if has_cc %}
 					<td class="text-right">{{ s.skill_master }}</td>
+					{% endif %}
 				</tr>
 				{% endfor %}
 				</tbody>

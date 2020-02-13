@@ -60,7 +60,7 @@
 		</div>
 		{% endif %}
 		{% if not unit.has_cc() %}
-		{{- macros.unit_stats_tab_pane('main', unit.stats) -}}
+		{{- macros.unit_stats_tab_pane('main', unit.stats, False) -}}
 		{% else %}
 		<div id="cc-info">
 			<ul class="nav nav-pills mb-3" role="tablist">
@@ -84,7 +84,7 @@
 					 class="tab-pane fade{% if loop.first %} active show{% endif %}"
 					 role="tabpanel">
 					{% set stats = unit.get_cc(cc_type).stats %}
-					{{- macros.unit_stats_tab_pane(cc_type.name, stats) -}}
+					{{- macros.unit_stats_tab_pane(cc_type.name, stats, True) -}}
 				</div>
 				{% endif %}
 				{% endfor %}
