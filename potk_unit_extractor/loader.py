@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Optional
 
 from potk_unit_extractor.model import *
@@ -194,6 +195,14 @@ class Loader:
         if not job_id:
             return None
         job = self._load_job(job_id)
+        if cc == ClassChangeType.VERTEX3:
+            # Assume all units with cc3 have cc1 and cc2 as well.
+            # Since unlocking cc3 requires mastering both cc1 and cc2,
+            # this is a safe assumption at least for now.
+            cc1 = self._load_job(data.job_id(ClassChangeType.VERTEX1))
+            cc2 = self._load_job(data.job_id(ClassChangeType.VERTEX2))
+            job.mastery_bonuses += cc1.mastery_bonuses + cc2.mastery_bonuses
+
         return UnitCCInfo(
             c_type=cc,
             job=job,
