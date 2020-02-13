@@ -39,6 +39,17 @@ def main(unit_ids: list):
         UnitType.DEX: '匠',
     }
 
+    jp_stats = {
+        StatType.HP: '',
+        StatType.STR: '力',
+        StatType.MGC: '魔',
+        StatType.GRD: '守',
+        StatType.SPR: '精',
+        StatType.SPD: '速',
+        StatType.TEC: '技',
+        StatType.LCK: '運',
+    }
+
     cc_desc = {
         ClassChangeType.NORMAL: '6★',
         ClassChangeType.VERTEX1: 'Vertex 1',
@@ -64,6 +75,7 @@ def main(unit_ids: list):
                 ClassChangeType=ClassChangeType,
                 stars=stars,
                 jp_types=jp_types,
+                jp_stats=jp_stats,
                 cc_desc=cc_desc,
             ).dump(fp)
 

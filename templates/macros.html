@@ -34,7 +34,7 @@
 				{% for stat in StatType %}
 				<tr>
 					{% set s = stats.of(type).of(stat) %}
-					<th scope="row" class="text-right">{{ stat.name }}</th>
+					<th scope="row" class="text-right">{{ stat.name }} {{ jp_stats[stat] }}</th>
 					<td class="text-right">{{ s.max }}</td>
 					<td class="text-right">
 						{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
