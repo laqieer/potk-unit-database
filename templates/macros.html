@@ -7,7 +7,7 @@
 			   role="tab"
 			   data-toggle="pill"
 			   href="#{{prefix}}-tab-{{ type.name | lower }}">
-				<h5>{{ type.name }} {{ jp_types[type] }}</h5>
+				<h5>{{ type.name }}&nbsp;{{ jp_types[type] }}</h5>
 			</a>
 		</li>
 		{% endfor %}
@@ -26,7 +26,7 @@
 					<th scope="col" class="text-right">Growth</th>
 					<th scope="col" class="text-right">Fusion(UD)</th>
 					{% if has_cc %}
-					<th scope="col" class="text-right">CC Skill</th>
+					<th scope="col" class="text-right">CC&nbsp;Skill</th>
 					{% endif %}
 				</tr>
 				</thead>
@@ -34,7 +34,9 @@
 				{% for stat in StatType %}
 				<tr>
 					{% set s = stats.of(type).of(stat) %}
-					<th scope="row" class="text-right">{{ stat.name }} {{ jp_stats[stat] }}</th>
+					<th scope="row" class="text-right">
+						{{ stat.name }}&nbsp;{{ jp_stats[stat] }}
+					</th>
 					<td class="text-right">{{ s.max }}</td>
 					<td class="text-right">
 						{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
