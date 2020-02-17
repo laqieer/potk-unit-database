@@ -18,16 +18,34 @@
 		PotK Unit Database <br/>
 		<small class="text-muted"><i>(WIP: {{ total }} units)</i></small>
 	</h1>
+	<input style="margin-top:10px; margin-bottom:15px" type="text" class="form-control" id="myInput" onkeyup="searchUnit()" placeholder="Search for units" title="Enter a unit name">
 	<div id="unit-list" class="list-group">
 		{% for unit in units %}
 		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item list-group-item-action">
 			<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
 			<small class="badge badge-secondary">{{ unit.ID }}</small>
-			{{ unit.any_name | title }} ({{ unit.element.name | title }})
-			{{stars[unit.rarity] }}
+			<span class="unit-name">{{ unit.any_name | title }} ({{ unit.element.name | title }})
+			{{stars[unit.rarity] }}</span>
 		</a>
 		{% endfor %}
 	</div>
 </div>
+<script>
+function searchUnit() {
+    var input, unit, unitattr, a, i;
+    input = (document.getElementById("myInput")).value.toUpperCase();
+    units = document.getElementById("unit-list");
+    unitattr = units.getElementsByClassName("list-group-item");
+    for (i = 0; i < unitattr.length; i++) {
+        a = unitattr[i].getElementsByClassName("unit-name")[0];
+        textval = a.textContent || a.innerText;
+        if (textval.toUpperCase().indexOf(input) > -1) {
+            unitattr[i].style.display = "";
+        } else {
+            unitattr[i].style.display = "none";
+        }
+    }
+}
+</script>
 </body>
 </html>
