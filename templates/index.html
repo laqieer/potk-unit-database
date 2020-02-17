@@ -18,16 +18,71 @@
 		PotK Unit Database <br/>
 		<small class="text-muted"><i>(WIP: {{ total }} units)</i></small>
 	</h1>
-	<div id="unit-list" class="list-group">
-		{% for unit in units %}
-		<a id="unit-{{unit.ID}}" href="units/{{ unit.ID }}.html" class="list-group-item list-group-item-action">
-			<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
-			<small class="badge badge-secondary">{{ unit.ID }}</small>
-			{{ unit.any_name | title }} ({{ unit.element.name | title }})
-			{{stars[unit.rarity] }}
-		</a>
-		{% endfor %}
+	<div class="row">
+		<div class="col">
+			<div class="input-group">
+				<input type="text" class="form-control" id="myInput"
+					   onkeyup="checkEnter(event)"
+					   placeholder="Search for units" title="Enter a unit name"/>
+				<div class="input-group-append">
+					<button type="button" class="btn btn-primary" onclick="searchUnit()">
+						Search
+					</button>
+					<button type="button" class="btn btn-secondary" onclick="toggleAll()">
+						Hide/Show all
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<div id="unit-list" class="list-group">
+				{% for unit in units %}
+				<a id="unit-{{unit.ID}}" href="units/{{unit.ID}}.html" data-unit-name="{{unit.any_name}} ({{unit.element.name}})" class="list-group-item list-group-item-action" style="display: none">
+					<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
+					<small class="badge badge-secondary">{{ unit.ID }}</small>
+					{{unit.any_name | title}} ({{unit.element.name | title}}) {{stars[unit.rarity]}}
+				</a>
+				{% endfor %}
+			</div>
+		</div>
 	</div>
 </div>
+<script>
+// Set some globals for readability; Kids, don't do this at home.
+units = document.getElementById("unit-list").getElementsByClassName("list-group-item");
+searchBox = document.getElementById("myInput");
+anyShown = false;
+
+function checkEnter(event) {
+	if (event.keyCode == 13) {
+		searchUnit();
+	}
+}
+
+function toggleAll() {
+	var i;
+	for (i = 0; i < units.length; i++) {
+		units[i].style.display = anyShown ? "none" : "";
+	}
+	anyShown = !anyShown;
+}
+
+function searchUnit() {
+	var input, i, name;
+	input = searchBox.value.toUpperCase();
+
+	for (i = 0; i < units.length; i++) {
+		name = units[i].dataset.unitName;
+		if (name.toUpperCase().indexOf(input) > -1) {
+			units[i].style.display = "";
+			anyShown = true;
+		} else {
+			units[i].style.display = "none";
+		}
+	}
+}
+</script>
 </body>
 </html>
