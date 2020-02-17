@@ -21,7 +21,9 @@
 	<div class="row">
 		<div class="col">
 			<div class="input-group">
-				<input type="text" class="form-control" id="myInput" placeholder="Search for units" title="Enter a unit name"/>
+				<input type="text" class="form-control" id="myInput"
+					   onkeyup="checkEnter(event)"
+					   placeholder="Search for units" title="Enter a unit name"/>
 				<div class="input-group-append">
 					<button type="button" class="btn btn-primary" onclick="searchUnit()">
 						Search
@@ -52,6 +54,12 @@
 units = document.getElementById("unit-list").getElementsByClassName("list-group-item");
 searchBox = document.getElementById("myInput");
 anyShown = false;
+
+function checkEnter(event) {
+	if (event.keyCode == 13) {
+		searchUnit();
+	}
+}
 
 function toggleAll() {
 	var i;
