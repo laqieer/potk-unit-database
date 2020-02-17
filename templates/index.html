@@ -26,11 +26,8 @@
 					<button type="button" class="btn btn-primary" onclick="searchUnit()">
 						Search
 					</button>
-					<button type="button" class="btn btn-secondary" onclick="showAll()">
-						Show all
-					</button>
-					<button type="button" class="btn btn-secondary" onclick="hideAll()">
-						Hide all
+					<button type="button" class="btn btn-secondary" onclick="toggleAll()">
+						Hide/Show all
 					</button>
 				</div>
 			</div>
@@ -54,20 +51,14 @@
 // Set some globals for readability; Kids, don't do this at home.
 units = document.getElementById("unit-list").getElementsByClassName("list-group-item");
 searchBox = document.getElementById("myInput");
+anyShown = false;
 
-function showAll() {
-	updateAll(true)
-}
-
-function hideAll() {
-	updateAll(false)
-}
-
-function updateAll(disp) {
+function toggleAll() {
 	var i;
 	for (i = 0; i < units.length; i++) {
-		units[i].style.display = disp ? "" : "none";
+		units[i].style.display = anyShown ? "none" : "";
 	}
+	anyShown = !anyShown;
 }
 
 function searchUnit() {
@@ -78,6 +69,7 @@ function searchUnit() {
 		name = units[i].dataset.unitName;
 		if (name.toUpperCase().indexOf(input) > -1) {
 			units[i].style.display = "";
+			anyShown = true;
 		} else {
 			units[i].style.display = "none";
 		}
