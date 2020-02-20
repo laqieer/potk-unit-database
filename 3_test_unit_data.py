@@ -155,7 +155,7 @@ class UnitUDTest(unittest.TestCase):
             unit = loader.load_unit(u_id)
             for stat, expected_ud in u_uds.items():
                 with self.subTest(unit=unit.h_id, stat=stat):
-                    actual_ud = unit.stats.bal.of(stat).ud
+                    actual_ud = unit.stats.bal.of(stat).ud.max
                     self.assertEqual(expected_ud, actual_ud)
 
 

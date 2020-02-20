@@ -39,8 +39,7 @@
 			<dt class="col-sm-3">Cost</dt>
 			<dd class="col-sm-9">{{ unit.cost }}</dd>
 			<dt class="col-sm-3">Level</dt>
-			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}
-			</dd>
+			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}</dd>
 			<dt class="col-sm-3">Job</dt>
 			<dd class="col-sm-9">{{ unit.job.name }}</dd>
 			<dt class="col-sm-3">Movement</dt>
@@ -92,6 +91,71 @@
 		</div>
 		{% endif %}
 	</div>
+	{% if unit.has_ud %}
+	<div id="ud-info">
+		<h2>
+			Unleashed Domain (UD)
+			<button class="btn btn-secondary" data-toggle="collapse" data-target="#ud-content">
+				Hide/Show
+			</button>
+		</h2>
+		<div id="ud-content" class="collapse">
+			<table class="table table-sm table-bordered table-hover table-condensed">
+				<thead>
+				<tr>
+					<th scope="col" class="text-right">DV</th>
+					{% for stat in StatType %}
+					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
+					{% endfor %}
+				</tr>
+				</thead>
+				<tbody>
+				{# UD isn't affected by unit type, so we just use bal #}
+				{% set stats = unit.stats.bal %}
+				{% for milestone in stats.ud_milestones %}
+				<tr>
+					<td class="text-right">{{ milestone }}</td>
+					{% for stat in StatType %}
+					<td class="text-right">
+						{% set ud = stats.of(stat).ud %}
+						{% set bonus = ud.bonus(milestone) %}
+						{% set inc = ud.inc_by_milestone[milestone] %}
+						{% if inc %}<small class="text-muted">(+{{- inc }})</small>&nbsp;{% endif %}
+						{{- bonus | default('-', true) -}}
+					</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<table class="table table-sm table-bordered table-hover table-condensed">
+				<thead>
+				<tr>
+					<td rowspan="2"></td>
+					<th scope="col" colspan="8" class="text-center">
+						Necessary DV to Reach the UD Bonus Cap
+					</th>
+				</tr>
+				<tr>
+					{% for stat in StatType %}
+					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
+					{% endfor %}
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<th scope="row" class="text-right">DV</th>
+					{% for stat in StatType %}
+					<td class="text-right">
+						{{- unit.stats.bal.of(stat).ud.dv_for_cap | default('-', true) -}}
+					</td>
+					{% endfor %}
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{% endif %}
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
