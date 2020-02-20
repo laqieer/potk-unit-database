@@ -57,6 +57,8 @@ def download_streaming_asset(
     target_fn = key.split('/')[-1]
     ext = asset[1]
     target_fp = target / f'{target_fn}{ext}'
+    if target_fp.exists():
+        return
 
     print(f'Saving "{key}" to "{target_fp}"...')
     with target_fp.open(mode='wb') as fd:

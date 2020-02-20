@@ -11,7 +11,7 @@ from pathlib import Path
 import json
 
 
-def main(paths_fp):
+def main(paths_fp, ids: list):
     print("Loading file: " + paths_fp)
     with open(paths_fp, mode='rb') as fd:
         paths = json.load(fd)
@@ -23,10 +23,12 @@ def main(paths_fp):
     target.mkdir(exist_ok=True, parents=True)
 
     loader = load_folder(Path('masterdata'))
-    assets = [unit.resource_id for unit in loader.load_playable_units()]
 
     seen = set()
-    for asset_id in assets:
+    for unit in loader.load_playable_units():
+        if ids and unit.ID not in ids:
+            continue
+        asset_id = unit.resource_id
         if asset_id in seen:
             continue
         seen.add(asset_id)
@@ -51,7 +53,7 @@ if __name__ == "__main__":
     import sys
 
     try:
-        main(sys.argv[1])
+        main(sys.argv[1], [int(arg) for arg in sys.argv[2:]])
     except ValueError as ex:
         print(ex, file=sys.stderr)
         exit(1)
