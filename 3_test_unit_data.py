@@ -138,6 +138,27 @@ class UnitCCMasterTest(unittest.TestCase):
                         self.assertEqual(master, actual)
 
 
+class UnitUDTest(unittest.TestCase):
+    test_ud_cases = [
+        # 6* OG Naegling
+        (100624, {StatType.HP: 90, StatType.SPD: 25, StatType.TEC: 35}),
+        # 6* Gaku Naegling
+        (100653, {StatType.HP: 110, StatType.SPD: 20, StatType.TEC: 20}),
+        # 6* SS Naegling
+        (2100613, {StatType.HP: 115, StatType.SPD: 15, StatType.TEC: 20}),
+        # 6* CCS Naegling
+        (100663, {StatType.HP: 65, StatType.SPD: 15, StatType.TEC: 20}),
+    ]
+
+    def test_expected_ini(self) -> None:
+        for u_id, u_uds in self.test_ud_cases:
+            unit = loader.load_unit(u_id)
+            for stat, expected_ud in u_uds.items():
+                with self.subTest(unit=unit.h_id, stat=stat):
+                    actual_ud = unit.stats.bal.of(stat).ud
+                    self.assertEqual(expected_ud, actual_ud)
+
+
 if __name__ == '__main__':
     loader = load_folder(Path('masterdata'))
     unittest.main()
