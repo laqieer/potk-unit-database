@@ -44,6 +44,16 @@
 			<dd class="col-sm-9">{{ unit.job.name }}</dd>
 			<dt class="col-sm-3">Movement</dt>
 			<dd class="col-sm-9">{{ unit.job.movement }}</dd>
+			{% if unit.tags %}
+			<dt class="col-sm-3">Tags</dt>
+			<dd class="col-sm-9">
+				{% for tag in unit.tags %}
+				<a class="badge badge-pill {{badge_tag[tag.kind]}}" href="../tags/{{tag.uid}}.html">
+					{{- tag.long_label -}}
+				</a>
+				{% endfor %}
+			</dd>
+			{% endif %}
 		</dl>
 	</div>
 	<div id="stats-caps">

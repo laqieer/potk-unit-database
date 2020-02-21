@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Optional
 
 from potk_unit_extractor.model import *
@@ -26,6 +25,15 @@ JOB_CH_BONUS_TO_STAT = {
     9: None,  # movement_add
 }
 
+# From UnitGroup
+GROUP_FIELD_TAG_KIND = {
+    "group_large_category_id_UnitGroupLargeCategory":           UnitTagKind.LARGE,
+    "group_small_category_id_UnitGroupSmallCategory":           UnitTagKind.SMALL,
+    "group_clothing_category_id_UnitGroupClothingCategory":     UnitTagKind.CLOTHING,
+    "group_clothing_category_id_2_UnitGroupClothingCategory":   UnitTagKind.CLOTHING,
+    "group_generation_category_id_UnitGroupGenerationCategory": UnitTagKind.GENERATION,
+}
+
 
 @dataclass()
 class _RawUnitData:
@@ -40,6 +48,7 @@ class _RawUnitData:
     evo_from: dict
     ud: dict
     skills: list
+    groups: dict
     source_unit: UnitData = None
 
     @property
@@ -95,6 +104,11 @@ class Loader:
             skills: list,
             cc_patterns: list,
             job_characteristics: list,
+            unit_groups: list,
+            unit_groups_large: list,
+            unit_groups_small: list,
+            unit_groups_clothing: list,
+            unit_groups_gen: list,
     ):
         """
         :param units: List of unit info (UnitUnit).
@@ -108,6 +122,11 @@ class Loader:
         :param skills: List of Battle Skill data (BattleskillSkill)
         :param cc_patterns: List of Class Changes data (JobChangePatterns)
         :param job_characteristics: List of JobCharacteristics
+        :param unit_groups: List of UnitGroup
+        :param unit_groups_large: List of UnitGroupLargeCategory
+        :param unit_groups_small: List of UnitGroupSmallCategory
+        :param unit_groups_clothing: List of UnitGroupClothingCategory
+        :param unit_groups_gen: List of UnitGroupGenerationCategory
         """
         # Converts the lists into dicts indexed by ID for fast access.
         self.units = _index('ID', units)
@@ -129,6 +148,13 @@ class Loader:
         self.skills = _index('ID', skills)
         self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
         self.job_characteristics = _index('ID', job_characteristics)
+        self.unit_groups = _index('unit_id', unit_groups)
+        self.groups = {
+            UnitTagKind.LARGE:      _index('ID', unit_groups_large),
+            UnitTagKind.SMALL:      _index('ID', unit_groups_small),
+            UnitTagKind.CLOTHING:   _index('ID', unit_groups_clothing),
+            UnitTagKind.GENERATION: _index('ID', unit_groups_gen),
+        }
 
     def load_playable_units(self):
         """
@@ -175,6 +201,7 @@ class Loader:
         if data.evo_from:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
+        tags = sorted(self._load_tags(data))
         return UnitData(
             ID=unit_id,
             same_character_id=data.unit['same_character_id'],
@@ -194,6 +221,7 @@ class Loader:
             vertex1=self._load_unit_cc(data, ClassChangeType.VERTEX1),
             vertex2=self._load_unit_cc(data, ClassChangeType.VERTEX2),
             vertex3=self._load_unit_cc(data, ClassChangeType.VERTEX3),
+            tags=tags,
         )
 
     def _load_unit_cc(
@@ -274,6 +302,23 @@ class Loader:
                 result.append(bonus)
         return result
 
+    def _load_tags(self, data: _RawUnitData) -> Set[UnitTag]:
+        r = {
+            self._load_tag(tag_id=data.groups[field_name], tag_kind=kind)
+            for field_name, kind in GROUP_FIELD_TAG_KIND.items()
+        }
+        return {r for r in r if r.name}
+
+    def _load_tag(self, tag_id: int, tag_kind: UnitTagKind) -> UnitTag:
+        data: dict = self.groups[tag_kind][tag_id]
+        return UnitTag(
+            ID=data['ID'],
+            kind=tag_kind,
+            name=data['name'],
+            short_label_name=data['short_label_name'],
+            description=data['description'],
+        )
+
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
         Composes all raw data relevant for an unit.
@@ -298,6 +343,7 @@ class Loader:
                 'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'
             ]),
             skills=skills,
+            groups=self.unit_groups[unit_id],
         )
 
 
@@ -402,6 +448,12 @@ def load_folder(path: Path) -> Loader:
         skills=_load_file(path / 'BattleskillSkill.json'),
         cc_patterns=_load_file(path / 'JobChangePatterns.json'),
         job_characteristics=_load_file(path / 'JobCharacteristics.json'),
+        unit_groups=_load_file(path / 'UnitGroup.json'),
+        unit_groups_large=_load_file(path / 'UnitGroupLargeCategory.json'),
+        unit_groups_small=_load_file(path / 'UnitGroupSmallCategory.json'),
+        unit_groups_clothing=_load_file(
+            path / 'UnitGroupClothingCategory.json'),
+        unit_groups_gen=_load_file(path / 'UnitGroupGenerationCategory.json'),
     )
 
 

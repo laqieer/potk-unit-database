@@ -13,6 +13,7 @@
 	<meta property="og:image:height" content="520">
 </head>
 <body>
+{% import 'macros.html' as macros with context %}
 <div class="container">
 	<h1>
 		PotK Unit Database <br/>
@@ -39,10 +40,18 @@
 		<div class="col">
 			<div id="unit-list" class="list-group">
 				{% for unit in units %}
-				<a id="unit-{{unit.ID}}" href="units/{{unit.ID}}.html" data-unit-name="{{unit.any_name}} ({{unit.element.name}})" class="list-group-item list-group-item-action" style="display: none">
-					<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
-					<small class="badge badge-secondary">{{ unit.ID }}</small>
-					{{unit.any_name | title}} ({{unit.element.name | title}}) {{stars[unit.rarity]}}
+				{{- macros.unit_link(unit, True, '.') -}}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<h2>Browse by Tags</h2>
+			<div id="tags">
+				{% for tag in tags %}
+				<a class="badge badge-pill {{ badge_tag[tag.kind] }}" href="tags/{{tag.uid}}.html">
+					{{- tag.short_label_name -}}
 				</a>
 				{% endfor %}
 			</div>
