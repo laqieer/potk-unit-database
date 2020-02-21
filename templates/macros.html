@@ -22,9 +22,9 @@
 				<tr>
 					<td>&nbsp;</td>
 					<th scope="col" class="text-right">Max</th>
-					<th scope="col" class="text-right">Base(Evo)</th>
+					<th scope="col" class="text-right">Base&nbsp;(Evo)</th>
 					<th scope="col" class="text-right">Growth</th>
-					<th scope="col" class="text-right">Fusion(UD)</th>
+					<th scope="col" class="text-right">Fusion&nbsp;(UD)</th>
 					{% if has_cc %}
 					<th scope="col" class="text-right">CC&nbsp;Skill</th>
 					{% endif %}
@@ -39,11 +39,11 @@
 					</th>
 					<td class="text-right">{{ s.max }}</td>
 					<td class="text-right">
-						{{ s.initial + s.evo_bonus }}({{ s.evo_bonus }})
+						{{ s.initial + s.evo_bonus }}&nbsp;({{ s.evo_bonus }})
 					</td>
 					<td class="text-right">{{ s.growth }}</td>
 					<td class="text-right">
-						{{ s.compose + s.ud.max }}({{ s.ud.max }})
+						{{ s.compose + s.ud.max }}&nbsp;({{ s.ud.max }})
 					</td>
 					{% if has_cc %}
 					<td class="text-right">{{ s.skill_master }}</td>
