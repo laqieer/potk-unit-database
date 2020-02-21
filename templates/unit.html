@@ -103,6 +103,35 @@
 			<table class="table table-sm table-bordered table-hover table-condensed">
 				<thead>
 				<tr>
+					<td rowspan="2"></td>
+					<th scope="col" colspan="8" class="text-center">
+						Necessary DV to Reach the UD Bonus Cap
+					</th>
+				</tr>
+				<tr>
+					{% for stat in StatType %}
+					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
+					{% endfor %}
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<th scope="row" class="text-right">DV</th>
+					{% for stat in StatType %}
+					<td class="text-right">
+						{{- unit.stats.bal.of(stat).ud.dv_for_cap | default('-', true) -}}
+					</td>
+					{% endfor %}
+				</tr>
+				</tbody>
+			</table>
+			<table class="table table-sm table-bordered table-hover table-condensed">
+				<thead>
+				<tr>
+					<td></td>
+					<th scope="col" colspan="8" class="text-center">Total Bonus</th>
+				</tr>
+				<tr>
 					<th scope="col" class="text-right">DV</th>
 					{% for stat in StatType %}
 					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
@@ -126,31 +155,6 @@
 					{% endfor %}
 				</tr>
 				{% endfor %}
-				</tbody>
-			</table>
-			<table class="table table-sm table-bordered table-hover table-condensed">
-				<thead>
-				<tr>
-					<td rowspan="2"></td>
-					<th scope="col" colspan="8" class="text-center">
-						Necessary DV to Reach the UD Bonus Cap
-					</th>
-				</tr>
-				<tr>
-					{% for stat in StatType %}
-					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
-					{% endfor %}
-				</tr>
-				</thead>
-				<tbody>
-				<tr>
-					<th scope="row" class="text-right">DV</th>
-					{% for stat in StatType %}
-					<td class="text-right">
-						{{- unit.stats.bal.of(stat).ud.dv_for_cap | default('-', true) -}}
-					</td>
-					{% endfor %}
-				</tr>
 				</tbody>
 			</table>
 		</div>
