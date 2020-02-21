@@ -1,7 +1,49 @@
+from collections import Counter
 from dataclasses import dataclass
 from enum import Enum, IntEnum
 from typing import List
 import math
+
+
+DV_CAP = 99
+
+
+class UD:
+    """
+    Representation for Unleashed Domain bonuses (Dupe Value status bonuses).
+
+    Encodes the DV->Bonus series and allows quick access to the maximum value.
+    Represents the bonuses for a single stat.
+    """
+    def __init__(self, dvs: List[int]):
+        # This is a map of total_dv -> status_increase.
+        self.inc_by_milestone = Counter(dvs)
+        # This is a map of dv_range -> total_status_increase.
+        # Please tell me a more clean way of doing this.
+        self._total_by_dv = {}
+        dvs = sorted({0, DV_CAP + 1} | set(self.inc_by_milestone.keys()))
+        total = 0
+        for prev, curr in zip(dvs, dvs[1:]):
+            dv_range = range(prev, curr)
+            self._total_by_dv[dv_range] = total
+            total += self.inc_by_milestone[curr]
+
+    def _pair(self, dv):
+        for dv_range, bonus in self._total_by_dv.items():
+            if dv in dv_range:
+                return dv_range, bonus
+        raise ValueError(dv)
+
+    def bonus(self, dv):
+        return self._pair(dv)[1]
+
+    @property
+    def max(self):
+        return self.bonus(DV_CAP)
+
+    @property
+    def dv_for_cap(self):
+        return self._pair(DV_CAP)[0].start
 
 
 @dataclass
@@ -16,7 +58,7 @@ class Stat:
     evo_bonus: int  # Maximum obtainable bonus from the previous rarity.
     growth: int  # Maximum growth value from level up. May be impossible.
     compose: int  # Maximum fusion value without UD.
-    ud: int  # Extra fusion value obtained from max UD.
+    ud: UD  # Extra fusion value obtained from max UD.
     skill_master: int  # Extra value from skill mastery.
 
     @property
@@ -25,7 +67,7 @@ class Stat:
                 + self.evo_bonus
                 + self.growth
                 + self.compose
-                + self.ud
+                + self.ud.max
                 + self.skill_master)
 
     @property
@@ -77,6 +119,18 @@ class Stats:
 
     def of(self, t: StatType) -> Stat:
         return getattr(self, t.name.lower())
+
+    @property
+    def ud_milestones(self) -> List[int]:
+        result = set()
+        for s in StatType:
+            result = result | self.of(s).ud.inc_by_milestone.keys()
+        return sorted(result)
+
+    @property
+    def has_ud(self) -> bool:
+        # 0 is false
+        return any(self.of(s).ud.max for s in StatType)
 
 
 class UnitType(IntEnum):
@@ -267,6 +321,11 @@ class UnitData:
     def short_title(self) -> str:
         return f'{self.rarity.stars} {self.any_name} ({self.element.name}) ' \
                f'[{self.ID}]'
+
+    @property
+    def has_ud(self) -> bool:
+        # UD isn't affected by unit type.
+        return self.stats.bal.has_ud
 
     def get_cc(self, c_type: ClassChangeType) -> UnitCCInfo:
         return getattr(self, f'vertex{c_type.value - 1}')

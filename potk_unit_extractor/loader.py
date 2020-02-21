@@ -61,6 +61,23 @@ class _RawUnitData:
         return Element.NONE
 
 
+def _load_stats(
+        data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
+    """
+    Load all stats for a given unit job and type.
+
+    :param data: Raw unit data.
+    :param job: Job data.
+    :param t: UnitType
+    :return: Stats
+    """
+    stats = {
+        stat.name.lower(): _load_stat(data, job, stat, t)
+        for stat in StatType
+    }
+    return Stats(**stats)
+
+
 class Loader:
     """OOP Based loader for unit data based on raw lists-of-dicts.
     """
@@ -167,7 +184,7 @@ class Loader:
             eng_name=data.unit['english_name'],
             element=data.compute_element(),
             gear_kind=GearKind(data.unit['kind_GearKind']),
-            level=self._load_level(data.params),
+            level=_load_level(data.params),
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
             job=self._load_job(data.unit['job_UnitJob']),
             cost=data.unit['cost'],
@@ -221,74 +238,10 @@ class Loader:
         if not job:
             job: UnitJob = self._load_job(data.unit['job_UnitJob'])
         stats = {
-            t.name.lower():
-                self._load_stats(data, job, t)
+            t.name.lower(): _load_stats(data, job, t)
             for t in UnitType
         }
         return UnitStats(**stats)
-
-    def _load_stats(
-            self, data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
-        """
-        Load all stats for a given unit job and type.
-
-        :param data: Raw unit data.
-        :param job: Job data.
-        :param t: UnitType
-        :return: Stats
-        """
-        stats = {
-            stat.name.lower(): self._load_stat(data, job, stat, t)
-            for stat in StatType
-        }
-        return Stats(**stats)
-
-    @staticmethod
-    def _load_stat(
-            data: _RawUnitData,
-            job: UnitJob,
-            stat: StatType,
-            t: UnitType) -> Stat:
-        """
-        Loads a single stat based on raw unit data, job and type.
-
-        Performs the actual calculations to determine all components of a stat.
-        This involves the unit current job and recursive info from previous
-        versions (evolutions) to determine evo bonus.
-
-        :param data: Raw unit data.
-        :param job: Job data.
-        :param stat: The stat type to be loaded.
-        :param t: The unit type for adjusting caps and compose (fusion) values.
-        :return: A single stat of the unit.
-        """
-        type_data = data.type_data(t)
-        is_awake = 1 == data.unit['awake_unit_flag']
-        ud_str: str = data.ud[stat.ud_key]
-        ud = len(ud_str.split(',')) if len(ud_str) > 0 else 0
-
-        return Stat(
-            initial=data.initial[stat.ini_key] + job.get_initial(stat),
-            evo_bonus=_calc_evo_bonus(data.source_unit, stat, t, is_awake),
-            growth=_calc_gr(
-                data.params[stat.max_key], type_data[stat.correction_key]),
-            compose=type_data[stat.compose_key],
-            ud=ud,
-            skill_master=job.get_skill_master_bonus(stat),
-        )
-
-    @staticmethod
-    def _load_level(params: dict) -> Level:
-        """
-        Loads level cap information for an unit.
-
-        :param params: Unit parameters raw data.
-        :return: Level info.
-        """
-        ini: int = params['_initial_max_level']
-        inc: int = params['_level_per_breakthrough']
-        mlb_c: int = params['breakthrough_limit']
-        return Level(ini=ini, inc=inc, mlb_c=mlb_c)
 
     def _load_job(self, job_id: int) -> UnitJob:
         """
@@ -316,19 +269,10 @@ class Loader:
         result = []
         chs = (self.job_characteristics[int(i)] for i in ids_str.split(','))
         for ch in chs:
-            bonus = self._parse_job_bonus(ch)
+            bonus = _parse_job_bonus(ch)
             if bonus:
                 result.append(bonus)
         return result
-
-    @staticmethod
-    def _parse_job_bonus(ch: dict) -> Optional[UnitJobSkillMasterBonus]:
-        raw_stat = ch['levelmax_bonus_JobCharacteristicsLevelmaxBonus']
-        stat = _get_or_def(JOB_CH_BONUS_TO_STAT, raw_stat)
-        if stat is None:
-            return None
-        return UnitJobSkillMasterBonus(
-            stat=stat, plus_value=ch['levelmax_bonus_value'])
 
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
@@ -355,6 +299,66 @@ class Loader:
             ]),
             skills=skills,
         )
+
+
+def _load_stat(
+        data: _RawUnitData,
+        job: UnitJob,
+        stat: StatType,
+        t: UnitType) -> Stat:
+    """
+    Loads a single stat based on raw unit data, job and type.
+
+    Performs the actual calculations to determine all components of a stat.
+    This involves the unit current job and recursive info from previous
+    versions (evolutions) to determine evo bonus.
+
+    :param data: Raw unit data.
+    :param job: Job data.
+    :param stat: The stat type to be loaded.
+    :param t: The unit type for adjusting caps and compose (fusion) values.
+    :return: A single stat of the unit.
+    """
+    type_data = data.type_data(t)
+    is_awake = 1 == data.unit['awake_unit_flag']
+
+    return Stat(
+        initial=data.initial[stat.ini_key] + job.get_initial(stat),
+        evo_bonus=_calc_evo_bonus(data.source_unit, stat, t, is_awake),
+        growth=_calc_gr(
+            data.params[stat.max_key], type_data[stat.correction_key]),
+        compose=type_data[stat.compose_key],
+        ud=_load_ud(data.ud[stat.ud_key]),
+        skill_master=job.get_skill_master_bonus(stat),
+    )
+
+
+def _parse_job_bonus(ch: dict) -> Optional[UnitJobSkillMasterBonus]:
+    raw_stat = ch['levelmax_bonus_JobCharacteristicsLevelmaxBonus']
+    stat = _get_or_def(JOB_CH_BONUS_TO_STAT, raw_stat)
+    if stat is None:
+        return None
+    return UnitJobSkillMasterBonus(
+        stat=stat, plus_value=ch['levelmax_bonus_value'])
+
+
+def _load_level(params: dict) -> Level:
+    """
+    Loads level cap information for an unit.
+
+    :param params: Unit parameters raw data.
+    :return: Level info.
+    """
+    ini: int = params['_initial_max_level']
+    inc: int = params['_level_per_breakthrough']
+    mlb_c: int = params['breakthrough_limit']
+    return Level(ini=ini, inc=inc, mlb_c=mlb_c)
+
+
+def _load_ud(ud_str: str) -> UD:
+    if not ud_str:
+        return UD([])
+    return UD([int(ud) for ud in ud_str.split(',')])
 
 
 def _calc_evo_bonus(
