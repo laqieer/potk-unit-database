@@ -258,6 +258,13 @@ class UnitTag:
     short_label_name: str
     description: str
 
+    @property
+    def long_label(self) -> str:
+        if self.name != self.short_label_name:
+            return f'{self.name} - {self.short_label_name}'
+        else:
+            return self.name
+
 
 @dataclass
 class UnitJobSkillMasterBonus:

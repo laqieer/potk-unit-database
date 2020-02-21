@@ -43,6 +43,11 @@
 					<img src="images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
 					<small class="badge badge-secondary">{{ unit.ID }}</small>
 					{{unit.any_name | title}} ({{unit.element.name | title}}) {{stars[unit.rarity]}}
+					{% for tag in unit.tags %}
+					<small class="badge badge-pill {{badge_tag[tag.kind]}}">
+						{{tag.short_label_name}}
+					</small>
+					{% endfor %}
 				</a>
 				{% endfor %}
 			</div>

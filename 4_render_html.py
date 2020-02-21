@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
-    ClassChangeType
+    ClassChangeType, UnitTagKind
 from potk_unit_extractor.loader import load_folder
 from pathlib import Path
 
@@ -40,7 +40,7 @@ def main(unit_ids: list):
     }
 
     jp_stats = {
-        StatType.HP: '',
+        StatType.HP:  '',
         StatType.STR: '力',
         StatType.MGC: '魔',
         StatType.GRD: '守',
@@ -51,10 +51,17 @@ def main(unit_ids: list):
     }
 
     cc_desc = {
-        ClassChangeType.NORMAL: '6★',
+        ClassChangeType.NORMAL:  '6★',
         ClassChangeType.VERTEX1: 'Vertex 1',
         ClassChangeType.VERTEX2: 'Vertex 2',
         ClassChangeType.VERTEX3: 'Vertex 3',
+    }
+
+    badge_tag = {
+        UnitTagKind.LARGE:      'badge-danger',
+        UnitTagKind.SMALL:      'badge-warning',
+        UnitTagKind.CLOTHING:   'badge-primary',
+        UnitTagKind.GENERATION: 'badge-dark',
     }
 
     if unit_ids:
@@ -77,6 +84,7 @@ def main(unit_ids: list):
                 jp_types=jp_types,
                 jp_stats=jp_stats,
                 cc_desc=cc_desc,
+                badge_tag=badge_tag,
             ).dump(fp)
 
     units.sort(key=lambda u: (u.any_name, u.ID))
@@ -87,6 +95,7 @@ def main(unit_ids: list):
             units=units,
             total=len(units),
             stars=stars,
+            badge_tag=badge_tag,
         ).dump(fp)
 
 
