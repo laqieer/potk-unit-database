@@ -98,6 +98,7 @@ def main(unit_ids: list):
             else:
                 units_by_tag[tag] = [unit]
     for tag, tag_units in units_by_tag.items():
+        tag_units.sort(key=lambda u: (u.any_name, u.ID))
         output_path = tags_path / f'{tag.uid}.html'
         print(output_path)
         with output_path.open(mode='w', encoding='utf8') as fp:
