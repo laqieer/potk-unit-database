@@ -265,6 +265,10 @@ class UnitTag:
         else:
             return self.name
 
+    @property
+    def uid(self) -> str:
+        return f'{self.kind.value}-{self.ID}'
+
 
 @dataclass
 class UnitJobSkillMasterBonus:

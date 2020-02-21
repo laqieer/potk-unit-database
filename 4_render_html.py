@@ -14,11 +14,12 @@ def main(unit_ids: list):
         trim_blocks=True,
         lstrip_blocks=True,
     )
-    unit_template = env.get_template('unit.html')
 
     site_path = Path('site')
     units_path = site_path / 'units'
     units_path.mkdir(exist_ok=True)
+    tags_path = site_path / 'tags'
+    tags_path.mkdir(exist_ok=True)
 
     stars = {
         # ★☆
@@ -69,13 +70,14 @@ def main(unit_ids: list):
     else:
         generator = loader.load_playable_units()
 
+    # Templates units pages
     units = []
     for unit in generator:
         units.append(unit)
         output_path = units_path / f'{unit.ID}.html'
         print(output_path)
         with output_path.open(mode='w', encoding='utf8') as fp:
-            unit_template.stream(
+            env.get_template('unit.html').stream(
                 unit=unit,
                 StatType=StatType,
                 UnitType=UnitType,
@@ -87,6 +89,26 @@ def main(unit_ids: list):
                 badge_tag=badge_tag,
             ).dump(fp)
 
+    # Templates units tags
+    units_by_tag = {}
+    for unit in units:
+        for tag in unit.tags:
+            if tag in units_by_tag:
+                units_by_tag[tag].append(unit)
+            else:
+                units_by_tag[tag] = [unit]
+    for tag, tag_units in units_by_tag.items():
+        output_path = tags_path / f'{tag.uid}.html'
+        print(output_path)
+        with output_path.open(mode='w', encoding='utf8') as fp:
+            env.get_template('tag.html').stream(
+                tag=tag,
+                units=tag_units,
+                stars=stars,
+                badge_tag=badge_tag,
+            ).dump(fp)
+
+    # Templates index page
     units.sort(key=lambda u: (u.any_name, u.ID))
     index_path = site_path / 'index.html'
     print(index_path)
@@ -94,6 +116,7 @@ def main(unit_ids: list):
         env.get_template('index.html').stream(
             units=units,
             total=len(units),
+            tags=sorted(units_by_tag.keys()),
             stars=stars,
             badge_tag=badge_tag,
         ).dump(fp)

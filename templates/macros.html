@@ -57,3 +57,20 @@
 	</div>
 </div>
 {% endmacro %}
+
+{% macro unit_link(unit, hidden, cd_root) %}
+<a id="unit-{{unit.ID}}"
+   href="{{cd_root}}/units/{{unit.ID}}.html"
+   data-unit-name="{{unit.any_name}} ({{unit.element.name}})"
+   class="list-group-item list-group-item-action"
+   style="{% if hidden %} display: none {% endif %}">
+	<img src="{{cd_root}}/images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
+	{{unit.any_name | title}} {{unit.rarity.stars}}
+	<small class="badge badge-secondary">{{ unit.ID }}</small>
+	{% for tag in unit.tags %}
+	<small class="badge {{badge_tag[tag.kind]}}">
+		{{- tag.short_label_name -}}
+	</small>
+	{% endfor %}
+</a>
+{% endmacro %}

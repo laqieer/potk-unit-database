@@ -48,7 +48,9 @@
 			<dt class="col-sm-3">Tags</dt>
 			<dd class="col-sm-9">
 				{% for tag in unit.tags %}
-				<span class="badge badge-pill {{badge_tag[tag.kind]}}">{{tag.long_label}}</span>
+				<a class="badge badge-pill {{badge_tag[tag.kind]}}" href="../tags/{{tag.uid}}.html">
+					{{- tag.long_label -}}
+				</a>
 				{% endfor %}
 			</dd>
 			{% endif %}
