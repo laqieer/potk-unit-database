@@ -1,7 +1,7 @@
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum, IntEnum
-from typing import List
+from typing import List, Set
 import math
 
 
@@ -243,6 +243,22 @@ class Element(IntEnum):
     PRINCESS = 16
 
 
+class UnitTagKind(IntEnum):
+    LARGE = 1
+    SMALL = 2
+    CLOTHING = 3
+    GENERATION = 4
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class UnitTag:
+    kind: UnitTagKind
+    ID: int
+    name: str
+    short_label_name: str
+    description: str
+
+
 @dataclass
 class UnitJobSkillMasterBonus:
     stat: StatType
@@ -304,10 +320,11 @@ class UnitData:
     cost: int
     is_awakened: bool
     stats: UnitStats
-    vertex0: UnitCCInfo = None
-    vertex1: UnitCCInfo = None
-    vertex2: UnitCCInfo = None
-    vertex3: UnitCCInfo = None
+    vertex0: UnitCCInfo
+    vertex1: UnitCCInfo
+    vertex2: UnitCCInfo
+    vertex3: UnitCCInfo
+    tags: List[UnitTag]
 
     @property
     def any_name(self) -> str:
