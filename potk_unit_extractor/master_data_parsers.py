@@ -272,3 +272,24 @@ def parse_battle_skill(reader: MasterDataReader, item: dict):
     item['max_use_count'] = reader.ReadInt()
     item['awake_skill_category_id'] = reader.ReadInt()
     item['resource_reference_id'] = reader.ReadInt()
+
+
+def parse_unit_group(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_id'] = reader.ReadInt()
+    item['group_large_category_id_UnitGroupLargeCategory'] = reader.ReadInt()
+    item['group_small_category_id_UnitGroupSmallCategory'] = reader.ReadInt()
+    item['group_clothing_category_id_UnitGroupClothingCategory'] \
+        = reader.ReadInt()
+    item['group_clothing_category_id_2_UnitGroupClothingCategory'] \
+        = reader.ReadInt()
+    item['group_generation_category_id_UnitGroupGenerationCategory'] \
+        = reader.ReadInt()
+
+
+def parse_unit_group_generic_category(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['name'] = reader.ReadString(True)
+    item['short_label_name'] = reader.ReadString(True)
+    item['description'] = reader.ReadString(True)
+    item['start_at'] = reader.ReadDateTimeOrNull()

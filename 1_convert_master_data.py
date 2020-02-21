@@ -50,4 +50,9 @@ if __name__ == "__main__":
         ('BattleskillSkill', parse_battle_skill),
         ('JobChangePatterns', parse_job_change_pattern),
         ('JobCharacteristics', parse_job_characteristics),
+        ('UnitGroup', parse_unit_group),
+        ('UnitGroupLargeCategory', parse_unit_group_generic_category),
+        ('UnitGroupSmallCategory', parse_unit_group_generic_category),
+        ('UnitGroupClothingCategory', parse_unit_group_generic_category),
+        ('UnitGroupGenerationCategory', parse_unit_group_generic_category),
     ])

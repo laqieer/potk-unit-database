@@ -36,6 +36,11 @@ def main(paths_fp):
         "MasterData/BattleskillSkill",
         "MasterData/JobChangePatterns",
         "MasterData/JobCharacteristics",
+        "MasterData/UnitGroup",
+        "MasterData/UnitGroupClothingCategory",
+        "MasterData/UnitGroupGenerationCategory",
+        "MasterData/UnitGroupLargeCategory",
+        "MasterData/UnitGroupSmallCategory",
     ]
     for name in names:
         download_asset_bundle(env, asset_bundle[name], name, target)
