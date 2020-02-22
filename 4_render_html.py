@@ -136,6 +136,7 @@ def main(unit_ids: list):
             env.get_template('tag.html').stream(
                 tag=tag,
                 units=tag_units,
+                total=len(tag_units),
                 stars=stars,
                 badge_tag=badge_tag,
             ).dump(fp)

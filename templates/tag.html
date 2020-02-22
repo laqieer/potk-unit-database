@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<title>{{ tag.name }}</title>
-	<meta property="og:title" content="{{ tag.name }}"/>
-	<meta property="og:description" content="{{ tag.description }}"/>
+	<title>{{ tag.name }} - PotK Unit Database</title>
+	<meta property="og:title" content="{{ tag.name }} - PotK Unit Database"/>
+	<meta property="og:description" content="Browse all {{ total }} {{ tag.name }} units"/>
 </head>
 <body>
 {% import 'macros.html' as macros with context %}
@@ -18,7 +18,11 @@
 			<span class="breadcrumb-child">{{ tag.name }}</span>
 		</h5>
 	</div>
-	<h1>{{ tag.name }}<br/><small class="text-muted">{{ tag.short_label_name }}</small></h1>
+	<h1>
+		{{ tag.name }}<br/>
+		<small class="text-muted">{{ tag.short_label_name }}</small><br/>
+		<small class="text-muted">{{ total }} units</small>
+	</h1>
 	<p>{{ tag.description }}</p>
 	<div id="unit-list" class="list-group">
 		{% for unit in units %}
