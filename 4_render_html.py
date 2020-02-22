@@ -1,9 +1,35 @@
 # -*- coding:utf-8 -*-
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
-    ClassChangeType, UnitTagKind
+    ClassChangeType, UnitTagKind, Element
 from potk_unit_extractor.loader import load_folder
 from pathlib import Path
+
+
+def unit_sort_key(unit):
+    return unit.any_name, unit.ID
+
+
+def group_units(units: list, key: callable) -> dict:
+    result = {}
+
+    def add(k, v):
+        if k in result:
+            result[k].append(v)
+        else:
+            result[k] = [v]
+
+    for unit in units:
+        key_val = key(unit)
+        try:
+            iterator = iter(key_val)
+        except TypeError:
+            add(key_val, unit)
+        else:
+            for item in iterator:
+                add(item, unit)
+
+    return result
 
 
 def main(unit_ids: list):
@@ -20,6 +46,8 @@ def main(unit_ids: list):
     units_path.mkdir(exist_ok=True)
     tags_path = site_path / 'tags'
     tags_path.mkdir(exist_ok=True)
+    weapons_path = site_path / 'weapons'
+    weapons_path.mkdir(exist_ok=True)
 
     stars = {
         # ★☆
@@ -65,6 +93,15 @@ def main(unit_ids: list):
         UnitTagKind.GENERATION: 'badge-dark',
     }
 
+    badge_element = {
+        Element.FIRE:    'badge-danger',
+        Element.ICE:     'badge-primary',
+        Element.WIND:    'badge-success',
+        Element.THUNDER: 'badge-warning',
+        Element.LIGHT:   'badge-light',
+        Element.DARK:    'badge-dark',
+    }
+
     if unit_ids:
         generator = (loader.load_unit(int(u)) for u in unit_ids)
     else:
@@ -90,27 +127,48 @@ def main(unit_ids: list):
             ).dump(fp)
 
     # Templates units tags
-    units_by_tag = {}
-    for unit in units:
-        for tag in unit.tags:
-            if tag in units_by_tag:
-                units_by_tag[tag].append(unit)
-            else:
-                units_by_tag[tag] = [unit]
+    units_by_tag = group_units(units, key=lambda u: u.tags)
     for tag, tag_units in units_by_tag.items():
-        tag_units.sort(key=lambda u: (u.any_name, u.ID))
+        tag_units.sort(key=unit_sort_key)
         output_path = tags_path / f'{tag.uid}.html'
         print(output_path)
         with output_path.open(mode='w', encoding='utf8') as fp:
             env.get_template('tag.html').stream(
                 tag=tag,
                 units=tag_units,
+                total=len(tag_units),
                 stars=stars,
                 badge_tag=badge_tag,
             ).dump(fp)
 
+    generic_list_template = env.get_template('generic-unit-list.html')
+
+    def render_generic_template(unit_map: dict, sub_path: str):
+        generic_path = site_path / sub_path
+        generic_path.mkdir(exist_ok=True)
+        for k, k_units in unit_map.items():
+            k_units.sort(key=unit_sort_key)
+            out_path = generic_path / f'{k.value}.html'
+            print(out_path)
+            with out_path.open(mode='w', encoding='utf8') as fp:
+                generic_list_template.stream(
+                    page_title=k.name,
+                    total=len(k_units),
+                    units=k_units,
+                    stars=stars,
+                    badge_tag=badge_tag,
+                ).dump(fp)
+        pass
+
+    # Templates units weapons
+    units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
+    render_generic_template(units_by_weapon, 'weapons')
+    # Templates units elements
+    units_by_element = group_units(units, key=lambda u: u.element)
+    render_generic_template(units_by_element, 'elements')
+
     # Templates index page
-    units.sort(key=lambda u: (u.any_name, u.ID))
+    units.sort(key=unit_sort_key)
     index_path = site_path / 'index.html'
     print(index_path)
     with index_path.open(mode='w', encoding='utf8') as fp:
@@ -118,8 +176,11 @@ def main(unit_ids: list):
             units=units,
             total=len(units),
             tags=sorted(units_by_tag.keys()),
+            weapons=sorted(units_by_weapon.keys()),
+            elements=sorted(units_by_element.keys()),
             stars=stars,
             badge_tag=badge_tag,
+            badge_element=badge_element,
         ).dump(fp)
 
 

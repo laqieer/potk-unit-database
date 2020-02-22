@@ -4,20 +4,25 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<title>PotK Unit Database (WIP)</title>
+	<title>Main - PotK Unit Database</title>
 	<meta property="og:title" content="Phantom of the Kill Fan Database"/>
 	<meta property="og:description"
-		  content="A fan-mantained database of playable units in the Phantom of the Kill Japanese Server. Still a WIP."/>
+		  content="A fan-mantained database of playable units in the Phantom of the Kill Japanese Server."/>
 	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/3101411/unit_hires.png">
 	<meta property="og:image:width" content="600">
 	<meta property="og:image:height" content="520">
+	<style>
+		div.row {
+			margin-bottom: 1.5em;
+		}
+	</style>
 </head>
 <body>
 {% import 'macros.html' as macros with context %}
 <div class="container">
 	<h1>
 		PotK Unit Database <br/>
-		<small class="text-muted"><i>(WIP: {{ total }} units)</i></small>
+		<small class="text-muted">{{ total }} units</small>
 	</h1>
 	<div class="row">
 		<div class="col">
@@ -41,6 +46,30 @@
 			<div id="unit-list" class="list-group">
 				{% for unit in units %}
 				{{- macros.unit_link(unit, True, '.') -}}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<h2>Browse by Weapon Type</h2>
+			<div id="weapons">
+				{% for weapon in weapons %}
+				<a class="badge badge-pill badge-light" href="weapons/{{weapon.value}}.html">
+					{{- weapon.name | title -}}
+				</a>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<h2>Browse by Element</h2>
+			<div id="elements">
+				{% for el in elements %}
+				<a class="badge badge-pill {{ badge_element[el] }}" href="elements/{{el.value}}.html">
+					{{- el.name | title -}}
+				</a>
 				{% endfor %}
 			</div>
 		</div>
