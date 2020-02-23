@@ -41,7 +41,7 @@ def parse_unit_unit(reader: MasterDataReader, item: dict):
     item['camera_pattern_UnitCameraPattern'] = reader.ReadInt()
     item['illust_pattern_UnitIllustPattern'] = reader.ReadInt()
     item['cutin_pattern_id'] = reader.ReadIntOrNull()
-    item['voice_pattern_id'] = reader.ReadInt()
+    item['unit_voice_pattern_id'] = reader.ReadInt()
     item['non_disp_weapon'] = reader.ReadInt()
     item['buildup_limit_release_id_UnitUnitBuildupLimitRelease'] \
         = reader.ReadInt()
@@ -56,12 +56,11 @@ def parse_unit_unit(reader: MasterDataReader, item: dict):
     item['awake_special_skill_category_id'] = reader.ReadIntOrNull()
     item['compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'] \
         = reader.ReadInt()
-    item['is_appendedskill_only'] = reader.ReadBool()
     item['is_unity_value_up'] = reader.ReadBool()
     item['job_characteristics_levelup_pattern'] = reader.ReadBool()
-    # Skip 5 unknown bytes on end of each record.
-    # TODO Determine what those 5 bytes are and store them in JSON.
-    reader.buf.read(5)
+    item['exist_overkillers_slot'] = reader.ReadBool()
+    item['exist_overkillers_skill'] = reader.ReadBool()
+    item['overkillers_parameter'] = reader.ReadInt()
 
 
 def parse_unit_parameters(reader: MasterDataReader, item: dict):
