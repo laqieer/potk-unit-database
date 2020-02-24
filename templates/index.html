@@ -51,7 +51,7 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col">
+		<div class="col-sm">
 			<h2>Browse by Weapon Type</h2>
 			<div id="weapons">
 				{% for weapon in weapons %}
@@ -61,9 +61,7 @@
 				{% endfor %}
 			</div>
 		</div>
-	</div>
-	<div class="row">
-		<div class="col">
+		<div class="col-sm">
 			<h2>Browse by Element</h2>
 			<div id="elements">
 				{% for el in elements %}
@@ -80,7 +78,7 @@
 			<div id="tags">
 				{% for tag in tags %}
 				<a class="badge badge-pill {{ badge_tag[tag.kind] }}" href="tags/{{tag.uid}}.html">
-					{{- tag.short_label_name -}}
+					{{- tag.desc.short_label_name -}}
 				</a>
 				{% endfor %}
 			</div>

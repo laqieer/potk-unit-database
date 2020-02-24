@@ -7,6 +7,8 @@ import math
 import json
 
 # From game. Yes, it's hardcoded there too.
+from potk_unit_extractor.translations import TAGS
+
 ELEMENTAL_SKILLS_IDS = [
     490000010, 490000013, 490000015, 490000017, 490000019, 490000021, 490000173
 ]
@@ -27,11 +29,16 @@ JOB_CH_BONUS_TO_STAT = {
 
 # From UnitGroup
 GROUP_FIELD_TAG_KIND = {
-    "group_large_category_id_UnitGroupLargeCategory":           UnitTagKind.LARGE,
-    "group_small_category_id_UnitGroupSmallCategory":           UnitTagKind.SMALL,
-    "group_clothing_category_id_UnitGroupClothingCategory":     UnitTagKind.CLOTHING,
-    "group_clothing_category_id_2_UnitGroupClothingCategory":   UnitTagKind.CLOTHING,
-    "group_generation_category_id_UnitGroupGenerationCategory": UnitTagKind.GENERATION,
+    "group_large_category_id_UnitGroupLargeCategory":
+        UnitTagKind.LARGE,
+    "group_small_category_id_UnitGroupSmallCategory":
+        UnitTagKind.SMALL,
+    "group_clothing_category_id_UnitGroupClothingCategory":
+        UnitTagKind.CLOTHING,
+    "group_clothing_category_id_2_UnitGroupClothingCategory":
+        UnitTagKind.CLOTHING,
+    "group_generation_category_id_UnitGroupGenerationCategory":
+        UnitTagKind.GENERATION,
 }
 
 
@@ -307,16 +314,20 @@ class Loader:
             self._load_tag(tag_id=data.groups[field_name], tag_kind=kind)
             for field_name, kind in GROUP_FIELD_TAG_KIND.items()
         }
-        return {r for r in r if r.name}
+        return {r for r in r if r.desc_jp.name}
 
     def _load_tag(self, tag_id: int, tag_kind: UnitTagKind) -> UnitTag:
         data: dict = self.groups[tag_kind][tag_id]
+        tag_id = data['ID']
         return UnitTag(
-            ID=data['ID'],
+            ID=tag_id,
             kind=tag_kind,
-            name=data['name'],
-            short_label_name=data['short_label_name'],
-            description=data['description'],
+            desc_jp=UnitTagDesc(
+                name=data['name'],
+                short_label_name=data['short_label_name'],
+                description=data['description'],
+            ),
+            desc_en=TAGS.get((tag_kind, tag_id))
         )
 
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
@@ -457,7 +468,7 @@ def load_folder(path: Path) -> Loader:
     )
 
 
-def _load_file(fp: Path) -> list:
+def _load_file(fp: Path) -> any:
     with fp.open(mode='r', encoding='utf8') as fd:
         return json.load(fd)
 

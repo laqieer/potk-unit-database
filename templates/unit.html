@@ -49,7 +49,7 @@
 			<dd class="col-sm-9">
 				{% for tag in unit.tags %}
 				<a class="badge badge-pill {{badge_tag[tag.kind]}}" href="../tags/{{tag.uid}}.html">
-					{{- tag.long_label -}}
+					{{- tag.desc.short_label_name -}}
 				</a>
 				{% endfor %}
 			</dd>

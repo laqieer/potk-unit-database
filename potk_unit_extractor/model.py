@@ -251,19 +251,22 @@ class UnitTagKind(IntEnum):
 
 
 @dataclass(eq=True, frozen=True, order=True)
-class UnitTag:
-    kind: UnitTagKind
-    ID: int
+class UnitTagDesc:
     name: str
     short_label_name: str
     description: str
 
+
+@dataclass(eq=True, frozen=True, order=True)
+class UnitTag:
+    kind: UnitTagKind
+    ID: int
+    desc_jp: UnitTagDesc
+    desc_en: UnitTagDesc = None
+
     @property
-    def long_label(self) -> str:
-        if self.name != self.short_label_name:
-            return f'{self.name} - {self.short_label_name}'
-        else:
-            return self.name
+    def desc(self) -> UnitTagDesc:
+        return self.desc_en or self.desc_jp
 
     @property
     def uid(self) -> str:
