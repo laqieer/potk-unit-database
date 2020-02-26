@@ -61,6 +61,7 @@ def parse_unit_unit(reader: MasterDataReader, item: dict):
     item['exist_overkillers_slot'] = reader.ReadBool()
     item['exist_overkillers_skill'] = reader.ReadBool()
     item['overkillers_parameter'] = reader.ReadInt()
+    item['expire_date_UnitExpireDate'] = reader.ReadIntOrNull()
 
 
 def parse_unit_parameters(reader: MasterDataReader, item: dict):
