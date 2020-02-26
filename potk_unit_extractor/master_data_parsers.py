@@ -287,7 +287,7 @@ def parse_unit_group(reader: MasterDataReader, item: dict):
         = reader.ReadInt()
 
 
-def parse_unit_group_generic_category(reader: MasterDataReader, item: dict):
+def parse_unit_group_category(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['name'] = reader.ReadString(True)
     item['short_label_name'] = reader.ReadString(True)
