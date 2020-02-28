@@ -1,7 +1,7 @@
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, IntEnum
-from typing import List, Set
+from typing import List, Optional
 import math
 
 
@@ -243,6 +243,70 @@ class Element(IntEnum):
     PRINCESS = 16
 
 
+class SkillType(IntEnum):
+    """From MasterDataTable.BattleskillSkillType enum"""
+    COMMAND = 1
+    RELEASE = 2
+    PASSIVE = 3
+    DUEL = 4
+    MAGIC = 5
+    LEADER = 6
+    ITEM = 7
+    ENEMY = 8
+    AILMENT = 9
+    GROWTH = 10
+    ATTACK_CLASS = 11
+    ATTACK_ELEMENT = 12
+    ATTACK_METHOD = 13
+
+
+class SkillGenre(IntEnum):
+    """From MasterDataTable.BattleskillGenre enum"""
+    ATTACK = 1
+    HEAL = 2
+    BUFF = 3
+    DEBUFF = 4
+    AILMENT = 5
+    DEFENSE = 6
+    GROWTH = 7
+    MOVE = 8
+
+
+class SkillTarget(IntEnum):
+    """From MasterDataTable.BattleskillTargetType enum"""
+    MYSELF = 1
+    PLAYER_RANGE = 2
+    PLAYER_SINGLE = 3
+    ENEMY_SINGLE = 4
+    ENEMY_RANGE = 5
+    DEAD_PLAYER_SINGLE = 6
+    COMPLEX_SINGLE = 7
+    COMPLEX_RANGE = 8
+    PANEL_SINGLE = 9
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class SkillDesc:
+    name: str
+    full: str
+    short: str
+
+
+@dataclass
+class Skill:
+    type: SkillType
+    ID: int
+    jp_desc: SkillDesc
+    en_desc: Optional[SkillDesc]
+    element: Element
+    target: SkillTarget
+    genres: List[SkillGenre]
+    use_count: int
+    cooldown_turns: int
+    max_lv: int
+    resource_id: int
+
+
 class UnitTagKind(IntEnum):
     LARGE = 1
     SMALL = 2
@@ -339,6 +403,7 @@ class UnitData:
     vertex2: UnitCCInfo
     vertex3: UnitCCInfo
     tags: List[UnitTag]
+    skills: List[Skill]
 
     @property
     def any_name(self) -> str:

@@ -1,14 +1,12 @@
-from typing import Optional
-
-from potk_unit_extractor.model import *
+from .model import *
+from .translations import TAGS
+from typing import Optional, Set
 from dataclasses import dataclass
 from pathlib import Path
 import math
 import json
 
 # From game. Yes, it's hardcoded there too.
-from potk_unit_extractor.translations import TAGS
-
 ELEMENTAL_SKILLS_IDS = [
     490000010, 490000013, 490000015, 490000017, 490000019, 490000021, 490000173
 ]
@@ -54,7 +52,7 @@ class _RawUnitData:
     types: dict
     evo_from: dict
     ud: dict
-    skills: list
+    skills_ids: list
     groups: dict
     source_unit: UnitData = None
 
@@ -69,29 +67,6 @@ class _RawUnitData:
         if not self.cc_pattern:
             return 0
         return self.cc_pattern[f'job{cc.value}_UnitJob']
-
-    def compute_element(self):
-        for skill in self.skills:
-            if skill['ID'] in ELEMENTAL_SKILLS_IDS:
-                return Element(skill['element_CommonElement'])
-        return Element.NONE
-
-
-def _load_stats(
-        data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
-    """
-    Load all stats for a given unit job and type.
-
-    :param data: Raw unit data.
-    :param job: Job data.
-    :param t: UnitType
-    :return: Stats
-    """
-    stats = {
-        stat.name.lower(): _load_stat(data, job, stat, t)
-        for stat in StatType
-    }
-    return Stats(**stats)
 
 
 class Loader:
@@ -209,6 +184,7 @@ class Loader:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
         tags = sorted(self._load_tags(data))
+        skills = self._load_skills(data.skills_ids)
         return UnitData(
             ID=unit_id,
             same_character_id=data.unit['same_character_id'],
@@ -216,7 +192,7 @@ class Loader:
             resource_id=data.unit['resource_reference_unit_id_UnitUnit'],
             jp_name=data.unit['name'],
             eng_name=data.unit['english_name'],
-            element=data.compute_element(),
+            element=_compute_element(skills),
             gear_kind=GearKind(data.unit['kind_GearKind']),
             level=_load_level(data.params),
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
@@ -229,6 +205,7 @@ class Loader:
             vertex2=self._load_unit_cc(data, ClassChangeType.VERTEX2),
             vertex3=self._load_unit_cc(data, ClassChangeType.VERTEX3),
             tags=tags,
+            skills=skills,
         )
 
     def _load_unit_cc(
@@ -330,6 +307,33 @@ class Loader:
             desc_en=TAGS.get((tag_kind, tag_id))
         )
 
+    def _load_skills(self, skills: list) -> list:
+        return [self._load_skill(i) for i in skills]
+
+    def _load_skill(self, skill_id: int) -> Skill:
+        skill = self.skills[skill_id]
+        return Skill(
+            type=SkillType(skill['skill_type_BattleskillSkillType']),
+            ID=skill['ID'],
+            jp_desc=SkillDesc(
+                name=skill['name'],
+                full=skill['description'],
+                short=skill['shortDescription'],
+            ),
+            en_desc=None,
+            element=Element(skill['element_CommonElement']),
+            target=SkillTarget(skill['target_type_BattleskillTargetType']),
+            genres=[
+                SkillGenre(skill[k])
+                for k in ['genre1_BattleskillGenre', 'genre2_BattleskillGenre']
+                if skill[k]
+            ],
+            use_count=skill['use_count'],
+            cooldown_turns=skill['charge_turn'],
+            max_lv=skill['upper_level'],
+            resource_id=skill['resource_reference_id'],
+        )
+
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
         Composes all raw data relevant for an unit.
@@ -339,7 +343,7 @@ class Loader:
         """
         unit = self.units[unit_id]
         if unit_id in self.unit_skill:
-            skills = [self.skills[link['skill_BattleskillSkill']]
+            skills = [link['skill_BattleskillSkill']
                       for link in self.unit_skill[unit_id]]
         else:
             skills = []
@@ -353,9 +357,33 @@ class Loader:
             ud=_get_or_def(self.ud, unit[
                 'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'
             ]),
-            skills=skills,
+            skills_ids=skills,
             groups=self.unit_groups[unit_id],
         )
+
+
+def _compute_element(skills: List[Skill]) -> Element:
+    for skill in skills:
+        if skill.ID in ELEMENTAL_SKILLS_IDS:
+            return skill.element
+    return Element.NONE
+
+
+def _load_stats(
+        data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
+    """
+    Load all stats for a given unit job and type.
+
+    :param data: Raw unit data.
+    :param job: Job data.
+    :param t: UnitType
+    :return: Stats
+    """
+    stats = {
+        stat.name.lower(): _load_stat(data, job, stat, t)
+        for stat in StatType
+    }
+    return Stats(**stats)
 
 
 def _load_stat(

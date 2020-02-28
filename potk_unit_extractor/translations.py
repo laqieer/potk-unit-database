@@ -270,3 +270,6 @@ TAGS = {
             description="Units from Ancient Killers Generation",
         ),
 }
+
+# TODO Load from a yaml file?
+SKILLS = {}
