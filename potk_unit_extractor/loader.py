@@ -184,7 +184,7 @@ class Loader:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
         tags = sorted(self._load_tags(data))
-        skills = self._load_skills(data.skills_ids)
+        skills = sorted(self._load_skills(data.skills_ids))
         return UnitData(
             ID=unit_id,
             same_character_id=data.unit['same_character_id'],
@@ -323,11 +323,11 @@ class Loader:
             en_desc=None,
             element=Element(skill['element_CommonElement']),
             target=SkillTarget(skill['target_type_BattleskillTargetType']),
-            genres=[
+            genres=sorted(
                 SkillGenre(skill[k])
                 for k in ['genre1_BattleskillGenre', 'genre2_BattleskillGenre']
                 if skill[k]
-            ],
+            ),
             use_count=skill['use_count'],
             cooldown_turns=skill['charge_turn'],
             max_lv=skill['upper_level'],

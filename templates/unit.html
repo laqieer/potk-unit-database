@@ -170,6 +170,37 @@
 		</div>
 	</div>
 	{% endif %}
+	<div id="skills-info">
+		<h2>Skills</h2>
+		{% for skill in unit.skills %}
+		<div class="card mb-3">
+			<div class="card-header font-weight-bold">
+				<div class="row">
+					<div class="col">
+						<img src="../images/skills/{{ skill.skill_icon }}.png" style="zoom: 0.75">
+					</div>
+					<div class="col text-center">{{ skill.jp_desc.name }}</div>
+					<div class="col text-right">lv&nbsp;{{ skill.max_lv }}</div>
+				</div>
+			</div>
+			<div class="card-body pt-3">
+				<div class="row mb-3">
+					<div class="col">
+						{# TODO Use contextual badges #}
+						<span class="badge badge-secondary">{{ skill.type.name | title }}</span>
+					</div>
+					<div class="col text-right">
+						{% for genre in skill.genres %}
+						{# TODO Use contextual badges #}
+						<span class="badge badge-primary">{{ genre.name | title }}</span>
+						{% endfor %}
+					</div>
+				</div>
+				<p class="card-text">{{ skill.jp_desc.full }}</p>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>

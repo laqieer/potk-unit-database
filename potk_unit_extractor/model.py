@@ -292,7 +292,7 @@ class SkillDesc:
     short: str
 
 
-@dataclass
+@dataclass(eq=True, frozen=True, order=True)
 class Skill:
     type: SkillType
     ID: int
@@ -305,6 +305,17 @@ class Skill:
     cooldown_turns: int
     max_lv: int
     resource_id: int
+
+    @property
+    def skill_icon(self) -> str:
+        # TODO Handle CC skills?
+        if self.type == SkillType.LEADER:
+            return 'leader_skill_icon'
+        elif self.type == SkillType.ITEM:
+            return 'supply_skill_icon'
+        else:
+            rid = self.resource_id or self.ID
+            return f'{rid}'
 
 
 class UnitTagKind(IntEnum):
