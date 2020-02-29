@@ -82,6 +82,7 @@ class Loader:
             evos: list,
             ud: list,
             unit_skill: list,
+            unit_rs: list,
             unit_ls: list,
             unit_cq: list,
             unit_is: list,
@@ -113,6 +114,7 @@ class Loader:
         self.evos = _index('target_unit_UnitUnit', evos)
         self.ud = _index('ID', ud)
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
+        self.unit_rs = _index('character_id', unit_rs)
         self.unit_ls = _index('unit_UnitUnit', unit_ls)
         self.unit_cq = _group_by('unit_UnitUnit', unit_cq)
         self.unit_is = _index('unit_UnitUnit', unit_is)
@@ -172,10 +174,11 @@ class Loader:
         if data.evo_from:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
+        same_ch_id = data.unit['same_character_id']
         skills = sorted(self._load_skills(unit_id))
         return UnitData(
             ID=unit_id,
-            same_character_id=data.unit['same_character_id'],
+            same_character_id=same_ch_id,
             character_id=data.unit['character_UnitCharacter'],
             resource_id=data.unit['resource_reference_unit_id_UnitUnit'],
             jp_name=data.unit['name'],
@@ -193,6 +196,7 @@ class Loader:
             vertex2=self._load_unit_cc(data, ClassChangeType.VERTEX2),
             vertex3=self._load_unit_cc(data, ClassChangeType.VERTEX3),
             tags=sorted(self._load_tags(data)),
+            relationship_skill=self._maybe_load_relationship_skill(same_ch_id),
             leader_skill=self._maybe_load_leader_skill(unit_id),
             intimate_skill=self._maybe_load_intimate_skill(unit_id),
             skills=skills,
@@ -296,6 +300,13 @@ class Loader:
             ),
             desc_en=TAGS.get((tag_kind, tag_id))
         )
+
+    def _maybe_load_relationship_skill(
+            self, same_ch_id: int) -> Optional[Skill]:
+        if same_ch_id not in self.unit_rs:
+            return None
+        return self._load_skill(
+            self.unit_rs[same_ch_id]['skill_BattleskillSkill'])
 
     def _maybe_load_leader_skill(self, unit_id: int) -> Optional[Skill]:
         if unit_id not in self.unit_ls:
@@ -486,6 +497,7 @@ def load_folder(path: Path) -> Loader:
         evos=_load_file(path / 'UnitEvolutionPattern.json'),
         ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
         unit_skill=_load_file(path / 'UnitSkill.json'),
+        unit_rs=_load_file(path / 'UnitSkillAwake.json'),
         unit_ls=_load_file(path / 'UnitLeaderSkill.json'),
         unit_cq=_load_file(path / 'UnitSkillCharacterQuest.json'),
         unit_is=_load_file(path / 'UnitSkillIntimate.json'),

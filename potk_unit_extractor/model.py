@@ -414,6 +414,7 @@ class UnitData:
     vertex2: UnitCCInfo
     vertex3: UnitCCInfo
     tags: List[UnitTag]
+    relationship_skill: Optional[Skill]
     leader_skill: Optional[Skill]
     intimate_skill: Optional[Skill]
     skills: List[Skill]

@@ -21,6 +21,7 @@ KNOWN_MASTER_DATA = [
     MasterDataAsset("UnitSkill", parse_unit_skill),
     MasterDataAsset("UnitLeaderSkill", parse_unit_skill_link),
     MasterDataAsset("UnitSkillCharacterQuest", parse_unit_cq),
+    MasterDataAsset("UnitSkillAwake", parse_unit_rs),
     MasterDataAsset("UnitSkillIntimate", parse_unit_skill_link),
     MasterDataAsset("BattleskillSkill", parse_battle_skill),
     MasterDataAsset("JobChangePatterns", parse_job_change_pattern),

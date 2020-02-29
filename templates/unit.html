@@ -173,13 +173,24 @@
 	<div id="skills-info">
 		<h2>Skills</h2>
 
+		{% if unit.relationship_skill %}
+		<h3 class="text-muted">
+			Relationship Skill <br/>
+			<small>Unlocked by improving relationship (a.k.a. RS/TS/GS)</small>
+		</h3>
+		{{- macros.skill(unit.relationship_skill, '..') -}}
+		{% endif %}
+
 		{% if unit.leader_skill %}
 		<h3 class="text-muted">Leader Skill</h3>
 		{{- macros.skill(unit.leader_skill, '..') -}}
 		{% endif %}
 
 		{% if unit.intimate_skill %}
-		<h3 class="text-muted">Multi Skill</h3>
+		<h3 class="text-muted">
+			Multi Skill <br/>
+			<small>Unlocked by raising intimacy with other units</small>
+		</h3>
 		{{- macros.skill(unit.intimate_skill, '..') -}}
 		{% endif %}
 
