@@ -86,6 +86,7 @@ class Loader:
             unit_ls: list,
             unit_cq: list,
             unit_is: list,
+            unit_skill_evo: list,
             skills: list,
             cc_patterns: list,
             job_characteristics: list,
@@ -102,14 +103,8 @@ class Loader:
         self.parameters = _index('ID', parameters)
         self.initials = _index('ID', initials)
         self.jobs = _index('ID', jobs)
-        # Type data is actually a two level index by rarity and typing.
-        self.types_data = {}
-        for data in types_data:
-            rarity = data['rarity_UnitRarity']
-            if rarity not in self.types_data:
-                self.types_data[rarity] = {}
-            type_ = data['unit_type_UnitType']
-            self.types_data[rarity][type_] = data
+        self.types_data = _index_two_level(
+            'rarity_UnitRarity', 'unit_type_UnitType', types_data)
         # Evolutions are reverse-mapped for evo bonus lookup.
         self.evos = _index('target_unit_UnitUnit', evos)
         self.ud = _index('ID', ud)
@@ -118,6 +113,9 @@ class Loader:
         self.unit_ls = _index('unit_UnitUnit', unit_ls)
         self.unit_cq = _group_by('unit_UnitUnit', unit_cq)
         self.unit_is = _index('unit_UnitUnit', unit_is)
+        self.unit_skill_evo = _index_two_level(
+            'unit_UnitUnit', 'before_skill_BattleskillSkill', unit_skill_evo,
+            tuples=True)
         self.skills = _index('ID', skills)
         self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
         self.job_characteristics = _index('ID', job_characteristics)
@@ -306,17 +304,19 @@ class Loader:
         if same_ch_id not in self.unit_rs:
             return None
         return self._load_skill(
-            self.unit_rs[same_ch_id]['skill_BattleskillSkill'])
+            None, self.unit_rs[same_ch_id]['skill_BattleskillSkill'])
 
     def _maybe_load_leader_skill(self, unit_id: int) -> Optional[Skill]:
         if unit_id not in self.unit_ls:
             return None
-        return self._load_skill(self.unit_ls[unit_id]['skill_BattleskillSkill'])
+        return self._load_skill(
+            unit_id, self.unit_ls[unit_id]['skill_BattleskillSkill'])
 
     def _maybe_load_intimate_skill(self, unit_id: int) -> Optional[Skill]:
         if unit_id not in self.unit_is:
             return None
-        return self._load_skill(self.unit_is[unit_id]['skill_BattleskillSkill'])
+        return self._load_skill(
+            unit_id, self.unit_is[unit_id]['skill_BattleskillSkill'])
 
     def _load_skills(self, unit_id: int) -> list:
         skill_ids = []
@@ -326,9 +326,16 @@ class Loader:
                     link['skill_BattleskillSkill'] for link in links[unit_id]
                 ]
 
-        return [self._load_skill(i) for i in skill_ids]
+        return [self._load_skill(unit_id, i) for i in skill_ids]
 
-    def _load_skill(self, skill_id: int) -> Skill:
+    def _load_skill(self, unit_id: Optional[int], skill_id: int) -> Skill:
+        evo = None
+        evo_skill_id, evo_level = self._find_evo_skill_id(unit_id, skill_id)
+        if evo_skill_id:
+            evo = SkillEvo(
+                to_skill=self._load_skill(unit_id, evo_skill_id),
+                req_level=evo_level)
+
         skill = self.skills[skill_id]
         return Skill(
             type=SkillType(skill['skill_type_BattleskillSkillType']),
@@ -350,7 +357,15 @@ class Loader:
             cooldown_turns=skill['charge_turn'],
             max_lv=skill['upper_level'],
             resource_id=skill['resource_reference_id'],
+            evo=evo,
         )
+
+    def _find_evo_skill_id(self, unit_id: int, src_skill_id: int) -> tuple:
+        key = (unit_id, src_skill_id)
+        if key in self.unit_skill_evo:
+            evo = self.unit_skill_evo[key]
+            return evo['after_skill_BattleskillSkill'], evo['level']
+        return None, None
 
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
@@ -501,6 +516,7 @@ def load_folder(path: Path) -> Loader:
         unit_ls=_load_file(path / 'UnitLeaderSkill.json'),
         unit_cq=_load_file(path / 'UnitSkillCharacterQuest.json'),
         unit_is=_load_file(path / 'UnitSkillIntimate.json'),
+        unit_skill_evo=_load_file(path / 'UnitSkillEvolution.json'),
         skills=_load_file(path / 'BattleskillSkill.json'),
         cc_patterns=_load_file(path / 'JobChangePatterns.json'),
         job_characteristics=_load_file(path / 'JobCharacteristics.json'),
@@ -530,6 +546,23 @@ def _group_by(key: any, items: list) -> dict:
             result[key_val] = [item]
         else:
             result[key_val].append(item)
+    return result
+
+
+def _index_two_level(
+        key1: any, key2: any, items: list, tuples: bool = False) -> dict:
+    result = {}
+    if tuples:
+        for item in items:
+            k = (item[key1], item[key2])
+            result[k] = item
+    else:
+        for item in items:
+            k1 = item[key1]
+            if k1 not in result:
+                result[k1] = {}
+            k2 = item[key2]
+            result[k1][k2] = item
     return result
 
 

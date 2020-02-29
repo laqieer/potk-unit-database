@@ -178,12 +178,12 @@
 			Relationship Skill <br/>
 			<small>Unlocked by improving relationship (a.k.a. RS/TS/GS)</small>
 		</h3>
-		{{- macros.skill(unit.relationship_skill, '..') -}}
+		{{- macros.unit_skill(unit.relationship_skill, '..') -}}
 		{% endif %}
 
 		{% if unit.leader_skill %}
 		<h3 class="text-muted">Leader Skill</h3>
-		{{- macros.skill(unit.leader_skill, '..') -}}
+		{{- macros.unit_skill(unit.leader_skill, '..') -}}
 		{% endif %}
 
 		{% if unit.intimate_skill %}
@@ -191,12 +191,12 @@
 			Multi Skill <br/>
 			<small>Unlocked by raising intimacy with other units</small>
 		</h3>
-		{{- macros.skill(unit.intimate_skill, '..') -}}
+		{{- macros.unit_skill(unit.intimate_skill, '..') -}}
 		{% endif %}
 
 		<h3 class="text-muted">Common Skills</h3>
 		{% for skill in unit.skills %}
-		{{- macros.skill(skill, '..') -}}
+		{{- macros.unit_skill(skill, '..') -}}
 		{% endfor %}
 	</div>
 </div>

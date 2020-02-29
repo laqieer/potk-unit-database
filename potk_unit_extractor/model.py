@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from enum import Enum, IntEnum
@@ -305,6 +306,7 @@ class Skill:
     cooldown_turns: int
     max_lv: int
     resource_id: int
+    evo: Optional[SkillEvo]
 
     @property
     def skill_icon(self) -> Optional[str]:
@@ -319,6 +321,12 @@ class Skill:
         else:
             rid = self.resource_id or self.ID
             return f'{rid}'
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class SkillEvo:
+    to_skill: Skill
+    req_level: int
 
 
 class UnitTagKind(IntEnum):

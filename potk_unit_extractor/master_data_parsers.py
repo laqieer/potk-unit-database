@@ -255,6 +255,14 @@ def parse_unit_skill_link(reader: MasterDataReader, item: dict):
     item['skill_BattleskillSkill'] = reader.ReadInt()
 
 
+def parse_unit_skill_evo(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['before_skill_BattleskillSkill'] = reader.ReadInt()
+    item['level'] = reader.ReadInt()
+    item['after_skill_BattleskillSkill'] = reader.ReadInt()
+
+
 def parse_unit_rs(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['character_id'] = reader.ReadInt()
