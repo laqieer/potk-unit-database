@@ -69,7 +69,7 @@
 </a>
 {% endmacro %}
 
-{% macro inner_unit_skill(skill, cd_root, req_lv) %}
+{% macro inner_unit_skill(skill, cd_root, type, req_lv) %}
 <div class="card">
 	<div class="card-header font-weight-bold {% if req_lv %} bg-transparent {% endif %} ">
 		<div class="row">
@@ -94,6 +94,11 @@
 	<div class="card-body pt-3">
 		<div class="row mb-3">
 			<div class="col">
+				{% if type %}
+				<span class="badge badge-warning">
+					{{ jp_types[type] }}&nbsp;{{ type.name }}
+				</span>
+				{% endif %}
 				{# TODO Use contextual badges #}
 				<span class="badge badge-secondary">{{ skill.type.name | title }}</span>
 			</div>
@@ -109,15 +114,15 @@
 </div>
 {% endmacro %}
 
-{% macro unit_skill(skill, cd_root) %}
+{% macro unit_skill(skill, cd_root, type = None) %}
 {% if skill.evo %}
 <div class="mb-3">
-	{{ inner_unit_skill(skill, cd_root, 0) }}
-	{{ inner_unit_skill(skill.evo.to_skill, cd_root, skill.evo.req_level) }}
+	{{ inner_unit_skill(skill, cd_root, type, 0) }}
+	{{ inner_unit_skill(skill.evo.to_skill, type, cd_root, skill.evo.req_level) }}
 </div>
 {% else %}
 <div class="mb-3">
-	{{ inner_unit_skill(skill, cd_root, 0) }}
+	{{ inner_unit_skill(skill, cd_root, type, 0) }}
 </div>
 {% endif %}
 {% endmacro %}

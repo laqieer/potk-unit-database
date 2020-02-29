@@ -2,9 +2,8 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from enum import Enum, IntEnum
-from typing import List, Optional
+from typing import List, Optional, Dict
 import math
-
 
 DV_CAP = 99
 
@@ -16,6 +15,7 @@ class UD:
     Encodes the DV->Bonus series and allows quick access to the maximum value.
     Represents the bonuses for a single stat.
     """
+
     def __init__(self, dvs: List[int]):
         # This is a map of total_dv -> status_increase.
         self.inc_by_milestone = Counter(dvs)
@@ -141,6 +141,17 @@ class UnitType(IntEnum):
     MGC = 4  # +mgc, -spr
     GRD = 5  # +grd, +spr, -str, -mgc
     DEX = 6  # +spd, +tec, -grd, -spr
+
+    @property
+    def jp_ch(self) -> str:
+        return {
+            UnitType.BAL: '王',
+            UnitType.VIT: '命',
+            UnitType.STR: '攻',
+            UnitType.MGC: '魔',
+            UnitType.GRD: '守',
+            UnitType.DEX: '匠',
+        }[self]
 
 
 @dataclass
@@ -309,6 +320,13 @@ class Skill:
     evo: Optional[SkillEvo]
 
     @property
+    def unit_type(self) -> Optional[UnitType]:
+        for t in UnitType:
+            if self.jp_desc.name.endswith(t.jp_ch + '器'):
+                return t
+        return None
+
+    @property
     def skill_icon(self) -> Optional[str]:
         # TODO Handle CC skills?
         if self.type == SkillType.LEADER:
@@ -428,6 +446,7 @@ class UnitData:
     relationship_skill: Optional[Skill]
     leader_skill: Optional[Skill]
     intimate_skill: Optional[Skill]
+    type_skills: Dict[UnitType, Skill]
     skills: List[Skill]
 
     @property

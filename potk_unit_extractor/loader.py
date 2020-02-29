@@ -173,7 +173,9 @@ class Loader:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
         same_ch_id = data.unit['same_character_id']
-        skills = sorted(self._load_skills(unit_id))
+        all_skills = self._load_skills(unit_id)
+        common_skills = sorted(s for s in all_skills if s.unit_type is None)
+        type_skills = {s.unit_type: s for s in all_skills if s.unit_type}
         return UnitData(
             ID=unit_id,
             same_character_id=same_ch_id,
@@ -181,7 +183,7 @@ class Loader:
             resource_id=data.unit['resource_reference_unit_id_UnitUnit'],
             jp_name=data.unit['name'],
             eng_name=data.unit['english_name'],
-            element=_compute_element(skills),
+            element=_compute_element(common_skills),
             gear_kind=GearKind(data.unit['kind_GearKind']),
             level=_load_level(data.params),
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
@@ -197,7 +199,8 @@ class Loader:
             relationship_skill=self._maybe_load_relationship_skill(same_ch_id),
             leader_skill=self._maybe_load_leader_skill(unit_id),
             intimate_skill=self._maybe_load_intimate_skill(unit_id),
-            skills=skills,
+            type_skills=type_skills,
+            skills=common_skills,
         )
 
     def _load_unit_cc(
@@ -318,7 +321,7 @@ class Loader:
         return self._load_skill(
             unit_id, self.unit_is[unit_id]['skill_BattleskillSkill'])
 
-    def _load_skills(self, unit_id: int) -> list:
+    def _load_skills(self, unit_id: int) -> List[Skill]:
         skill_ids = []
         for links in [self.unit_skill, self.unit_cq]:
             if unit_id in links:

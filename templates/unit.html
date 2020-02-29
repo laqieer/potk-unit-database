@@ -194,6 +194,15 @@
 		{{- macros.unit_skill(unit.intimate_skill, '..') -}}
 		{% endif %}
 
+		{% if unit.type_skills %}
+		<h3 class="text-muted">Type Skills</h3>
+		<div id="type-skills">
+			{% for type, skill in unit.type_skills.items() %}
+			{{- macros.unit_skill(skill, '..', type) -}}
+			{% endfor %}
+		</div>
+		{% endif %}
+
 		<h3 class="text-muted">Common Skills</h3>
 		{% for skill in unit.skills %}
 		{{- macros.unit_skill(skill, '..') -}}

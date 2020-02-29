@@ -59,14 +59,8 @@ def main(unit_ids: list):
         UnitRarityStars.SIX:   '★★★★★★',
     }
 
-    jp_types = {
-        UnitType.BAL: '王',
-        UnitType.VIT: '命',
-        UnitType.STR: '攻',
-        UnitType.MGC: '魔',
-        UnitType.GRD: '守',
-        UnitType.DEX: '匠',
-    }
+    # TODO Remove and use t.jp_ch directly
+    jp_types = {t: t.jp_ch for t in UnitType}
 
     jp_stats = {
         StatType.HP:  '',
