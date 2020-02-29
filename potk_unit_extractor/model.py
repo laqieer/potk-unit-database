@@ -307,12 +307,15 @@ class Skill:
     resource_id: int
 
     @property
-    def skill_icon(self) -> str:
+    def skill_icon(self) -> Optional[str]:
         # TODO Handle CC skills?
         if self.type == SkillType.LEADER:
             return 'leader'
         elif self.type == SkillType.ITEM:
             return 'supply'
+        elif self.type == SkillType.MAGIC:
+            # TODO Use bullet icons
+            return None
         else:
             rid = self.resource_id or self.ID
             return f'{rid}'
