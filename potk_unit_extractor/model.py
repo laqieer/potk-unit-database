@@ -310,9 +310,9 @@ class Skill:
     def skill_icon(self) -> str:
         # TODO Handle CC skills?
         if self.type == SkillType.LEADER:
-            return 'leader_skill_icon'
+            return 'leader'
         elif self.type == SkillType.ITEM:
-            return 'supply_skill_icon'
+            return 'supply'
         else:
             rid = self.resource_id or self.ID
             return f'{rid}'
