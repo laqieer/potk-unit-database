@@ -32,4 +32,5 @@ KNOWN_MASTER_DATA = [
     MasterDataAsset("UnitGroupGenerationCategory", parse_unit_group_category),
     MasterDataAsset("UnitGroupLargeCategory", parse_unit_group_category),
     MasterDataAsset("UnitGroupSmallCategory", parse_unit_group_category),
+    MasterDataAsset("OverkillersSkillRelease", parse_ovk_skill_release),
 ]

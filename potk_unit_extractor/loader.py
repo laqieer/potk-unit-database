@@ -95,6 +95,7 @@ class Loader:
             unit_groups_small: list,
             unit_groups_clothing: list,
             unit_groups_gen: list,
+            ovk_releases: list,
     ):
         """FIXME This code sucks.
         Create individual loaders for each independent resource."""
@@ -126,6 +127,7 @@ class Loader:
             UnitTagKind.CLOTHING:   _index('ID', unit_groups_clothing),
             UnitTagKind.GENERATION: _index('ID', unit_groups_gen),
         }
+        self.ovk_releases = _index('ID', ovk_releases)
 
     def load_playable_units(self):
         """
@@ -173,9 +175,15 @@ class Loader:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
         same_ch_id = data.unit['same_character_id']
+
+        ovk_skill = None
+        if data.unit['exist_overkillers_skill']:
+            ovk_skill = self._load_ovk_skill(same_ch_id)
+
         all_skills = self._load_skills(unit_id)
         common_skills = sorted(s for s in all_skills if s.unit_type is None)
         type_skills = {s.unit_type: s for s in all_skills if s.unit_type}
+
         return UnitData(
             ID=unit_id,
             same_character_id=same_ch_id,
@@ -201,6 +209,7 @@ class Loader:
             intimate_skill=self._maybe_load_intimate_skill(unit_id),
             type_skills=type_skills,
             skills=common_skills,
+            ovk_skill=ovk_skill,
         )
 
     def _load_unit_cc(
@@ -300,6 +309,13 @@ class Loader:
                 description=data['description'],
             ),
             desc_en=TAGS.get((tag_kind, tag_id))
+        )
+
+    def _load_ovk_skill(self, same_ch_id: int) -> OvkSkill:
+        data = self.ovk_releases[same_ch_id]
+        return OvkSkill(
+            skill=self._load_skill(None, data['skill_BattleskillSkill']),
+            req_dv=data['unity_value'],
         )
 
     def _maybe_load_relationship_skill(
@@ -529,6 +545,7 @@ def load_folder(path: Path) -> Loader:
         unit_groups_clothing=_load_file(
             path / 'UnitGroupClothingCategory.json'),
         unit_groups_gen=_load_file(path / 'UnitGroupGenerationCategory.json'),
+        ovk_releases=_load_file(path / 'OverkillersSkillRelease.json'),
     )
 
 

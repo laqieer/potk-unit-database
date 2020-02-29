@@ -173,6 +173,11 @@
 	<div id="skills-info">
 		<h2>Skills</h2>
 
+		{% if unit.ovk_skill %}
+		<h3 class="text-muted">Overkiller Skill</h3>
+		{{- macros.unit_skill(unit.ovk_skill.skill, '..', req_dv=unit.ovk_skill.req_dv) -}}
+		{% endif %}
+
 		{% if unit.relationship_skill %}
 		<h3 class="text-muted">
 			Relationship Skill <br/>

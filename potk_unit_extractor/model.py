@@ -347,6 +347,12 @@ class SkillEvo:
     req_level: int
 
 
+@dataclass(eq=True, frozen=True, order=True)
+class OvkSkill:
+    skill: Skill
+    req_dv: int
+
+
 class UnitTagKind(IntEnum):
     LARGE = 1
     SMALL = 2
@@ -448,6 +454,7 @@ class UnitData:
     intimate_skill: Optional[Skill]
     type_skills: Dict[UnitType, Skill]
     skills: List[Skill]
+    ovk_skill: Optional[OvkSkill]
 
     @property
     def any_name(self) -> str:
