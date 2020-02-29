@@ -68,3 +68,32 @@
 	{% endfor %}
 </a>
 {% endmacro %}
+
+{% macro skill(skill, cd_root) %}
+<div class="card mb-3">
+	<div class="card-header font-weight-bold">
+		<div class="row">
+			<div class="col">
+				<img src="{{ cd_root }}/images/skills/{{ skill.skill_icon }}.png" style="zoom: 0.75">
+			</div>
+			<div class="col text-center">{{ skill.jp_desc.name }}</div>
+			<div class="col text-right">lv&nbsp;{{ skill.max_lv }}</div>
+		</div>
+	</div>
+	<div class="card-body pt-3">
+		<div class="row mb-3">
+			<div class="col">
+				{# TODO Use contextual badges #}
+				<span class="badge badge-secondary">{{ skill.type.name | title }}</span>
+			</div>
+			<div class="col text-right">
+				{% for genre in skill.genres %}
+				{# TODO Use contextual badges #}
+				<span class="badge badge-primary">{{ genre.name | title }}</span>
+				{% endfor %}
+			</div>
+		</div>
+		<p class="card-text">{{ skill.jp_desc.full }}</p>
+	</div>
+</div>
+{% endmacro %}

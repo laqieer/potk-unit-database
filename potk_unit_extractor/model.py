@@ -415,6 +415,7 @@ class UnitData:
     vertex3: UnitCCInfo
     tags: List[UnitTag]
     skills: List[Skill]
+    intimate_skill: Optional[Skill]
 
     @property
     def any_name(self) -> str:

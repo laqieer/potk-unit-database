@@ -83,6 +83,7 @@ class Loader:
             ud: list,
             unit_skill: list,
             unit_cq: list,
+            unit_is: list,
             skills: list,
             cc_patterns: list,
             job_characteristics: list,
@@ -112,6 +113,7 @@ class Loader:
         self.ud = _index('ID', ud)
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
         self.unit_cq = _group_by('unit_UnitUnit', unit_cq)
+        self.unit_is = _index('unit_UnitUnit', unit_is)
         self.skills = _index('ID', skills)
         self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
         self.job_characteristics = _index('ID', job_characteristics)
@@ -191,6 +193,7 @@ class Loader:
             vertex3=self._load_unit_cc(data, ClassChangeType.VERTEX3),
             tags=tags,
             skills=skills,
+            intimate_skill=self._maybe_load_intimate_skill(unit_id),
         )
 
     def _load_unit_cc(
@@ -291,6 +294,11 @@ class Loader:
             ),
             desc_en=TAGS.get((tag_kind, tag_id))
         )
+
+    def _maybe_load_intimate_skill(self, unit_id: int) -> Optional[Skill]:
+        if unit_id not in self.unit_is:
+            return None
+        return self._load_skill(self.unit_is[unit_id]['skill_BattleskillSkill'])
 
     def _load_skills(self, unit_id: int) -> list:
         skill_ids = []
@@ -472,6 +480,7 @@ def load_folder(path: Path) -> Loader:
         ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
         unit_skill=_load_file(path / 'UnitSkill.json'),
         unit_cq=_load_file(path / 'UnitSkillCharacterQuest.json'),
+        unit_is=_load_file(path / 'UnitSkillIntimate.json'),
         skills=_load_file(path / 'BattleskillSkill.json'),
         cc_patterns=_load_file(path / 'JobChangePatterns.json'),
         job_characteristics=_load_file(path / 'JobCharacteristics.json'),
