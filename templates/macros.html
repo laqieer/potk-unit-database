@@ -118,7 +118,7 @@
 {% if skill.evo %}
 <div class="mb-3">
 	{{ inner_unit_skill(skill, cd_root, type, 0) }}
-	{{ inner_unit_skill(skill.evo.to_skill, type, cd_root, skill.evo.req_level) }}
+	{{ inner_unit_skill(skill.evo.to_skill, cd_root, type, skill.evo.req_level) }}
 </div>
 {% else %}
 <div class="mb-3">
