@@ -52,7 +52,6 @@ class _RawUnitData:
     types: dict
     evo_from: dict
     ud: dict
-    skills_ids: list
     groups: dict
     source_unit: UnitData = None
 
@@ -83,6 +82,7 @@ class Loader:
             evos: list,
             ud: list,
             unit_skill: list,
+            unit_cq: list,
             skills: list,
             cc_patterns: list,
             job_characteristics: list,
@@ -92,24 +92,8 @@ class Loader:
             unit_groups_clothing: list,
             unit_groups_gen: list,
     ):
-        """
-        :param units: List of unit info (UnitUnit).
-        :param parameters: List of parameters info (UnitUnitParameter)
-        :param initials: List of initial parameters (UnitInitialParam)
-        :param jobs: List of jobs (UnitJob)
-        :param types_data: List of param data by unit type (UnitTypeParameter)
-        :param evos: List of evolution patterns (UnitEvolutionPattern)
-        :param ud: List of Unleashed Domain Data (ComposeMaxUnityValueSetting)
-        :param unit_skill: List of Unit and Skills associations (UnitSkill)
-        :param skills: List of Battle Skill data (BattleskillSkill)
-        :param cc_patterns: List of Class Changes data (JobChangePatterns)
-        :param job_characteristics: List of JobCharacteristics
-        :param unit_groups: List of UnitGroup
-        :param unit_groups_large: List of UnitGroupLargeCategory
-        :param unit_groups_small: List of UnitGroupSmallCategory
-        :param unit_groups_clothing: List of UnitGroupClothingCategory
-        :param unit_groups_gen: List of UnitGroupGenerationCategory
-        """
+        """FIXME This code sucks.
+        Create individual loaders for each independent resource."""
         # Converts the lists into dicts indexed by ID for fast access.
         self.units = _index('ID', units)
         self.parameters = _index('ID', parameters)
@@ -127,6 +111,7 @@ class Loader:
         self.evos = _index('target_unit_UnitUnit', evos)
         self.ud = _index('ID', ud)
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
+        self.unit_cq = _group_by('unit_UnitUnit', unit_cq)
         self.skills = _index('ID', skills)
         self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
         self.job_characteristics = _index('ID', job_characteristics)
@@ -184,7 +169,7 @@ class Loader:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
         tags = sorted(self._load_tags(data))
-        skills = sorted(self._load_skills(data.skills_ids))
+        skills = sorted(self._load_skills(unit_id))
         return UnitData(
             ID=unit_id,
             same_character_id=data.unit['same_character_id'],
@@ -307,8 +292,15 @@ class Loader:
             desc_en=TAGS.get((tag_kind, tag_id))
         )
 
-    def _load_skills(self, skills: list) -> list:
-        return [self._load_skill(i) for i in skills]
+    def _load_skills(self, unit_id: int) -> list:
+        skill_ids = []
+        for links in [self.unit_skill, self.unit_cq]:
+            if unit_id in links:
+                skill_ids += [
+                    link['skill_BattleskillSkill'] for link in links[unit_id]
+                ]
+
+        return [self._load_skill(i) for i in skill_ids]
 
     def _load_skill(self, skill_id: int) -> Skill:
         skill = self.skills[skill_id]
@@ -342,11 +334,6 @@ class Loader:
         :return: Raw data for the unit.
         """
         unit = self.units[unit_id]
-        if unit_id in self.unit_skill:
-            skills = [link['skill_BattleskillSkill']
-                      for link in self.unit_skill[unit_id]]
-        else:
-            skills = []
         return _RawUnitData(
             unit=unit,
             params=self.parameters[unit['parameter_data_UnitUnitParameter']],
@@ -357,7 +344,6 @@ class Loader:
             ud=_get_or_def(self.ud, unit[
                 'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'
             ]),
-            skills_ids=skills,
             groups=self.unit_groups[unit_id],
         )
 
@@ -475,6 +461,7 @@ def load_folder(path: Path) -> Loader:
     :param path: Path of the folder containing the files.
     :return: Populated loader.
     """
+    # FIXME Use master_data.py
     return Loader(
         units=_load_file(path / 'UnitUnit.json'),
         parameters=_load_file(path / 'UnitUnitParameter.json'),
@@ -484,6 +471,7 @@ def load_folder(path: Path) -> Loader:
         evos=_load_file(path / 'UnitEvolutionPattern.json'),
         ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
         unit_skill=_load_file(path / 'UnitSkill.json'),
+        unit_cq=_load_file(path / 'UnitSkillCharacterQuest.json'),
         skills=_load_file(path / 'BattleskillSkill.json'),
         cc_patterns=_load_file(path / 'JobChangePatterns.json'),
         job_characteristics=_load_file(path / 'JobCharacteristics.json'),

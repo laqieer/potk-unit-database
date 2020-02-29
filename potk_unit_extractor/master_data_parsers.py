@@ -240,6 +240,15 @@ def parse_unit_skill(reader: MasterDataReader, item: dict):
     item['unit_type'] = reader.ReadInt()
 
 
+def parse_unit_cq(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['character_quest_QuestCharacterS'] = reader.ReadInt()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
+    item['quest_id_for_evolution'] = reader.ReadInt()
+    item['skill_after_evolution'] = reader.ReadInt()
+
+
 def parse_battle_skill(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['name'] = reader.ReadString(True)
