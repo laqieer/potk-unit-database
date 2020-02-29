@@ -170,14 +170,20 @@
 		</div>
 	</div>
 	{% endif %}
-	{% if unit.intimate_skill %}
-	<div id="multi-skill-info">
-		<h2>Multi Skill</h2>
-		{{- macros.skill(unit.intimate_skill, '..') -}}
-	</div>
-	{% endif %}
 	<div id="skills-info">
 		<h2>Skills</h2>
+
+		{% if unit.leader_skill %}
+		<h3 class="text-muted">Leader Skill</h3>
+		{{- macros.skill(unit.leader_skill, '..') -}}
+		{% endif %}
+
+		{% if unit.intimate_skill %}
+		<h3 class="text-muted">Multi Skill</h3>
+		{{- macros.skill(unit.intimate_skill, '..') -}}
+		{% endif %}
+
+		<h3 class="text-muted">Common Skills</h3>
 		{% for skill in unit.skills %}
 		{{- macros.skill(skill, '..') -}}
 		{% endfor %}

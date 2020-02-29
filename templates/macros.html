@@ -77,7 +77,11 @@
 				<img src="{{ cd_root }}/images/skills/{{ skill.skill_icon }}.png" style="zoom: 0.75">
 			</div>
 			<div class="col text-center">{{ skill.jp_desc.name }}</div>
-			<div class="col text-right">lv&nbsp;{{ skill.max_lv }}</div>
+			<div class="col text-right">
+				{%- if skill.max_lv -%}
+				lv&nbsp;{{ skill.max_lv }}
+				{%- endif -%}
+			</div>
 		</div>
 	</div>
 	<div class="card-body pt-3">
