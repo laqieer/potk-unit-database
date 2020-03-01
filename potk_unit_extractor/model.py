@@ -328,7 +328,7 @@ class Skill:
     @property
     def unit_type(self) -> Optional[UnitType]:
         for t in UnitType:
-            flag = f'の{t.jp_ch}器'
+            flag = f'{t.jp_ch}器'
             if flag in self.jp_desc.name:
                 return t
         return None
