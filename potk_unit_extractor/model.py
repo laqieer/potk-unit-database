@@ -310,14 +310,20 @@ class Skill:
     ID: int
     jp_desc: SkillDesc
     en_desc: Optional[SkillDesc]
-    element: Element
-    target: SkillTarget
+    max_lv: int
+    evo: Optional[SkillEvo]
     genres: List[SkillGenre]
+    target: SkillTarget
+    element: Element
     use_count: int
     cooldown_turns: int
-    max_lv: int
+    max_use_per_quest: int
+    min_range: int
+    max_range: int
+    weight: int
+    power: int
+    hp_cost: int
     resource_id: int
-    evo: Optional[SkillEvo]
 
     @property
     def unit_type(self) -> Optional[UnitType]:
@@ -325,6 +331,14 @@ class Skill:
             if self.jp_desc.name.endswith(t.jp_ch + '器'):
                 return t
         return None
+
+    @property
+    def range(self) -> Optional[str]:
+        if not self.min_range or not self.max_range:
+            return None
+        if self.min_range == self.max_range:
+            return f'{self.min_range}'
+        return f'{self.min_range}-{self.max_range}'
 
     @property
     def skill_icon(self) -> Optional[str]:

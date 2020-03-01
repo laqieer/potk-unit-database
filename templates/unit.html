@@ -10,6 +10,20 @@
 		  content="{{unit.rarity.stars}}, {{unit.element.name | title}}, {{unit.gear_kind.name | title}}, {{unit.cost}} cost unit. Follow the link for more details."/>
 	<meta property="og:url" content="https://potk-fan-database.neocities.org/units/{{unit.ID}}.html"/>
 	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/{{unit.resource_id}}/unit_hires.png">
+	<style>
+		dl.skill-attribute-list, dl.skill-attribute-list > dd {
+			margin-bottom: 0;
+		}
+
+		dl.skill-attribute-list > dt, dl.skill-attribute-list > dd {
+			margin-right: 1rem;
+			margin-top: 0.5rem;
+			float: left;
+		}
+		dl.skill-attribute-list > dt::after {
+			content: ":";
+		}
+	</style>
 </head>
 <body>
 {% import 'macros.html' as macros with context %}

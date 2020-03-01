@@ -112,7 +112,43 @@
 				{% endfor %}
 			</div>
 		</div>
-		<p class="card-text">{{ skill.jp_desc.full }}</p>
+		<p class="card-text mb-0">{{ skill.jp_desc.full }}</p>
+		<dl class="skill-attribute-list">
+			{% if skill.use_count %}
+			<dt>Uses</dt>
+			<dd>{{ skill.use_count }}</dd>
+			{% endif %}
+
+			{% if skill.cooldown_turns %}
+			<dt>Cooldown</dt>
+			<dd>{{ skill.cooldown_turns }} - (Skill Level - 1)</dd>
+			{% endif %}
+
+			{% if skill.max_use_per_quest %}
+			<dt>Max Uses per Quest</dt>
+			<dd>{{ skill.max_use_per_quest }}</dd>
+			{% endif %}
+
+			{% if skill.range %}
+			<dt>Range</dt>
+			<dd>{{ skill.range }}</dd>
+			{% endif %}
+
+			{% if skill.weight %}
+			<dt>Weight</dt>
+			<dd>{{ skill.weight }}</dd>
+			{% endif %}
+
+			{% if skill.power %}
+			<dt>Power</dt>
+			<dd>{{ skill.power }}</dd>
+			{% endif %}
+
+			{% if skill.hp_cost %}
+			<dt>HP Cost</dt>
+			<dd>{{ skill.hp_cost }}</dd>
+			{% endif %}
+		</dl>
 	</div>
 </div>
 {% endmacro %}

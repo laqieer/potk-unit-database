@@ -365,18 +365,24 @@ class Loader:
                 short=skill['shortDescription'],
             ),
             en_desc=None,
-            element=Element(skill['element_CommonElement']),
-            target=SkillTarget(skill['target_type_BattleskillTargetType']),
+            max_lv=skill['upper_level'],
+            evo=evo,
             genres=sorted(
                 SkillGenre(skill[k])
                 for k in ['genre1_BattleskillGenre', 'genre2_BattleskillGenre']
                 if skill[k]
             ),
+            target=SkillTarget(skill['target_type_BattleskillTargetType']),
+            element=Element(skill['element_CommonElement']),
             use_count=skill['use_count'],
             cooldown_turns=skill['charge_turn'],
-            max_lv=skill['upper_level'],
+            max_use_per_quest=skill['max_use_count'],
+            min_range=skill['min_range'],
+            max_range=skill['max_range'],
+            weight=skill['weight'],
+            power=skill['power'],
+            hp_cost=skill['consume_hp'],
             resource_id=skill['resource_reference_id'],
-            evo=evo,
         )
 
     def _find_evo_skill_id(self, unit_id: int, src_skill_id: int) -> tuple:
