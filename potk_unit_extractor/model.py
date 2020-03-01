@@ -1,9 +1,9 @@
+from __future__ import annotations
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, IntEnum
-from typing import List, Set
+from typing import List, Optional, Dict
 import math
-
 
 DV_CAP = 99
 
@@ -15,6 +15,7 @@ class UD:
     Encodes the DV->Bonus series and allows quick access to the maximum value.
     Represents the bonuses for a single stat.
     """
+
     def __init__(self, dvs: List[int]):
         # This is a map of total_dv -> status_increase.
         self.inc_by_milestone = Counter(dvs)
@@ -141,6 +142,17 @@ class UnitType(IntEnum):
     GRD = 5  # +grd, +spr, -str, -mgc
     DEX = 6  # +spd, +tec, -grd, -spr
 
+    @property
+    def jp_ch(self) -> str:
+        return {
+            UnitType.BAL: '王',
+            UnitType.VIT: '命',
+            UnitType.STR: '攻',
+            UnitType.MGC: '魔',
+            UnitType.GRD: '守',
+            UnitType.DEX: '匠',
+        }[self]
+
 
 @dataclass
 class UnitStats:
@@ -243,6 +255,118 @@ class Element(IntEnum):
     PRINCESS = 16
 
 
+class SkillType(IntEnum):
+    """From MasterDataTable.BattleskillSkillType enum"""
+    COMMAND = 1
+    RELEASE = 2
+    PASSIVE = 3
+    DUEL = 4
+    MAGIC = 5
+    LEADER = 6
+    ITEM = 7
+    ENEMY = 8
+    AILMENT = 9
+    GROWTH = 10
+    ATTACK_CLASS = 11
+    ATTACK_ELEMENT = 12
+    ATTACK_METHOD = 13
+
+
+class SkillGenre(IntEnum):
+    """From MasterDataTable.BattleskillGenre enum"""
+    ATTACK = 1
+    HEAL = 2
+    BUFF = 3
+    DEBUFF = 4
+    AILMENT = 5
+    DEFENSE = 6
+    GROWTH = 7
+    MOVE = 8
+
+
+class SkillTarget(IntEnum):
+    """From MasterDataTable.BattleskillTargetType enum"""
+    MYSELF = 1
+    PLAYER_RANGE = 2
+    PLAYER_SINGLE = 3
+    ENEMY_SINGLE = 4
+    ENEMY_RANGE = 5
+    DEAD_PLAYER_SINGLE = 6
+    COMPLEX_SINGLE = 7
+    COMPLEX_RANGE = 8
+    PANEL_SINGLE = 9
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class SkillDesc:
+    name: str
+    full: str
+    short: str
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class Skill:
+    type: SkillType
+    ID: int
+    jp_desc: SkillDesc
+    en_desc: Optional[SkillDesc]
+    max_lv: int
+    evo: Optional[SkillEvo]
+    genres: List[SkillGenre]
+    target: SkillTarget
+    element: Element
+    use_count: int
+    cooldown_turns: int
+    max_use_per_quest: int
+    min_range: int
+    max_range: int
+    weight: int
+    power: int
+    hp_cost: int
+    resource_id: int
+
+    @property
+    def unit_type(self) -> Optional[UnitType]:
+        for t in UnitType:
+            if self.jp_desc.name.endswith(t.jp_ch + '器'):
+                return t
+        return None
+
+    @property
+    def range(self) -> Optional[str]:
+        if not self.min_range or not self.max_range:
+            return None
+        if self.min_range == self.max_range:
+            return f'{self.min_range}'
+        return f'{self.min_range}-{self.max_range}'
+
+    @property
+    def skill_icon(self) -> Optional[str]:
+        # TODO Handle CC skills?
+        if self.type == SkillType.LEADER:
+            return 'leader'
+        elif self.type == SkillType.ITEM:
+            return 'supply'
+        elif self.type == SkillType.MAGIC:
+            # TODO Use bullet icons
+            return None
+        else:
+            rid = self.resource_id or self.ID
+            return f'{rid}'
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class SkillEvo:
+    to_skill: Skill
+    req_level: int
+
+
+@dataclass(eq=True, frozen=True, order=True)
+class OvkSkill:
+    skill: Skill
+    req_dv: int
+
+
 class UnitTagKind(IntEnum):
     LARGE = 1
     SMALL = 2
@@ -339,6 +463,12 @@ class UnitData:
     vertex2: UnitCCInfo
     vertex3: UnitCCInfo
     tags: List[UnitTag]
+    relationship_skill: Optional[Skill]
+    leader_skill: Optional[Skill]
+    intimate_skill: Optional[Skill]
+    type_skills: Dict[UnitType, Skill]
+    skills: List[Skill]
+    ovk_skill: Optional[OvkSkill]
 
     @property
     def any_name(self) -> str:

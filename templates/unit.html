@@ -10,6 +10,20 @@
 		  content="{{unit.rarity.stars}}, {{unit.element.name | title}}, {{unit.gear_kind.name | title}}, {{unit.cost}} cost unit. Follow the link for more details."/>
 	<meta property="og:url" content="https://potk-fan-database.neocities.org/units/{{unit.ID}}.html"/>
 	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/{{unit.resource_id}}/unit_hires.png">
+	<style>
+		dl.skill-attribute-list, dl.skill-attribute-list > dd {
+			margin-bottom: 0;
+		}
+
+		dl.skill-attribute-list > dt, dl.skill-attribute-list > dd {
+			margin-right: 1rem;
+			margin-top: 0.5rem;
+			float: left;
+		}
+		dl.skill-attribute-list > dt::after {
+			content: ":";
+		}
+	</style>
 </head>
 <body>
 {% import 'macros.html' as macros with context %}
@@ -170,6 +184,49 @@
 		</div>
 	</div>
 	{% endif %}
+	<div id="skills-info">
+		<h2>Skills</h2>
+
+		{% if unit.ovk_skill %}
+		<h3 class="text-muted">Overkiller Skill</h3>
+		{{- macros.unit_skill(unit.ovk_skill.skill, '..', req_dv=unit.ovk_skill.req_dv) -}}
+		{% endif %}
+
+		{% if unit.relationship_skill %}
+		<h3 class="text-muted">
+			Relationship Skill <br/>
+			<small>Unlocked by improving relationship (a.k.a. RS/TS/GS)</small>
+		</h3>
+		{{- macros.unit_skill(unit.relationship_skill, '..') -}}
+		{% endif %}
+
+		{% if unit.leader_skill %}
+		<h3 class="text-muted">Leader Skill</h3>
+		{{- macros.unit_skill(unit.leader_skill, '..') -}}
+		{% endif %}
+
+		{% if unit.intimate_skill %}
+		<h3 class="text-muted">
+			Multi Skill <br/>
+			<small>Unlocked by raising intimacy with other units</small>
+		</h3>
+		{{- macros.unit_skill(unit.intimate_skill, '..') -}}
+		{% endif %}
+
+		{% if unit.type_skills %}
+		<h3 class="text-muted">Type Skills</h3>
+		<div id="type-skills">
+			{% for type, skill in unit.type_skills.items() %}
+			{{- macros.unit_skill(skill, '..', type) -}}
+			{% endfor %}
+		</div>
+		{% endif %}
+
+		<h3 class="text-muted">Common Skills</h3>
+		{% for skill in unit.skills %}
+		{{- macros.unit_skill(skill, '..') -}}
+		{% endfor %}
+	</div>
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>

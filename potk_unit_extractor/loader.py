@@ -1,14 +1,12 @@
-from typing import Optional
-
-from potk_unit_extractor.model import *
+from .model import *
+from .translations import TAGS
+from typing import Optional, Set
 from dataclasses import dataclass
 from pathlib import Path
 import math
 import json
 
 # From game. Yes, it's hardcoded there too.
-from potk_unit_extractor.translations import TAGS
-
 ELEMENTAL_SKILLS_IDS = [
     490000010, 490000013, 490000015, 490000017, 490000019, 490000021, 490000173
 ]
@@ -54,7 +52,6 @@ class _RawUnitData:
     types: dict
     evo_from: dict
     ud: dict
-    skills: list
     groups: dict
     source_unit: UnitData = None
 
@@ -69,29 +66,6 @@ class _RawUnitData:
         if not self.cc_pattern:
             return 0
         return self.cc_pattern[f'job{cc.value}_UnitJob']
-
-    def compute_element(self):
-        for skill in self.skills:
-            if skill['ID'] in ELEMENTAL_SKILLS_IDS:
-                return Element(skill['element_CommonElement'])
-        return Element.NONE
-
-
-def _load_stats(
-        data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
-    """
-    Load all stats for a given unit job and type.
-
-    :param data: Raw unit data.
-    :param job: Job data.
-    :param t: UnitType
-    :return: Stats
-    """
-    stats = {
-        stat.name.lower(): _load_stat(data, job, stat, t)
-        for stat in StatType
-    }
-    return Stats(**stats)
 
 
 class Loader:
@@ -108,6 +82,11 @@ class Loader:
             evos: list,
             ud: list,
             unit_skill: list,
+            unit_rs: list,
+            unit_ls: list,
+            unit_cq: list,
+            unit_is: list,
+            unit_skill_evo: list,
             skills: list,
             cc_patterns: list,
             job_characteristics: list,
@@ -116,42 +95,28 @@ class Loader:
             unit_groups_small: list,
             unit_groups_clothing: list,
             unit_groups_gen: list,
+            ovk_releases: list,
     ):
-        """
-        :param units: List of unit info (UnitUnit).
-        :param parameters: List of parameters info (UnitUnitParameter)
-        :param initials: List of initial parameters (UnitInitialParam)
-        :param jobs: List of jobs (UnitJob)
-        :param types_data: List of param data by unit type (UnitTypeParameter)
-        :param evos: List of evolution patterns (UnitEvolutionPattern)
-        :param ud: List of Unleashed Domain Data (ComposeMaxUnityValueSetting)
-        :param unit_skill: List of Unit and Skills associations (UnitSkill)
-        :param skills: List of Battle Skill data (BattleskillSkill)
-        :param cc_patterns: List of Class Changes data (JobChangePatterns)
-        :param job_characteristics: List of JobCharacteristics
-        :param unit_groups: List of UnitGroup
-        :param unit_groups_large: List of UnitGroupLargeCategory
-        :param unit_groups_small: List of UnitGroupSmallCategory
-        :param unit_groups_clothing: List of UnitGroupClothingCategory
-        :param unit_groups_gen: List of UnitGroupGenerationCategory
-        """
+        """FIXME This code sucks.
+        Create individual loaders for each independent resource."""
         # Converts the lists into dicts indexed by ID for fast access.
         self.units = _index('ID', units)
         self.parameters = _index('ID', parameters)
         self.initials = _index('ID', initials)
         self.jobs = _index('ID', jobs)
-        # Type data is actually a two level index by rarity and typing.
-        self.types_data = {}
-        for data in types_data:
-            rarity = data['rarity_UnitRarity']
-            if rarity not in self.types_data:
-                self.types_data[rarity] = {}
-            type_ = data['unit_type_UnitType']
-            self.types_data[rarity][type_] = data
+        self.types_data = _index_two_level(
+            'rarity_UnitRarity', 'unit_type_UnitType', types_data)
         # Evolutions are reverse-mapped for evo bonus lookup.
         self.evos = _index('target_unit_UnitUnit', evos)
         self.ud = _index('ID', ud)
         self.unit_skill = _group_by('unit_UnitUnit', unit_skill)
+        self.unit_rs = _index('character_id', unit_rs)
+        self.unit_ls = _index('unit_UnitUnit', unit_ls)
+        self.unit_cq = _group_by('unit_UnitUnit', unit_cq)
+        self.unit_is = _index('unit_UnitUnit', unit_is)
+        self.unit_skill_evo = _index_two_level(
+            'unit_UnitUnit', 'before_skill_BattleskillSkill', unit_skill_evo,
+            tuples=True)
         self.skills = _index('ID', skills)
         self.cc_patterns = _index('unit_UnitUnit', cc_patterns)
         self.job_characteristics = _index('ID', job_characteristics)
@@ -162,6 +127,7 @@ class Loader:
             UnitTagKind.CLOTHING:   _index('ID', unit_groups_clothing),
             UnitTagKind.GENERATION: _index('ID', unit_groups_gen),
         }
+        self.ovk_releases = _index('ID', ovk_releases)
 
     def load_playable_units(self):
         """
@@ -208,15 +174,24 @@ class Loader:
         if data.evo_from:
             data.source_unit = self.load_unit(data.evo_from['unit_UnitUnit'])
 
-        tags = sorted(self._load_tags(data))
+        same_ch_id = data.unit['same_character_id']
+
+        ovk_skill = None
+        if data.unit['exist_overkillers_skill']:
+            ovk_skill = self._load_ovk_skill(same_ch_id)
+
+        all_skills = self._load_skills(unit_id)
+        common_skills = sorted(s for s in all_skills if s.unit_type is None)
+        type_skills = {s.unit_type: s for s in all_skills if s.unit_type}
+
         return UnitData(
             ID=unit_id,
-            same_character_id=data.unit['same_character_id'],
+            same_character_id=same_ch_id,
             character_id=data.unit['character_UnitCharacter'],
             resource_id=data.unit['resource_reference_unit_id_UnitUnit'],
             jp_name=data.unit['name'],
             eng_name=data.unit['english_name'],
-            element=data.compute_element(),
+            element=_compute_element(common_skills),
             gear_kind=GearKind(data.unit['kind_GearKind']),
             level=_load_level(data.params),
             rarity=UnitRarityStars(data.unit['rarity_UnitRarity']),
@@ -228,7 +203,13 @@ class Loader:
             vertex1=self._load_unit_cc(data, ClassChangeType.VERTEX1),
             vertex2=self._load_unit_cc(data, ClassChangeType.VERTEX2),
             vertex3=self._load_unit_cc(data, ClassChangeType.VERTEX3),
-            tags=tags,
+            tags=sorted(self._load_tags(data)),
+            relationship_skill=self._maybe_load_relationship_skill(same_ch_id),
+            leader_skill=self._maybe_load_leader_skill(unit_id),
+            intimate_skill=self._maybe_load_intimate_skill(unit_id),
+            type_skills=type_skills,
+            skills=common_skills,
+            ovk_skill=ovk_skill,
         )
 
     def _load_unit_cc(
@@ -330,6 +311,87 @@ class Loader:
             desc_en=TAGS.get((tag_kind, tag_id))
         )
 
+    def _load_ovk_skill(self, same_ch_id: int) -> OvkSkill:
+        data = self.ovk_releases[same_ch_id]
+        return OvkSkill(
+            skill=self._load_skill(None, data['skill_BattleskillSkill']),
+            req_dv=data['unity_value'],
+        )
+
+    def _maybe_load_relationship_skill(
+            self, same_ch_id: int) -> Optional[Skill]:
+        if same_ch_id not in self.unit_rs:
+            return None
+        return self._load_skill(
+            None, self.unit_rs[same_ch_id]['skill_BattleskillSkill'])
+
+    def _maybe_load_leader_skill(self, unit_id: int) -> Optional[Skill]:
+        if unit_id not in self.unit_ls:
+            return None
+        return self._load_skill(
+            unit_id, self.unit_ls[unit_id]['skill_BattleskillSkill'])
+
+    def _maybe_load_intimate_skill(self, unit_id: int) -> Optional[Skill]:
+        if unit_id not in self.unit_is:
+            return None
+        return self._load_skill(
+            unit_id, self.unit_is[unit_id]['skill_BattleskillSkill'])
+
+    def _load_skills(self, unit_id: int) -> List[Skill]:
+        skill_ids = []
+        for links in [self.unit_skill, self.unit_cq]:
+            if unit_id in links:
+                skill_ids += [
+                    link['skill_BattleskillSkill'] for link in links[unit_id]
+                ]
+
+        return [self._load_skill(unit_id, i) for i in skill_ids]
+
+    def _load_skill(self, unit_id: Optional[int], skill_id: int) -> Skill:
+        evo = None
+        evo_skill_id, evo_level = self._find_evo_skill_id(unit_id, skill_id)
+        if evo_skill_id:
+            evo = SkillEvo(
+                to_skill=self._load_skill(unit_id, evo_skill_id),
+                req_level=evo_level)
+
+        skill = self.skills[skill_id]
+        return Skill(
+            type=SkillType(skill['skill_type_BattleskillSkillType']),
+            ID=skill['ID'],
+            jp_desc=SkillDesc(
+                name=skill['name'],
+                full=skill['description'],
+                short=skill['shortDescription'],
+            ),
+            en_desc=None,
+            max_lv=skill['upper_level'],
+            evo=evo,
+            genres=sorted(
+                SkillGenre(skill[k])
+                for k in ['genre1_BattleskillGenre', 'genre2_BattleskillGenre']
+                if skill[k]
+            ),
+            target=SkillTarget(skill['target_type_BattleskillTargetType']),
+            element=Element(skill['element_CommonElement']),
+            use_count=skill['use_count'],
+            cooldown_turns=skill['charge_turn'],
+            max_use_per_quest=skill['max_use_count'],
+            min_range=skill['min_range'],
+            max_range=skill['max_range'],
+            weight=skill['weight'],
+            power=skill['power'],
+            hp_cost=skill['consume_hp'],
+            resource_id=skill['resource_reference_id'],
+        )
+
+    def _find_evo_skill_id(self, unit_id: int, src_skill_id: int) -> tuple:
+        key = (unit_id, src_skill_id)
+        if key in self.unit_skill_evo:
+            evo = self.unit_skill_evo[key]
+            return evo['after_skill_BattleskillSkill'], evo['level']
+        return None, None
+
     def _raw_unit(self, unit_id: int) -> _RawUnitData:
         """
         Composes all raw data relevant for an unit.
@@ -338,11 +400,6 @@ class Loader:
         :return: Raw data for the unit.
         """
         unit = self.units[unit_id]
-        if unit_id in self.unit_skill:
-            skills = [self.skills[link['skill_BattleskillSkill']]
-                      for link in self.unit_skill[unit_id]]
-        else:
-            skills = []
         return _RawUnitData(
             unit=unit,
             params=self.parameters[unit['parameter_data_UnitUnitParameter']],
@@ -353,9 +410,32 @@ class Loader:
             ud=_get_or_def(self.ud, unit[
                 'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting'
             ]),
-            skills=skills,
             groups=self.unit_groups[unit_id],
         )
+
+
+def _compute_element(skills: List[Skill]) -> Element:
+    for skill in skills:
+        if skill.ID in ELEMENTAL_SKILLS_IDS:
+            return skill.element
+    return Element.NONE
+
+
+def _load_stats(
+        data: _RawUnitData, job: UnitJob, t: UnitType) -> Stats:
+    """
+    Load all stats for a given unit job and type.
+
+    :param data: Raw unit data.
+    :param job: Job data.
+    :param t: UnitType
+    :return: Stats
+    """
+    stats = {
+        stat.name.lower(): _load_stat(data, job, stat, t)
+        for stat in StatType
+    }
+    return Stats(**stats)
 
 
 def _load_stat(
@@ -447,6 +527,7 @@ def load_folder(path: Path) -> Loader:
     :param path: Path of the folder containing the files.
     :return: Populated loader.
     """
+    # FIXME Use master_data.py
     return Loader(
         units=_load_file(path / 'UnitUnit.json'),
         parameters=_load_file(path / 'UnitUnitParameter.json'),
@@ -456,6 +537,11 @@ def load_folder(path: Path) -> Loader:
         evos=_load_file(path / 'UnitEvolutionPattern.json'),
         ud=_load_file(path / 'ComposeMaxUnityValueSetting.json'),
         unit_skill=_load_file(path / 'UnitSkill.json'),
+        unit_rs=_load_file(path / 'UnitSkillAwake.json'),
+        unit_ls=_load_file(path / 'UnitLeaderSkill.json'),
+        unit_cq=_load_file(path / 'UnitSkillCharacterQuest.json'),
+        unit_is=_load_file(path / 'UnitSkillIntimate.json'),
+        unit_skill_evo=_load_file(path / 'UnitSkillEvolution.json'),
         skills=_load_file(path / 'BattleskillSkill.json'),
         cc_patterns=_load_file(path / 'JobChangePatterns.json'),
         job_characteristics=_load_file(path / 'JobCharacteristics.json'),
@@ -465,6 +551,7 @@ def load_folder(path: Path) -> Loader:
         unit_groups_clothing=_load_file(
             path / 'UnitGroupClothingCategory.json'),
         unit_groups_gen=_load_file(path / 'UnitGroupGenerationCategory.json'),
+        ovk_releases=_load_file(path / 'OverkillersSkillRelease.json'),
     )
 
 
@@ -485,6 +572,23 @@ def _group_by(key: any, items: list) -> dict:
             result[key_val] = [item]
         else:
             result[key_val].append(item)
+    return result
+
+
+def _index_two_level(
+        key1: any, key2: any, items: list, tuples: bool = False) -> dict:
+    result = {}
+    if tuples:
+        for item in items:
+            k = (item[key1], item[key2])
+            result[k] = item
+    else:
+        for item in items:
+            k1 = item[key1]
+            if k1 not in result:
+                result[k1] = {}
+            k2 = item[key2]
+            result[k1][k2] = item
     return result
 
 

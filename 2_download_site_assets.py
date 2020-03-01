@@ -4,30 +4,41 @@
 #
 # Takes the paths.json file as an argument.
 # Saves all files to the current working directory.
-
+from typing import Iterable
 from potk_unit_extractor.loader import load_folder
-from potk_unit_extractor.api import Environment, download_streaming_asset
+from potk_unit_extractor.api import Environment
 from pathlib import Path
 import json
 
 
-def main(paths_fp, ids: list):
-    print("Loading file: " + paths_fp)
-    with open(paths_fp, mode='rb') as fd:
-        paths = json.load(fd)
-    print("File loaded successfully")
-    streaming_assets: dict = paths['StreamingAssets']
-    env = Environment(True)
+def download_skills(skills: Iterable, env: Environment, assets: dict):
+    target = Path('.', 'site', 'images', 'skills')
+    target.mkdir(exist_ok=True, parents=True)
 
+    seen = set()
+    for skill in skills:
+        if skill in seen:
+            continue
+        seen.add(skill)
+
+        key = f'BattleSkills/{skill}/skill_icon'
+        if key in assets:
+            icon_path = target / f'{skill}.png'
+            env.save_asset_icon(fn=assets[key][0], icon_path=icon_path)
+
+    for extra in ['ability', 'def', 'leader', 'supply']:
+        key = f'BattleSkills/{extra}_skill_icon'
+        if key in assets:
+            path = target / f'{extra}.png'
+            env.save_asset_icon(fn=assets[key][0], icon_path=path)
+
+
+def download_units(units: Iterable, env: Environment, streaming_assets: dict):
     target = Path('.', 'site', 'images', 'units')
     target.mkdir(exist_ok=True, parents=True)
 
-    loader = load_folder(Path('masterdata'))
-
     seen = set()
-    for unit in loader.load_playable_units():
-        if ids and unit.ID not in ids:
-            continue
+    for unit in units:
         asset_id = unit.resource_id
         if asset_id in seen:
             continue
@@ -38,13 +49,37 @@ def main(paths_fp, ids: list):
 
         thumb_key = f'AssetBundle/Resources/Units/{asset_id}/2D/c_thum'
         if thumb_key in streaming_assets:
-            download_streaming_asset(
-                env, streaming_assets[thumb_key], thumb_key, unit_asset_path)
+            env.save_streaming_asset(
+                streaming_assets[thumb_key], thumb_key, unit_asset_path)
 
         hires_key = f'AssetBundle/Resources/Units/{asset_id}/2D/unit_hires'
         if hires_key in streaming_assets:
-            download_streaming_asset(
-                env, streaming_assets[hires_key], hires_key, unit_asset_path)
+            env.save_streaming_asset(
+                streaming_assets[hires_key], hires_key, unit_asset_path)
+
+
+def main(paths_fp, ids: list):
+    print("Loading file: " + paths_fp)
+    with open(paths_fp, mode='rb') as fd:
+        paths = json.load(fd)
+    print("File loaded successfully")
+    env = Environment(True)
+    streaming_assets: dict = paths['StreamingAssets']
+    asset_bundle: dict = paths['AssetBundle']
+
+    loader = load_folder(Path('masterdata'))
+
+    download_skills(
+        (s['resource_reference_id'] or s['ID'] for s in loader.skills.values()),
+        env,
+        asset_bundle)
+
+    if ids:
+        units_gen = (loader.load_unit(i) for i in ids)
+    else:
+        units_gen = loader.load_playable_units()
+
+    download_units(units_gen, env, streaming_assets)
 
     print('All files downloaded')
 

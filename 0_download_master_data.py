@@ -6,7 +6,8 @@
 # Saves all files to the current working directory.
 
 from pathlib import Path
-from potk_unit_extractor.api import Environment, download_asset_bundle
+from potk_unit_extractor.api import Environment
+from potk_unit_extractor.master_data import KNOWN_MASTER_DATA
 import json
 import shutil
 
@@ -22,28 +23,9 @@ def main(paths_fp):
     shutil.rmtree(target, ignore_errors=True)
     target.mkdir()
 
-    names = [
-        "MasterData/UnitUnit",
-        "MasterData/UnitUnitParameter",
-        "MasterData/UnitInitialParam",
-        "MasterData/UnitTypeParameter",
-        "MasterData/UnitJob",
-        "MasterData/UnitEvolutionPattern",
-        "MasterData/ComposeMaxUnityValueSetting",
-        "MasterData/UnitRarity",
-        "MasterData/GearKind",
-        "MasterData/UnitSkill",
-        "MasterData/BattleskillSkill",
-        "MasterData/JobChangePatterns",
-        "MasterData/JobCharacteristics",
-        "MasterData/UnitGroup",
-        "MasterData/UnitGroupClothingCategory",
-        "MasterData/UnitGroupGenerationCategory",
-        "MasterData/UnitGroupLargeCategory",
-        "MasterData/UnitGroupSmallCategory",
-    ]
-    for name in names:
-        download_asset_bundle(env, asset_bundle[name], name, target)
+    for md in KNOWN_MASTER_DATA:
+        name = "MasterData/" + md.name
+        env.save_asset_bundle(asset_bundle[name], name, target)
 
     print('All files downloaded')
 

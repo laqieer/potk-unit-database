@@ -68,3 +68,113 @@
 	{% endfor %}
 </a>
 {% endmacro %}
+
+{% macro inner_unit_skill(skill, cd_root, type, req_lv, req_dv) %}
+<div class="card">
+	<div class="card-header font-weight-bold {% if req_lv %} bg-transparent {% endif %} ">
+		<div class="row">
+			<div class="col">
+				{% if skill.skill_icon %}
+				<img src="{{ cd_root }}/images/skills/{{ skill.skill_icon }}.png" style="zoom: 0.75">
+				{% endif %}
+			</div>
+			<div class="col p-0 text-center">
+				{% if req_lv %}
+				<small class="font-weight-bold">Evolves at Skill lv&nbsp;{{ req_lv }}</small> <br/>
+				{% endif %}
+				{{ skill.jp_desc.name }}
+				{% if req_dv %}
+				<br/> <span class="badge badge-danger">Required DV: {{ req_dv }}</span>
+				{% endif %}
+			</div>
+			<div class="col text-right">
+				{%- if skill.max_lv -%}
+				lv&nbsp;{{ skill.max_lv }}
+				{%- endif -%}
+			</div>
+		</div>
+	</div>
+	<div class="card-body pt-3">
+		<div class="row mb-3">
+			<div class="col">
+				{% if type %}
+				<span class="badge badge-warning">
+					{{ jp_types[type] }}&nbsp;{{ type.name }}
+				</span>
+				{% endif %}
+				{# TODO Use contextual badges #}
+				<span class="badge badge-secondary">{{ skill.type.name | title }}</span>
+			</div>
+			<div class="col text-right">
+				{% for genre in skill.genres %}
+				{# TODO Use contextual badges #}
+				<span class="badge badge-primary">{{ genre.name | title }}</span>
+				{% endfor %}
+			</div>
+		</div>
+		<p class="card-text mb-0">{{ skill.jp_desc.full }}</p>
+		<dl class="skill-attribute-list">
+			{% if skill.type.value == 5 %} {# Magic #}
+			<dt>Element</dt>
+			<dd>
+				<span class="badge {{ badge_element[skill.element] }}">
+					{{ skill.element.name | title }}
+				</span>
+			</dd>
+			{% endif %}
+
+			{% if skill.use_count %}
+			<dt>Uses</dt>
+			<dd>{{ skill.use_count }}</dd>
+			{% endif %}
+
+			{% if skill.cooldown_turns %}
+			<dt>Cooldown</dt>
+			<dd>{{ skill.cooldown_turns }} - (Skill Level - 1)</dd>
+			{% endif %}
+
+			{% if skill.max_use_per_quest %}
+			<dt>Max Uses per Quest</dt>
+			<dd>{{ skill.max_use_per_quest }}</dd>
+			{% endif %}
+
+			{% if skill.range %}
+			<dt>Range</dt>
+			<dd>{{ skill.range }}</dd>
+			{% endif %}
+
+			{% if skill.weight %}
+			<dt>Weight</dt>
+			<dd>{{ skill.weight }}</dd>
+			{% endif %}
+
+			{% if skill.power %}
+			<dt>Power</dt>
+			<dd>{{ skill.power }}</dd>
+			{% endif %}
+
+			{% if skill.hp_cost %}
+			<dt>HP Cost</dt>
+			<dd>{{ skill.hp_cost }}</dd>
+			{% endif %}
+		</dl>
+	</div>
+</div>
+{% endmacro %}
+
+{% macro unit_skill(skill, cd_root, type=None, req_dv=0) %}
+{% if skill.evo %}
+<div class="mb-3">
+	{{
+	inner_unit_skill(skill, cd_root, type, req_lv=0, req_dv=req_dv)
+	}}
+	{{
+	inner_unit_skill(skill.evo.to_skill, cd_root, type, req_lv=skill.evo.req_level, req_dv=req_dv)
+	}}
+</div>
+{% else %}
+<div class="mb-3">
+	{{ inner_unit_skill(skill, cd_root, type, req_lv=0, req_dv=req_dv) }}
+</div>
+{% endif %}
+{% endmacro %}

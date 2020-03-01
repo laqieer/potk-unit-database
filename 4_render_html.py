@@ -59,14 +59,8 @@ def main(unit_ids: list):
         UnitRarityStars.SIX:   '★★★★★★',
     }
 
-    jp_types = {
-        UnitType.BAL: '王',
-        UnitType.VIT: '命',
-        UnitType.STR: '攻',
-        UnitType.MGC: '魔',
-        UnitType.GRD: '守',
-        UnitType.DEX: '匠',
-    }
+    # TODO Remove and use t.jp_ch directly
+    jp_types = {t: t.jp_ch for t in UnitType}
 
     jp_stats = {
         StatType.HP:  '',
@@ -94,6 +88,7 @@ def main(unit_ids: list):
     }
 
     badge_element = {
+        Element.NONE:    'badge-secondary',
         Element.FIRE:    'badge-danger',
         Element.ICE:     'badge-primary',
         Element.WIND:    'badge-success',
@@ -124,6 +119,7 @@ def main(unit_ids: list):
                 jp_stats=jp_stats,
                 cc_desc=cc_desc,
                 badge_tag=badge_tag,
+                badge_element=badge_element,
             ).dump(fp)
 
     # Templates units tags

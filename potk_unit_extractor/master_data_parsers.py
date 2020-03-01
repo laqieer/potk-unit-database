@@ -240,6 +240,36 @@ def parse_unit_skill(reader: MasterDataReader, item: dict):
     item['unit_type'] = reader.ReadInt()
 
 
+def parse_unit_cq(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['character_quest_QuestCharacterS'] = reader.ReadInt()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
+    item['quest_id_for_evolution'] = reader.ReadInt()
+    item['skill_after_evolution'] = reader.ReadInt()
+
+
+def parse_unit_skill_link(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
+
+
+def parse_unit_skill_evo(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unit_UnitUnit'] = reader.ReadInt()
+    item['before_skill_BattleskillSkill'] = reader.ReadInt()
+    item['level'] = reader.ReadInt()
+    item['after_skill_BattleskillSkill'] = reader.ReadInt()
+
+
+def parse_unit_rs(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['character_id'] = reader.ReadInt()
+    item['need_affection'] = reader.ReadFloat()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
+
+
 def parse_battle_skill(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['name'] = reader.ReadString(True)
@@ -287,9 +317,15 @@ def parse_unit_group(reader: MasterDataReader, item: dict):
         = reader.ReadInt()
 
 
-def parse_unit_group_generic_category(reader: MasterDataReader, item: dict):
+def parse_unit_group_category(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['name'] = reader.ReadString(True)
     item['short_label_name'] = reader.ReadString(True)
     item['description'] = reader.ReadString(True)
     item['start_at'] = reader.ReadDateTimeOrNull()
+
+
+def parse_ovk_skill_release(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['unity_value'] = reader.ReadInt()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
