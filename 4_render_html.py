@@ -88,6 +88,7 @@ def main(unit_ids: list):
     }
 
     badge_element = {
+        Element.NONE:    'badge-secondary',
         Element.FIRE:    'badge-danger',
         Element.ICE:     'badge-primary',
         Element.WIND:    'badge-success',
@@ -118,6 +119,7 @@ def main(unit_ids: list):
                 jp_stats=jp_stats,
                 cc_desc=cc_desc,
                 badge_tag=badge_tag,
+                badge_element=badge_element,
             ).dump(fp)
 
     # Templates units tags
