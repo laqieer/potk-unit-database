@@ -11,19 +11,19 @@ from pathlib import Path
 import json
 
 
-def download_skills(skills: Iterable, env: Environment, assets: dict):
+def download_skills(ids: Iterable, env: Environment, assets: dict):
     target = Path('.', 'site', 'images', 'skills')
     target.mkdir(exist_ok=True, parents=True)
 
     seen = set()
-    for skill in skills:
-        if skill in seen:
+    for res_id in ids:
+        if res_id in seen:
             continue
-        seen.add(skill)
+        seen.add(res_id)
 
-        key = f'BattleSkills/{skill}/skill_icon'
+        key = f'BattleSkills/{res_id}/skill_icon'
         if key in assets:
-            icon_path = target / f'{skill}.png'
+            icon_path = target / f'{res_id}.png'
             env.save_asset_icon(fn=assets[key][0], icon_path=icon_path)
 
     for extra in ['ability', 'def', 'leader', 'supply']:
@@ -63,14 +63,14 @@ def main(paths_fp, ids: list):
     with open(paths_fp, mode='rb') as fd:
         paths = json.load(fd)
     print("File loaded successfully")
-    env = Environment(True)
+    env = Environment(review_app_connect=True)
     streaming_assets: dict = paths['StreamingAssets']
     asset_bundle: dict = paths['AssetBundle']
 
-    loader = load_folder(Path('masterdata'))
+    loader = load_folder(Path('cache'))
 
     download_skills(
-        (s['resource_reference_id'] or s['ID'] for s in loader.skills.values()),
+        (s.skill_icon for s in loader.skills_repo.all_skills),
         env,
         asset_bundle)
 

@@ -1,4 +1,4 @@
-from potk_unit_extractor.master_data_reader import MasterDataReader
+from .master_data_reader import MasterDataReader
 
 
 def parse_unit_unit(reader: MasterDataReader, item: dict):

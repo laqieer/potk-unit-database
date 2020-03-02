@@ -33,7 +33,7 @@ def group_units(units: list, key: callable) -> dict:
 
 
 def main(unit_ids: list):
-    loader = load_folder(Path('masterdata'))
+    loader = load_folder(Path('cache'))
     env = Environment(
         loader=FileSystemLoader('templates'),
         autoescape=select_autoescape(['html']),

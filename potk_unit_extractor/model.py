@@ -1,9 +1,11 @@
 from __future__ import annotations
-from collections import Counter
-from dataclasses import dataclass
-from enum import Enum, IntEnum
-from typing import List, Optional, Dict
+
 import math
+from collections import Counter
+from dataclasses import dataclass, field
+from enum import Enum, IntEnum
+from functools import lru_cache, cached_property
+from typing import List, Optional, Dict, Tuple
 
 DV_CAP = 99
 
@@ -29,25 +31,25 @@ class UD:
             self._total_by_dv[dv_range] = total
             total += self.inc_by_milestone[curr]
 
-    def _pair(self, dv):
+    def _pair(self, dv: int) -> Tuple[range, int]:
         for dv_range, bonus in self._total_by_dv.items():
             if dv in dv_range:
                 return dv_range, bonus
         raise ValueError(dv)
 
-    def bonus(self, dv):
+    def bonus(self, dv: int) -> int:
         return self._pair(dv)[1]
 
     @property
-    def max(self):
+    def max(self) -> int:
         return self.bonus(DV_CAP)
 
     @property
-    def dv_for_cap(self):
+    def dv_for_cap(self) -> int:
         return self._pair(DV_CAP)[0].start
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Stat:
     """
     Representation of a stat such as HP, STR, etc.
@@ -55,12 +57,17 @@ class Stat:
     Encodes all components of the stat separately, and provides computed
     properties for totals and other interesting values.
     """
-    initial: int  # Base stat value at level 1.
+    base: int  # Base stat from the unit itself.
+    job_initial: int  # Base value from the current unit job.
     evo_bonus: int  # Maximum obtainable bonus from the previous rarity.
     growth: int  # Maximum growth value from level up. May be impossible.
     compose: int  # Maximum fusion value without UD.
     ud: UD  # Extra fusion value obtained from max UD.
     skill_master: int  # Extra value from skill mastery.
+
+    @property
+    def initial(self) -> int:
+        return self.base + self.job_initial
 
     @property
     def max(self) -> int:
@@ -107,7 +114,7 @@ class StatType(Enum):
         return self.value + '_compose_add_max'
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Stats:
     hp: Stat
     str: Stat
@@ -121,17 +128,34 @@ class Stats:
     def of(self, t: StatType) -> Stat:
         return getattr(self, t.name.lower())
 
-    @property
+    @cached_property
     def ud_milestones(self) -> List[int]:
         result = set()
         for s in StatType:
             result = result | self.of(s).ud.inc_by_milestone.keys()
         return sorted(result)
 
-    @property
+    @cached_property
     def has_ud(self) -> bool:
         # 0 is false
         return any(self.of(s).ud.max for s in StatType)
+
+    def with_job(self, job: UnitJob, *extra_mastery: UnitJob) -> Stats:
+        """Recalculate these stats with a different base job."""
+        jobs = [job] + list(extra_mastery)
+        args = {}
+        for s in StatType:
+            src = self.of(s)
+            args[s.name.lower()] = Stat(
+                base=src.base,
+                job_initial=job.get_initial(s),
+                evo_bonus=src.evo_bonus,
+                growth=src.growth,
+                compose=src.compose,
+                ud=src.ud,
+                skill_master=sum(j.get_skill_master_bonus(s) for j in jobs),
+            )
+        return Stats(**args)
 
 
 class UnitType(IntEnum):
@@ -154,7 +178,7 @@ class UnitType(IntEnum):
         }[self]
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class UnitStats:
     bal: Stats
     vit: Stats
@@ -166,19 +190,23 @@ class UnitStats:
     def of(self, t: UnitType) -> Stats:
         return getattr(self, t.name.lower())
 
+    def with_job(self, job: UnitJob, *extra_mastery: UnitJob) -> UnitStats:
+        """Recalculate these stats with a different base job."""
+        return UnitStats(**{
+            t.name.lower(): self.of(t).with_job(job, *extra_mastery)
+            for t in UnitType
+        })
 
-@dataclass
+
+@dataclass(eq=True, frozen=True)
 class Level:
     ini: int
     inc: int
     mlb_c: int
 
-    @property
-    def max(self):
+    @cached_property
+    def max(self) -> int:
         return self.ini + (self.inc * self.mlb_c)
-
-    def __repr__(self) -> str:
-        return f'{self.ini}-{self.max}'
 
 
 class UnitRarityStars(IntEnum):
@@ -195,7 +223,7 @@ class UnitRarityStars(IntEnum):
     FIVE = 803
     SIX = 991
 
-    @property
+    @cached_property
     def stars(self) -> str:
         if self == self.ONE:
             return '1★'
@@ -311,8 +339,7 @@ class Skill:
     jp_desc: SkillDesc
     en_desc: Optional[SkillDesc]
     max_lv: int
-    evo: Optional[SkillEvo]
-    genres: List[SkillGenre]
+    genres: Tuple[SkillGenre]
     target: SkillTarget
     element: Element
     use_count: int
@@ -325,7 +352,7 @@ class Skill:
     hp_cost: int
     resource_id: int
 
-    @property
+    @cached_property
     def unit_type(self) -> Optional[UnitType]:
         for t in UnitType:
             flag = f'{t.jp_ch}器'
@@ -333,7 +360,7 @@ class Skill:
                 return t
         return None
 
-    @property
+    @cached_property
     def range(self) -> Optional[str]:
         if not self.min_range or not self.max_range:
             return None
@@ -341,7 +368,7 @@ class Skill:
             return f'{self.min_range}'
         return f'{self.min_range}-{self.max_range}'
 
-    @property
+    @cached_property
     def skill_icon(self) -> Optional[str]:
         # TODO Handle CC skills?
         if self.type == SkillType.LEADER:
@@ -358,12 +385,15 @@ class Skill:
 
 @dataclass(eq=True, frozen=True, order=True)
 class SkillEvo:
+    unit_id: int
+    from_skill: Skill
     to_skill: Skill
     req_level: int
 
 
 @dataclass(eq=True, frozen=True, order=True)
 class OvkSkill:
+    same_character_id: int
     skill: Skill
     req_dv: int
 
@@ -398,18 +428,19 @@ class UnitTag:
         return f'{self.kind.value}-{self.ID}'
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class UnitJobSkillMasterBonus:
+    ID: int
     stat: StatType
     plus_value: int
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class UnitJob:
     ID: int
     name: str
     movement: int
-    mastery_bonuses: List[UnitJobSkillMasterBonus]
+    mastery_bonuses: Tuple[UnitJobSkillMasterBonus]
     initial_hp: int
     initial_str: int
     initial_mgc: int
@@ -418,11 +449,12 @@ class UnitJob:
     initial_spd: int
     initial_tec: int
     initial_lck: int
-    new_cost: int = 0
+    new_cost: int
 
     def get_initial(self, stat_type: StatType) -> int:
         return getattr(self, 'initial_' + stat_type.name.lower())
 
+    @lru_cache(maxsize=None)
     def get_skill_master_bonus(self, stat_type: StatType) -> int:
         return sum(mb.plus_value
                    for mb in self.mastery_bonuses
@@ -436,11 +468,15 @@ class ClassChangeType(IntEnum):
     VERTEX3 = 4
 
 
-@dataclass
-class UnitCCInfo:
-    c_type: ClassChangeType
-    job: UnitJob
-    stats: UnitStats
+@dataclass(eq=True, frozen=True)
+class UnitSkills:
+    relationship: Optional[Skill]
+    leader: Optional[Skill]
+    intimate: Optional[Skill]
+    types: Dict[UnitType, Skill]
+    evolutions: Dict[Skill, SkillEvo]
+    basic: Tuple[Skill]
+    ovk: Optional[OvkSkill]
 
 
 @dataclass
@@ -459,40 +495,45 @@ class UnitData:
     cost: int
     is_awakened: bool
     stats: UnitStats
-    vertex0: UnitCCInfo
-    vertex1: UnitCCInfo
-    vertex2: UnitCCInfo
-    vertex3: UnitCCInfo
-    tags: List[UnitTag]
-    relationship_skill: Optional[Skill]
-    leader_skill: Optional[Skill]
-    intimate_skill: Optional[Skill]
-    type_skills: Dict[UnitType, Skill]
-    skills: List[Skill]
-    ovk_skill: Optional[OvkSkill]
+    cc: Dict[ClassChangeType, UnitJob]
+    tags: Tuple[UnitTag]
+    skills: UnitSkills
+    _cache: dict = field(init=False, default_factory=dict)
 
-    @property
+    @cached_property
     def any_name(self) -> str:
         return self.eng_name if self.eng_name else self.jp_name
 
-    @property
+    @cached_property
     def h_id(self) -> str:
         return f'<{self.ID} {self.rarity.stars} {self.any_name}>'
 
-    @property
+    @cached_property
     def short_title(self) -> str:
         return f'{self.rarity.stars} {self.any_name} ({self.element.name}) ' \
                f'[{self.ID}]'
 
-    @property
+    @cached_property
     def has_ud(self) -> bool:
         # UD isn't affected by unit type.
         return self.stats.bal.has_ud
 
-    def get_cc(self, c_type: ClassChangeType) -> UnitCCInfo:
-        return getattr(self, f'vertex{c_type.value - 1}')
+    def cc_stats(self, cc_type: ClassChangeType) -> UnitStats:
+        if cc_type in self._cache:
+            return self._cache[cc_type]
 
-    def has_cc(self, c_type: ClassChangeType = None) -> bool:
-        if not c_type:
-            return any(self.has_cc(c) for c in ClassChangeType)
-        return self.get_cc(c_type) is not None
+        if cc_type == ClassChangeType.NORMAL:
+            return self.stats
+
+        job = self.cc[cc_type]  # Possible KeyError is intentional.
+        extra = []
+        if cc_type == ClassChangeType.VERTEX3:
+            # Assume all units with cc3 have cc1 and cc2 as well.
+            # Since unlocking cc3 requires mastering both cc1 and cc2,
+            # this is a safe assumption at least for now.
+            extra = [
+                self.cc[ClassChangeType.VERTEX1],
+                self.cc[ClassChangeType.VERTEX2]
+            ]
+        self._cache[cc_type] = self.stats.with_job(job, *extra)
+        return self._cache[cc_type]

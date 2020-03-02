@@ -113,7 +113,7 @@ class UnitCCInitialTest(unittest.TestCase):
             unit = loader.load_unit(u_id)
             for stat, ini in u_ini.items():
                 with self.subTest(u=unit.h_id, c=u_cc, s=stat):
-                    actual = unit.get_cc(u_cc).stats.of(t).of(stat).initial
+                    actual = unit.cc_stats(u_cc).of(t).of(stat).initial
                     self.assertEqual(ini, actual)
 
 
@@ -133,7 +133,7 @@ class UnitCCMasterTest(unittest.TestCase):
                 unit = loader.load_unit(u_id)
                 for stat, master in u_master.items():
                     with self.subTest(u=unit.h_id, c=u_cc, s=stat):
-                        stats = unit.get_cc(u_cc).stats.of(t)
+                        stats = unit.cc_stats(u_cc).of(t)
                         actual = stats.of(stat).skill_master
                         self.assertEqual(master, actual)
 
@@ -160,5 +160,5 @@ class UnitUDTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    loader = load_folder(Path('masterdata'))
+    loader = load_folder(Path('cache'))
     unittest.main()
