@@ -1,5 +1,6 @@
 from pathlib import Path
 from PIL import ImageOps
+from .master_data import MasterData
 import urllib.request
 import tempfile
 import unitypack
@@ -15,7 +16,8 @@ class Environment:
     def dlc_url_base(self):
         return "/{0}".format("2018")  # Application.unityVersion.Split('.')[0])
 
-    def __init__(self, review_app_connect=False):
+    def __init__(self, paths: dict = None, review_app_connect=False):
+        self.paths = paths
         self.label = "review" if review_app_connect else "production"
 
         self.server_url = "https://{}.gu3.jp/".format(
@@ -31,24 +33,18 @@ class Environment:
             "windows"
         )
 
-    def download_asset(self, asset_type, asset_id):
+    def _download_asset(self, asset_type, asset_id):
         url = f"{self.dlc_path}{asset_type}/{asset_id}"
         return urllib.request.urlopen(url).read()
 
-    def save_asset_bundle(self, bundle: dict, ab_name: str, target_dir: Path):
-        """Save an unity3d asset bundle without conversions"""
+    def save_master_data(self, res: MasterData, out: Path):
+        key = f'MasterData/{res.name}'
+        bundle = self.paths['AssetBundle'][key]
         if not bundle:
-            raise ValueError(ab_name + " has empty bundle")
+            raise ValueError(res)
 
-        download_fn = bundle[0]
-        target_fn = '_'.join(ab_name.split('/')[1:])
-        target_fn = target_fn + '.' + download_fn.split('.')[-1]
-        target_fp = target_dir / target_fn
-
-        # FIXME no printing in API calls.
-        print(f'Saving "{ab_name}" to "{target_fp}"...')
-        with target_fp.open(mode='wb') as fd:
-            fd.write(self.download_asset('ab', download_fn))
+        with out.open(mode='wb') as fd:
+            fd.write(self._download_asset('ab', bundle[0]))
 
     def save_streaming_asset(
             self,
@@ -70,7 +66,7 @@ class Environment:
         # FIXME no printing in API calls.
         print(f'Saving "{key}" to "{target_fp}"...')
         with target_fp.open(mode='wb') as fd:
-            fd.write(self.download_asset('sa', download_fn))
+            fd.write(self._download_asset('sa', download_fn))
 
     def save_asset_icon(
             self, fn: str, icon_path: Path, skip_existing: bool = True):
@@ -79,7 +75,7 @@ class Environment:
             return
         print(f'Saving {fn} to {icon_path}...')
         with tempfile.TemporaryFile() as fp:
-            fp.write(self.download_asset('ab', fn))
+            fp.write(self._download_asset('ab', fn))
             fp.seek(0)
             pack = unitypack.load(fp)
         data = pack.assets[0].objects[2].read()

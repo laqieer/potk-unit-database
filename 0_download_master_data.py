@@ -3,11 +3,10 @@
 # (Stats caps, skills, etc).
 #
 # Takes the paths.json file as an argument.
-# Saves all files to the current working directory.
-
+# Saves the downloaded assets into ./cache/
 from pathlib import Path
 from potk_unit_extractor.api import Environment
-from potk_unit_extractor.master_data import KNOWN_MASTER_DATA
+from potk_unit_extractor.master_data import MasterDataRepo, MasterData
 import json
 import shutil
 
@@ -17,15 +16,17 @@ def main(paths_fp):
     with open(paths_fp, mode='rb') as fd:
         paths = json.load(fd)
     print("File loaded successfully")
-    asset_bundle: dict = paths['AssetBundle']
-    env = Environment(True)
-    target = Path('.', 'bundles')
-    shutil.rmtree(target, ignore_errors=True)
-    target.mkdir()
+    env = Environment(paths, True)
 
-    for md in KNOWN_MASTER_DATA:
-        name = "MasterData/" + md.name
-        env.save_asset_bundle(asset_bundle[name], name, target)
+    root_path = Path('.', 'cache')
+    if root_path.exists():  # FIXME Ask for forgiveness
+        shutil.rmtree(root_path)
+    repo = MasterDataRepo(root_path)
+
+    for md in MasterData:
+        md_path = repo.path_of(md)
+        print(f'Saving {md.name} to {md_path}...')
+        env.save_master_data(res=md, out=md_path)
 
     print('All files downloaded')
 

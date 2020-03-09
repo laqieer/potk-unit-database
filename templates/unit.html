@@ -82,13 +82,13 @@
 			</p>
 		</div>
 		{% endif %}
-		{% if not unit.has_cc() %}
+		{% if not unit.cc %}
 		{{- macros.unit_stats_tab_pane('main', unit.stats, False) -}}
 		{% else %}
 		<div id="cc-info">
 			<ul class="nav nav-pills mb-3" role="tablist">
 				{% for cc_type in ClassChangeType %}
-				{% if unit.has_cc(cc_type) %}
+				{% if cc_type in unit.cc %}
 				<li class="nav-item">
 					<a class="nav-link{% if loop.first %} active{% endif %}"
 					   role="tab"
@@ -102,11 +102,11 @@
 			</ul>
 			<div class="tab-content">
 				{% for cc_type in ClassChangeType %}
-				{% if unit.has_cc(cc_type) %}
+				{% if cc_type in unit.cc %}
 				<div id="cc-tab-{{cc_type.name}}"
 					 class="tab-pane fade{% if loop.first %} active show{% endif %}"
 					 role="tabpanel">
-					{% set stats = unit.get_cc(cc_type).stats %}
+					{% set stats = unit.cc_stats(cc_type) %}
 					{{- macros.unit_stats_tab_pane(cc_type.name, stats, True) -}}
 				</div>
 				{% endif %}
@@ -187,44 +187,62 @@
 	<div id="skills-info">
 		<h2>Skills</h2>
 
-		{% if unit.ovk_skill %}
+		{% if unit.skills.ovk %}
 		<h3 class="text-muted">Overkiller Skill</h3>
-		{{- macros.unit_skill(unit.ovk_skill.skill, '..', req_dv=unit.ovk_skill.req_dv) -}}
+		<div class="mb-3">
+			{{- macros.unit_skill(unit.skills.ovk.skill, '..', req_dv=unit.skills.ovk.req_dv) -}}
+		</div>
 		{% endif %}
 
-		{% if unit.relationship_skill %}
+		{% if unit.skills.relationship %}
 		<h3 class="text-muted">
 			Relationship Skill <br/>
 			<small>Unlocked by improving relationship (a.k.a. RS/TS/GS)</small>
 		</h3>
-		{{- macros.unit_skill(unit.relationship_skill, '..') -}}
+		<div class="mb-3">
+			{{- macros.unit_skill(unit.skills.relationship, '..') -}}
+		</div>
 		{% endif %}
 
-		{% if unit.leader_skill %}
+		{% if unit.skills.leader %}
 		<h3 class="text-muted">Leader Skill</h3>
-		{{- macros.unit_skill(unit.leader_skill, '..') -}}
+		<div class="mb-3">
+			{{- macros.unit_skill(unit.skills.leader, '..') -}}
+		</div>
 		{% endif %}
 
-		{% if unit.intimate_skill %}
+		{% if unit.skills.intimate %}
 		<h3 class="text-muted">
 			Multi Skill <br/>
 			<small>Unlocked by raising intimacy with other units</small>
 		</h3>
-		{{- macros.unit_skill(unit.intimate_skill, '..') -}}
+		<div class="mb-3">
+			{{- macros.unit_skill(unit.skills.intimate, '..') -}}
+		</div>
 		{% endif %}
 
-		{% if unit.type_skills %}
+		{% if unit.skills.types %}
 		<h3 class="text-muted">Type Skills</h3>
 		<div id="type-skills">
-			{% for type, skill in unit.type_skills.items() %}
-			{{- macros.unit_skill(skill, '..', type) -}}
+			{% for type, skill in unit.skills.types.items() %}
+			<div class="mb-3">
+				{{- macros.unit_skill(skill, '..', type) -}}
+			</div>
 			{% endfor %}
 		</div>
 		{% endif %}
 
 		<h3 class="text-muted">Common Skills</h3>
-		{% for skill in unit.skills %}
-		{{- macros.unit_skill(skill, '..') -}}
+		{% for skill in unit.skills.basic %}
+		<div class="mb-3">
+			{% if skill in unit.skills.evolutions %}
+			{##}{% set evo = unit.skills.evolutions[skill] %}
+			{##}{{- macros.unit_skill(skill, '..') -}}
+			{##}{{- macros.unit_skill(evo.to_skill, '..', req_lv=evo.req_level) -}}
+			{% else %}
+			{##}{{- macros.unit_skill(skill, '..') -}}
+			{% endif %}
+		</div>
 		{% endfor %}
 	</div>
 </div>

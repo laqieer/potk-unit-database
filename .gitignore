@@ -1,7 +1,5 @@
 **/.idea/
 **/*.pyc
-bundles/
-masterdata/
+cache/
 site/
 paths.json
-composed.json

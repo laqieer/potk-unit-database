@@ -1,4 +1,4 @@
-from potk_unit_extractor.model import UnitTagKind, UnitTagDesc
+from .model import UnitTagKind, UnitTagDesc
 
 TAGS = {
     (UnitTagKind.LARGE, 2):
@@ -270,6 +270,3 @@ TAGS = {
             description="Units from Ancient Killers Generation",
         ),
 }
-
-# TODO Load from a yaml file?
-SKILLS = {}
