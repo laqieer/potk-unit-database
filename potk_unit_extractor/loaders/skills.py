@@ -59,27 +59,23 @@ class SkillsRepo:
     @lru_cache(maxsize=None)
     def skills_of(self, unit_id: int) -> UnitSkills:
         unit = self._units[unit_id]
-        base_skills = self._base_skills(unit.ID)
         evolutions = {s.from_skill: s for s in self._evolutions[unit.ID]}
+        native = self._list_skills(unit_id, self._unit_skill)
         return UnitSkills(
             relationship=self._find_skill(unit.same_id, self._unit_rs),
             leader=self._find_skill(unit.ID, self._unit_ls),
-            intimate=(self._find_skill(unit.ID, self._unit_is)
-                      or self._find_skill(unit.char_id, self._unit_hq)),
-            types={s.unit_type: s for s in base_skills if s.unit_type},
+            intimate=self._find_skill(unit.ID, self._unit_is),
+            harmony=self._find_skill(unit.char_id, self._unit_hq),
+            types={s.unit_type: s for s in native if s.unit_type},
             evolutions=evolutions,
-            basic=tuple(sorted(s for s in base_skills if not s.unit_type)),
+            cq=tuple(sorted(self._list_skills(unit_id, self._unit_cq))),
+            native=tuple(sorted(s for s in native if not s.unit_type)),
             ovk=self._ovk_skills.get(unit.same_id) if unit.has_ovk else None
         )
 
-    def _base_skills(self, unit_id: int) -> List[Skill]:
-        skill_ids = []
-        for links in [self._unit_skill, self._unit_cq]:
-            if unit_id in links:
-                skill_ids += [
-                    link['skill_BattleskillSkill'] for link in links[unit_id]
-                ]
-        return [self._skills[i] for i in skill_ids]
+    def _list_skills(self, key: int, index: dict) -> List[Skill]:
+        return [self._skills[link['skill_BattleskillSkill']]
+                for link in index[key]]
 
     def _find_skill(self, key: int, index: dict) -> Optional[Skill]:
         if key not in index:

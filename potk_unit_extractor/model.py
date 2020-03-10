@@ -5,6 +5,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from functools import lru_cache, cached_property
+from itertools import chain
 from typing import List, Optional, Dict, Tuple
 
 DV_CAP = 99
@@ -472,11 +473,21 @@ class ClassChangeType(IntEnum):
 class UnitSkills:
     relationship: Optional[Skill]
     leader: Optional[Skill]
-    intimate: Optional[Skill]
+    intimate: Optional[Skill]  # Multi DS
+    harmony: Optional[Skill]  # Multi DS that requires CQ.
     types: Dict[UnitType, Skill]
     evolutions: Dict[Skill, SkillEvo]
-    basic: Tuple[Skill]
+    cq: Tuple[Skill]
+    native: Tuple[Skill]
     ovk: Optional[OvkSkill]
+
+    @cached_property
+    def basic(self) -> Tuple[Skill]:
+        return tuple(chain(iter(self.cq), iter(self.native)))
+
+    @cached_property
+    def multi_skill(self) -> Optional[Skill]:
+        return self.intimate or self.harmony
 
 
 @dataclass

@@ -69,7 +69,7 @@
 </a>
 {% endmacro %}
 
-{% macro unit_skill(skill, cd_root, type=None, req_dv=0, req_lv=0) %}
+{% macro unit_skill(skill, cd_root, type=None, req_dv=0, req_lv=0, need_cq=False) %}
 <div class="card">
 	<div class="card-header font-weight-bold {% if req_lv %} bg-transparent {% endif %} ">
 		<div class="row">
@@ -102,12 +102,13 @@
 					{{ jp_types[type] }}&nbsp;{{ type.name }}
 				</span>
 				{% endif %}
-				{# TODO Use contextual badges #}
+				{% if need_cq %}
+				<span class="badge badge-info">CQ</span>
+				{% endif %}
 				<span class="badge badge-secondary">{{ skill.type.name | title }}</span>
 			</div>
 			<div class="col text-right">
 				{% for genre in skill.genres %}
-				{# TODO Use contextual badges #}
 				<span class="badge badge-primary">{{ genre.name | title }}</span>
 				{% endfor %}
 			</div>
