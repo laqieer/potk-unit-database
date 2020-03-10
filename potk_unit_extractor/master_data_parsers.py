@@ -249,6 +249,13 @@ def parse_unit_cq(reader: MasterDataReader, item: dict):
     item['skill_after_evolution'] = reader.ReadInt()
 
 
+def parse_unit_hq(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['character_UnitCharacter'] = reader.ReadInt()
+    item['character_quest_QuestHarmonyS'] = reader.ReadInt()
+    item['skill_BattleskillSkill'] = reader.ReadInt()
+
+
 def parse_unit_skill_link(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['unit_UnitUnit'] = reader.ReadInt()

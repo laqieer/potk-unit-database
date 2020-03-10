@@ -3,19 +3,10 @@ import math
 from functools import lru_cache
 from typing import Dict
 
+from . import UnitMetadata
 from .jobs import JobsRepo
 from ..master_data import MasterDataRepo, MasterData
 from ..model import UnitStats, Stat, StatType, UnitType, UD, Stats, Level
-
-
-class UnitMetadata:
-    def __init__(self, unit_dict: dict):
-        self.ID: int = unit_dict['ID']
-        self.job_id: int = unit_dict['job_UnitJob']
-        self.rarity: int = unit_dict['rarity_UnitRarity']
-        self.is_awake: bool = 1 == unit_dict['awake_unit_flag']
-        self.ud_id: int = unit_dict[
-            'compose_max_unity_value_setting_id_ComposeMaxUnityValueSetting']
 
 
 class StatsRepo:

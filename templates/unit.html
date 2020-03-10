@@ -211,13 +211,14 @@
 		</div>
 		{% endif %}
 
-		{% if unit.skills.intimate %}
+		{% if unit.skills.multi_skill %}
 		<h3 class="text-muted">
 			Multi Skill <br/>
 			<small>Unlocked by raising intimacy with other units</small>
 		</h3>
 		<div class="mb-3">
-			{{- macros.unit_skill(unit.skills.intimate, '..') -}}
+			{% set mds = unit.skills.multi_skill %}
+			{{- macros.unit_skill(mds, '..', need_cq=(mds == unit.skills.harmony)) -}}
 		</div>
 		{% endif %}
 
@@ -237,10 +238,10 @@
 		<div class="mb-3">
 			{% if skill in unit.skills.evolutions %}
 			{##}{% set evo = unit.skills.evolutions[skill] %}
-			{##}{{- macros.unit_skill(skill, '..') -}}
+			{##}{{- macros.unit_skill(evo.from_skill, '..') -}}
 			{##}{{- macros.unit_skill(evo.to_skill, '..', req_lv=evo.req_level) -}}
 			{% else %}
-			{##}{{- macros.unit_skill(skill, '..') -}}
+			{##}{{- macros.unit_skill(skill, '..', need_cq=(skill in unit.skills.cq)) -}}
 			{% endif %}
 		</div>
 		{% endfor %}
