@@ -22,6 +22,7 @@ class MasterData(Enum):
     UnitSkill = (auto(), parse_unit_skill)
     UnitLeaderSkill = (auto(), parse_unit_skill_link)
     UnitSkillCharacterQuest = (auto(), parse_unit_cq)
+    UnitSkillHarmonyQuest = (auto(), parse_unit_hq)
     UnitSkillAwake = (auto(), parse_unit_rs)
     UnitSkillIntimate = (auto(), parse_unit_skill_link)
     UnitSkillEvolution = (auto(), parse_unit_skill_evo)

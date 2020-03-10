@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 from functools import lru_cache, cached_property
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
+from . import UnitMetadata
 from ..master_data import MasterDataRepo, MasterData
 from ..model import Skill, SkillType, SkillDesc, SkillGenre, SkillTarget, \
     Element, SkillEvo, UnitSkills, OvkSkill
@@ -10,6 +11,11 @@ from ..model import Skill, SkillType, SkillDesc, SkillGenre, SkillTarget, \
 
 class SkillsRepo:
     def __init__(self, repo: MasterDataRepo):
+        self._units: Dict[int, UnitMetadata] = {
+            u.ID: u
+            for u in map(UnitMetadata, repo.read(MasterData.UnitUnit))
+        }
+
         self._skills = {
             skill.ID: skill
             for skill in (
@@ -39,6 +45,9 @@ class SkillsRepo:
             key='unit_UnitUnit', res=MasterData.UnitLeaderSkill)
         self._unit_cq = repo.group_by(
             key='unit_UnitUnit', res=MasterData.UnitSkillCharacterQuest)
+        self._unit_hq = repo.index(
+            key='character_UnitCharacter',
+            res=MasterData.UnitSkillHarmonyQuest)
         self._unit_is = repo.index(
             key='unit_UnitUnit', res=MasterData.UnitSkillIntimate)
 
@@ -48,17 +57,19 @@ class SkillsRepo:
         return tuple(skills)
 
     @lru_cache(maxsize=None)
-    def skills_of(self, unit_id: int, same_ch_id: int, ovk: bool) -> UnitSkills:
-        base_skills = self._base_skills(unit_id)
-        evolutions = {s.from_skill: s for s in self._evolutions[unit_id]}
+    def skills_of(self, unit_id: int) -> UnitSkills:
+        unit = self._units[unit_id]
+        base_skills = self._base_skills(unit.ID)
+        evolutions = {s.from_skill: s for s in self._evolutions[unit.ID]}
         return UnitSkills(
-            relationship=self._find_skill(same_ch_id, self._unit_rs),
-            leader=self._find_skill(unit_id, self._unit_ls),
-            intimate=self._find_skill(unit_id, self._unit_is),
+            relationship=self._find_skill(unit.same_id, self._unit_rs),
+            leader=self._find_skill(unit.ID, self._unit_ls),
+            intimate=(self._find_skill(unit.ID, self._unit_is)
+                      or self._find_skill(unit.char_id, self._unit_hq)),
             types={s.unit_type: s for s in base_skills if s.unit_type},
             evolutions=evolutions,
             basic=tuple(sorted(s for s in base_skills if not s.unit_type)),
-            ovk=self._ovk_skills.get(same_ch_id) if ovk else None
+            ovk=self._ovk_skills.get(unit.same_id) if unit.has_ovk else None
         )
 
     def _base_skills(self, unit_id: int) -> List[Skill]:

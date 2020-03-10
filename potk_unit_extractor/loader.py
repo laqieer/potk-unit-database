@@ -62,13 +62,11 @@ class Loader:
 
     def load_unit(self, unit_id: int) -> UnitData:
         unit = self.units[unit_id]
-        same_ch_id = unit['same_character_id']
-        has_ovk = unit['exist_overkillers_skill']
-        skills = self.skills_repo.skills_of(unit_id, same_ch_id, has_ovk)
+        skills = self.skills_repo.skills_of(unit_id)
 
         return UnitData(
             ID=unit_id,
-            same_character_id=same_ch_id,
+            same_character_id=unit['same_character_id'],
             character_id=unit['character_UnitCharacter'],
             resource_id=unit['resource_reference_unit_id_UnitUnit'],
             jp_name=unit['name'],
