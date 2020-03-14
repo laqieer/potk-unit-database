@@ -15,46 +15,7 @@
 <body>
 {% import 'macros.html' as macros with context %}
 <div class="container">
-	<nav id="top-nav-bar" class="navbar navbar-expand-lg navbar-light bg-light mb-3">
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-		<a class="navbar-brand mr-0 mr-sm-3" href="#">PotK Unit Database</a>
-		<div class="collapse navbar-collapse" id="navbarNav">
-			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-				<li class="nav-item active">
-					<a class="nav-link" href="#">Main</a>
-				</li>
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Weapon
-						Types</a>
-					<div class="dropdown-menu">
-						{% for weapon in weapons %}
-						<a class="dropdown-item" href="weapons/{{weapon.value}}.html">
-							{{- weapon.name | title -}}
-						</a>
-						{% endfor %}
-					</div>
-				</li>
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Elements</a>
-					<div class="dropdown-menu">
-						{% for el in elements %}
-						<a class="dropdown-item" href="elements/{{el.value}}.html">
-							{{- el.name | title -}}
-						</a>
-						{% endfor %}
-					</div>
-				</li>
-			</ul>
-		</div>
-		<div class="mt-2 mt-sm-0">
-			<a href="https://discord.gg/5JrCu3K" rel="noreferrer noopener" target="_blank">
-				<small class="d-none d-lg-inline">Join our Discord</small>
-				<img height="35" src="./images/etc/discord-logo.svg">
-			</a>
-		</div>
-	</nav>
+	{{ macros.nav_bar(cd_root='.', active='Main') }}
 	<div id="title-about-row" class="row mb-3 d-none d-sm-block">
 		<div class="col">
 			<h1>PotK Unit Database</h1>
@@ -86,7 +47,7 @@
 		<div class="col">
 			<div id="unit-list" class="list-group">
 				{% for unit in units %}
-				{{- macros.unit_link(unit, True, '.') -}}
+				{{- macros.unit_link(unit, hidden=True, cd_root='.') -}}
 				{% endfor %}
 			</div>
 		</div>

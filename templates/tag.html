@@ -11,13 +11,7 @@
 <body>
 {% import 'macros.html' as macros with context %}
 <div class="container">
-	<div class="breadcrumb">
-		<h5>
-			<a class="breadcrumb-link" href="..">Main</a>
-			<span class="breadcrumb-gt">&gt;</span>
-			<span class="breadcrumb-child">{{ tag.desc.name }}</span>
-		</h5>
-	</div>
+	{{ macros.nav_bar(cd_root='..', active='') }}
 	<h1>
 		{{ tag.desc.name }}<br/>
 		<small class="text-muted">{{ tag.desc.short_label_name }}</small><br/>
@@ -35,7 +29,7 @@
 	</dl>
 	<div id="unit-list" class="list-group">
 		{% for unit in units %}
-		{{- macros.unit_link(unit, False, '..') -}}
+		{{- macros.unit_link(unit, hidden=False, cd_root='..') -}}
 		{% endfor %}
 	</div>
 </div>
