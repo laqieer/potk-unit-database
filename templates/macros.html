@@ -162,3 +162,59 @@
 	</div>
 </div>
 {% endmacro %}
+
+{% macro about_text() %}
+<p>
+	This is a fan-made database of playable units in the
+	<a href="https://pk.fg-games.co.jp">Phantom of the Kill Japanese Server</a>.
+</p>
+<p>
+	Here you can see units stats, skills, and more. If you have any questions, suggestions, or want
+	to report any errors,
+	<a href="https://discord.gg/5JrCu3K" rel="noreferrer noopener" target="_blank">Join our Discord
+		Server</a>.
+</p>
+{% endmacro %}
+
+{% macro nav_bar(cd_root, active) %}
+<nav id="top-nav-bar" class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<a class="navbar-brand mr-0 mr-sm-3" href="{{cd_root}}/#">PotK Unit Database</a>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+			<li class="nav-item {% if active == 'Main' %} active {% endif %}">
+				<a class="nav-link" href="{{cd_root}}/#">Main</a>
+			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Weapon
+					Types</a>
+				<div class="dropdown-menu">
+					{% for weapon in weapons %}
+					<a class="dropdown-item" href="{{cd_root}}/weapons/{{weapon.value}}.html">
+						{{- weapon.name | title -}}
+					</a>
+					{% endfor %}
+				</div>
+			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Elements</a>
+				<div class="dropdown-menu">
+					{% for el in elements %}
+					<a class="dropdown-item" href="{{cd_root}}/elements/{{el.value}}.html">
+						{{- el.name | title -}}
+					</a>
+					{% endfor %}
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="mt-2 mt-sm-0">
+		<a href="https://discord.gg/5JrCu3K" rel="noreferrer noopener" target="_blank">
+			<small class="d-none d-lg-inline">Join our Discord</small>
+			<img height="35" src="{{cd_root}}/images/etc/discord-logo.svg">
+		</a>
+	</div>
+</nav>
+{% endmacro %}

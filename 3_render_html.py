@@ -33,6 +33,7 @@ def group_units(units: list, key: callable) -> dict:
 
 
 def main(unit_ids: list):
+    print('Loading Units...')
     loader = load_folder(Path('cache'))
     env = Environment(
         loader=FileSystemLoader('templates'),
@@ -98,32 +99,42 @@ def main(unit_ids: list):
     }
 
     if unit_ids:
-        generator = (loader.load_unit(int(u)) for u in unit_ids)
+        units = [loader.load_unit(int(u)) for u in unit_ids]
     else:
-        generator = loader.load_playable_units()
+        units = list(loader.load_playable_units())
+
+    print(f'Loaded {len(units)} units successfully')
+
+    units_by_tag = group_units(units, key=lambda u: u.tags)
+    units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
+    units_by_element = group_units(units, key=lambda u: u.element)
+
+    shared_args = {
+        'StatType':        StatType,
+        'UnitType':        UnitType,
+        'ClassChangeType': ClassChangeType,
+        'stars':           stars,
+        'jp_types':        jp_types,
+        'jp_stats':        jp_stats,
+        'cc_desc':         cc_desc,
+        'badge_tag':       badge_tag,
+        'badge_element':   badge_element,
+        'tags':            sorted(units_by_tag.keys()),
+        'weapons':         sorted(units_by_weapon.keys()),
+        'elements':        sorted(units_by_element.keys()),
+    }
 
     # Templates units pages
-    units = []
-    for unit in generator:
-        units.append(unit)
+    for unit in units:
         output_path = units_path / f'{unit.ID}.html'
         print(output_path)
         with output_path.open(mode='w', encoding='utf8') as fp:
             env.get_template('unit.html').stream(
                 unit=unit,
-                StatType=StatType,
-                UnitType=UnitType,
-                ClassChangeType=ClassChangeType,
-                stars=stars,
-                jp_types=jp_types,
-                jp_stats=jp_stats,
-                cc_desc=cc_desc,
-                badge_tag=badge_tag,
-                badge_element=badge_element,
+                **shared_args,
             ).dump(fp)
 
     # Templates units tags
-    units_by_tag = group_units(units, key=lambda u: u.tags)
     for tag, tag_units in units_by_tag.items():
         tag_units.sort(key=unit_sort_key)
         output_path = tags_path / f'{tag.uid}.html'
@@ -133,8 +144,7 @@ def main(unit_ids: list):
                 tag=tag,
                 units=tag_units,
                 total=len(tag_units),
-                stars=stars,
-                badge_tag=badge_tag,
+                **shared_args,
             ).dump(fp)
 
     generic_list_template = env.get_template('generic-unit-list.html')
@@ -151,16 +161,13 @@ def main(unit_ids: list):
                     page_title=k.name,
                     total=len(k_units),
                     units=k_units,
-                    stars=stars,
-                    badge_tag=badge_tag,
+                    **shared_args,
                 ).dump(fp)
         pass
 
     # Templates units weapons
-    units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
     render_generic_template(units_by_weapon, 'weapons')
     # Templates units elements
-    units_by_element = group_units(units, key=lambda u: u.element)
     render_generic_template(units_by_element, 'elements')
 
     # Templates index page
@@ -171,12 +178,7 @@ def main(unit_ids: list):
         env.get_template('index.html').stream(
             units=units,
             total=len(units),
-            tags=sorted(units_by_tag.keys()),
-            weapons=sorted(units_by_weapon.keys()),
-            elements=sorted(units_by_element.keys()),
-            stars=stars,
-            badge_tag=badge_tag,
-            badge_element=badge_element,
+            **shared_args,
         ).dump(fp)
 
 
