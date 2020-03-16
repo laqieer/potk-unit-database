@@ -82,6 +82,7 @@ def main(site_path: str, api_key: str, dry_run: bool):
     if dry_run:
         for fn, new_md5 in sorted(changed):
             click.echo(f'[DRY-RUN] Upload {fn}')
+        click.echo(f'[DRY-RUN] Uploaded {len(changed)} files')
         return
 
     uploader = Uploader(base_url='https://neocities.org/', api_key=api_key)
