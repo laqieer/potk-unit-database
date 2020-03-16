@@ -43,6 +43,7 @@ def main(unit_ids: list):
     )
 
     site_path = Path('site')
+    site_path.mkdir(exist_ok=True)
     units_path = site_path / 'units'
     units_path.mkdir(exist_ok=True)
     tags_path = site_path / 'tags'
@@ -109,7 +110,7 @@ def main(unit_ids: list):
     units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
     units_by_element = group_units(units, key=lambda u: u.element)
 
-    shared_args = {
+    template_shared_args = {
         'StatType':        StatType,
         'UnitType':        UnitType,
         'ClassChangeType': ClassChangeType,
@@ -124,14 +125,20 @@ def main(unit_ids: list):
         'elements':        sorted(units_by_element.keys()),
     }
 
+    open_args = {
+        'mode':     'w',
+        'encoding': 'utf-8',
+        'newline':  '\n',
+    }
+
     # Templates units pages
     for unit in units:
         output_path = units_path / f'{unit.ID}.html'
         print(output_path)
-        with output_path.open(mode='w', encoding='utf8') as fp:
+        with output_path.open(**open_args) as fp:
             env.get_template('unit.html').stream(
                 unit=unit,
-                **shared_args,
+                **template_shared_args,
             ).dump(fp)
 
     # Templates units tags
@@ -139,12 +146,12 @@ def main(unit_ids: list):
         tag_units.sort(key=unit_sort_key)
         output_path = tags_path / f'{tag.uid}.html'
         print(output_path)
-        with output_path.open(mode='w', encoding='utf8') as fp:
+        with output_path.open(**open_args) as fp:
             env.get_template('tag.html').stream(
                 tag=tag,
                 units=tag_units,
                 total=len(tag_units),
-                **shared_args,
+                **template_shared_args,
             ).dump(fp)
 
     generic_list_template = env.get_template('generic-unit-list.html')
@@ -156,12 +163,12 @@ def main(unit_ids: list):
             k_units.sort(key=unit_sort_key)
             out_path = generic_path / f'{k.value}.html'
             print(out_path)
-            with out_path.open(mode='w', encoding='utf8') as fp:
+            with out_path.open(**open_args) as fp:
                 generic_list_template.stream(
                     page_title=k.name,
                     total=len(k_units),
                     units=k_units,
-                    **shared_args,
+                    **template_shared_args,
                 ).dump(fp)
         pass
 
@@ -174,11 +181,11 @@ def main(unit_ids: list):
     units.sort(key=unit_sort_key)
     index_path = site_path / 'index.html'
     print(index_path)
-    with index_path.open(mode='w', encoding='utf8') as fp:
+    with index_path.open(**open_args) as fp:
         env.get_template('index.html').stream(
             units=units,
             total=len(units),
-            **shared_args,
+            **template_shared_args,
         ).dump(fp)
 
 
