@@ -1,9 +1,12 @@
 # -*- coding:utf-8 -*-
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
-    ClassChangeType, UnitTagKind, Element
-from potk_unit_extractor.loader import load_folder
 from pathlib import Path
+from typing import Optional
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from potk_unit_extractor.loader import load_folder
+from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
+    ClassChangeType, UnitTagKind, Element, Skill, SkillType
 
 
 def unit_sort_key(unit):
@@ -30,6 +33,20 @@ def group_units(units: list, key: callable) -> dict:
                 add(item, unit)
 
     return result
+
+
+def get_skill_icon_name(skill: Skill) -> Optional[str]:
+    # CC Skills (ability) are handled on the template.
+    if skill.type == SkillType.LEADER:
+        return 'leader'
+    elif skill.type == SkillType.ITEM:
+        return 'supply'
+    elif skill.type == SkillType.MAGIC:
+        # TODO Use bullet icons
+        return None
+    else:
+        rid = skill.resource_id or skill.ID
+        return f'{rid}'
 
 
 def main(unit_ids: list):
@@ -109,6 +126,8 @@ def main(unit_ids: list):
     units_by_tag = group_units(units, key=lambda u: u.tags)
     units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
     units_by_element = group_units(units, key=lambda u: u.element)
+    skill_icons = {s.ID: get_skill_icon_name(s)
+                   for s in loader.skills_repo.all_skills}
 
     template_shared_args = {
         'StatType':        StatType,
@@ -123,6 +142,7 @@ def main(unit_ids: list):
         'tags':            sorted(units_by_tag.keys()),
         'weapons':         sorted(units_by_weapon.keys()),
         'elements':        sorted(units_by_element.keys()),
+        'skill_icons':     skill_icons,
     }
 
     open_args = {
@@ -170,7 +190,6 @@ def main(unit_ids: list):
                     units=k_units,
                     **template_shared_args,
                 ).dump(fp)
-        pass
 
     # Templates units weapons
     render_generic_template(units_by_weapon, 'weapons')

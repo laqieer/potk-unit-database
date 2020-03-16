@@ -76,8 +76,8 @@
 			<div class="col">
 				{% if is_cc %}
 				<img src="{{ cd_root }}/images/skills/ability.png" style="zoom: 0.75">
-				{% elif skill.skill_icon %}
-				<img src="{{ cd_root }}/images/skills/{{ skill.skill_icon }}.png" style="zoom: 0.75">
+				{% elif skill_icons[skill.ID] %}
+				<img src="{{ cd_root }}/images/skills/{{ skill_icons[skill.ID] }}.png" style="zoom: 0.75">
 				{% endif %}
 			</div>
 			<div class="col p-0 text-center">

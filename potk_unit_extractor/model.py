@@ -369,20 +369,6 @@ class Skill:
             return f'{self.min_range}'
         return f'{self.min_range}-{self.max_range}'
 
-    @cached_property
-    def skill_icon(self) -> Optional[str]:
-        # TODO Handle CC skills?
-        if self.type == SkillType.LEADER:
-            return 'leader'
-        elif self.type == SkillType.ITEM:
-            return 'supply'
-        elif self.type == SkillType.MAGIC:
-            # TODO Use bullet icons
-            return None
-        else:
-            rid = self.resource_id or self.ID
-            return f'{rid}'
-
 
 @dataclass(eq=True, frozen=True, order=True)
 class SkillEvo:
