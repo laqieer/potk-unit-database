@@ -23,7 +23,7 @@ class Loader:
     def __init__(self, repo: MasterDataRepo):
         self.tag_repo = TagRepo(repo)
         self.skills_repo = SkillsRepo(repo)
-        self.job_repo = JobsRepo(repo)
+        self.job_repo = JobsRepo(repo, self.skills_repo)
         self.cc_repo = CCRepo(repo, self.job_repo)
         self.stats_repo = StatsRepo(repo, self.job_repo)
         self.units = repo.index(

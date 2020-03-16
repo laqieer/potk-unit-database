@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from typing import Optional, Tuple, Dict
+from typing import Tuple, Dict
 
+from .skills import SkillsRepo
 from ..master_data import MasterDataRepo, MasterData
-from ..model import UnitJob, UnitJobSkillMasterBonus, StatType
+from ..model import UnitJob, JobCharacteristic, StatType
 
 # Based on JobCharacteristicsLevelmaxBonus Enum.
 JOB_CH_BONUS_TO_STAT = {
@@ -20,14 +21,14 @@ JOB_CH_BONUS_TO_STAT = {
 
 
 class JobsRepo:
-    def __init__(self, repo: MasterDataRepo):
-        self._job_characteristics: Dict[int, UnitJobSkillMasterBonus] = {
-            ch.ID: ch
-            for ch in (
-                self._create_job_bonus(b)
+    def __init__(self, repo: MasterDataRepo, skills: SkillsRepo):
+        self._skills = skills
+        self._job_characteristics: Dict[int, JobCharacteristic] = {
+            js.ID: js
+            for js in (
+                self._create_job_skill(b)
                 for b in repo.read(MasterData.JobCharacteristics)
             )
-            if ch
         }
         self._jobs: Dict[int, UnitJob] = {
             job.ID: job for job in (
@@ -46,11 +47,12 @@ class JobsRepo:
             name=job['name'],
             movement=job['movement'],
             new_cost=job['new_cost'],
-            mastery_bonuses=self._find_bonuses(job['job_characteristics_id']),
+            characteristics=self._find_characteristics(
+                job['job_characteristics_id']),
             **initials
         )
 
-    def _find_bonuses(self, ids_str: str) -> Tuple[UnitJobSkillMasterBonus]:
+    def _find_characteristics(self, ids_str: str) -> Tuple[JobCharacteristic]:
         if not ids_str:
             return tuple()
         return tuple(
@@ -61,14 +63,14 @@ class JobsRepo:
             if i in self._job_characteristics
         )
 
-    @staticmethod
-    def _create_job_bonus(bonus: dict) -> Optional[UnitJobSkillMasterBonus]:
-        raw_stat = bonus['levelmax_bonus_JobCharacteristicsLevelmaxBonus']
+    def _create_job_skill(self, ch: dict) -> JobCharacteristic:
+        raw_stat = ch['levelmax_bonus_JobCharacteristicsLevelmaxBonus']
         stat = JOB_CH_BONUS_TO_STAT.get(raw_stat)
-        if stat is None:
-            return None
-        return UnitJobSkillMasterBonus(
-            ID=bonus['ID'],
+        return JobCharacteristic(
+            ID=ch['ID'],
+            # skill2, when present, is always a hidden stat buff passive.
+            # But these are already mentioned in the first skill description.
+            skill=self._skills.get_skill(ch['skill_BattleskillSkill']),
             stat=stat,
-            plus_value=bonus['levelmax_bonus_value'],
+            plus_value=ch['levelmax_bonus_value'],
         )

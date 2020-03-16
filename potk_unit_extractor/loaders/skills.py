@@ -56,6 +56,9 @@ class SkillsRepo:
         skills: List[Skill] = sorted(self._skills.values())
         return tuple(skills)
 
+    def get_skill(self, skill_id: int) -> Skill:
+        return self._skills[skill_id]
+
     @lru_cache(maxsize=None)
     def skills_of(self, unit_id: int) -> UnitSkills:
         unit = self._units[unit_id]

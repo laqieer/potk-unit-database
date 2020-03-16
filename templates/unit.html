@@ -198,6 +198,21 @@
 		</div>
 		{% endif %}
 
+		{% if unit.cc %}
+		<h3 class="text-muted">Class Change Skills</h3>
+		{% for cc_type, job in unit.sorted_vertex %}
+		<h4 class="text-muted">
+			{{ job.name }} <br class="d-sm-none"/>
+			<small class="badge badge-dark">{{ cc_desc[cc_type] }}</small>
+		</h4>
+		{% for skill in job.skills %}
+		<div class="mb-3">
+			{{- macros.unit_skill(skill, '..', is_cc=True) -}}
+		</div>
+		{% endfor %}
+		{% endfor %}
+		{% endif -%}
+
 		{% if unit.skills.leader %}
 		<h3 class="text-muted">Leader Skill</h3>
 		<div class="mb-3">

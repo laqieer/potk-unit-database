@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from functools import lru_cache, cached_property
 from itertools import chain
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Iterable
 
 DV_CAP = 99
 
@@ -430,8 +430,9 @@ class UnitTag:
 
 
 @dataclass(eq=True, frozen=True)
-class UnitJobSkillMasterBonus:
+class JobCharacteristic:
     ID: int
+    skill: Skill
     stat: StatType
     plus_value: int
 
@@ -441,7 +442,7 @@ class UnitJob:
     ID: int
     name: str
     movement: int
-    mastery_bonuses: Tuple[UnitJobSkillMasterBonus]
+    characteristics: Tuple[JobCharacteristic]
     initial_hp: int
     initial_str: int
     initial_mgc: int
@@ -452,13 +453,17 @@ class UnitJob:
     initial_lck: int
     new_cost: int
 
+    @cached_property
+    def skills(self) -> Tuple[Skill]:
+        return tuple(c.skill for c in self.characteristics)
+
     def get_initial(self, stat_type: StatType) -> int:
         return getattr(self, 'initial_' + stat_type.name.lower())
 
     @lru_cache(maxsize=None)
     def get_skill_master_bonus(self, stat_type: StatType) -> int:
         return sum(mb.plus_value
-                   for mb in self.mastery_bonuses
+                   for mb in self.characteristics
                    if mb.stat == stat_type)
 
 
@@ -548,3 +553,10 @@ class UnitData:
             ]
         self._cache[cc_type] = self.stats.with_job(job, *extra)
         return self._cache[cc_type]
+
+    @cached_property
+    def sorted_vertex(self) -> Tuple[Tuple[ClassChangeType, UnitJob]]:
+        return tuple(sorted(
+            (ct, j) for ct, j in self.cc.items()
+            if ct != ClassChangeType.NORMAL
+        ))

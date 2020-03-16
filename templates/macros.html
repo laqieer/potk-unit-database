@@ -69,12 +69,14 @@
 </a>
 {% endmacro %}
 
-{% macro unit_skill(skill, cd_root, type=None, req_dv=0, req_lv=0, need_cq=False) %}
+{% macro unit_skill(skill, cd_root, type=None, req_dv=0, req_lv=0, need_cq=False, is_cc=False) %}
 <div class="card">
 	<div class="card-header font-weight-bold {% if req_lv %} bg-transparent {% endif %} ">
 		<div class="row">
 			<div class="col">
-				{% if skill.skill_icon %}
+				{% if is_cc %}
+				<img src="{{ cd_root }}/images/skills/ability.png" style="zoom: 0.75">
+				{% elif skill.skill_icon %}
 				<img src="{{ cd_root }}/images/skills/{{ skill.skill_icon }}.png" style="zoom: 0.75">
 				{% endif %}
 			</div>
