@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
@@ -13,25 +14,15 @@ def unit_sort_key(unit):
     return unit.any_name, unit.ID
 
 
-def group_units(units: list, key: callable) -> dict:
-    result = {}
-
-    def add(k, v):
-        if k in result:
-            result[k].append(v)
-        else:
-            result[k] = [v]
-
+def group_units(units: list, key: callable, iter_key: bool = False) -> dict:
+    result = defaultdict(list)
     for unit in units:
         key_val = key(unit)
-        try:
-            iterator = iter(key_val)
-        except TypeError:
-            add(key_val, unit)
+        if iter_key:
+            for item in key_val:
+                result[item].append(unit)
         else:
-            for item in iterator:
-                add(item, unit)
-
+            result[key_val].append(unit)
     return result
 
 
@@ -67,6 +58,8 @@ def main(unit_ids: list):
     tags_path.mkdir(exist_ok=True)
     weapons_path = site_path / 'weapons'
     weapons_path.mkdir(exist_ok=True)
+    skills_path = site_path / 'skills'
+    skills_path.mkdir(exist_ok=True)
 
     stars = {
         # ★☆
@@ -123,11 +116,17 @@ def main(unit_ids: list):
 
     print(f'Loaded {len(units)} units successfully')
 
-    units_by_tag = group_units(units, key=lambda u: u.tags)
+    print(f'Computing groups...')
+    units.sort(key=unit_sort_key)
+    units_by_tag = group_units(units, key=lambda u: u.tags, iter_key=True)
     units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
     units_by_element = group_units(units, key=lambda u: u.element)
     skill_icons = {s.ID: get_skill_icon_name(s)
                    for s in loader.skills_repo.all_skills}
+
+    ovk_units = [unit for unit in units if unit.skills.ovk]
+    ovk_units = group_units(ovk_units, key=lambda u: u.any_name)
+    ovk_units = sorted((name, units) for name, units in ovk_units.items())
 
     template_shared_args = {
         'StatType':        StatType,
@@ -151,21 +150,27 @@ def main(unit_ids: list):
         'newline':  '\n',
     }
 
-    # Templates units pages
+    print(f'Rendering Units to {units_path}')
     for unit in units:
         output_path = units_path / f'{unit.ID}.html'
-        print(output_path)
         with output_path.open(**open_args) as fp:
             env.get_template('unit.html').stream(
                 unit=unit,
                 **template_shared_args,
             ).dump(fp)
 
-    # Templates units tags
+    print(f'Rendering Skills lists to {skills_path}')
+    ovk_path = skills_path / 'overkillers.html'
+    with ovk_path.open(**open_args) as fp:
+        env.get_template('ovk-skill-list.html').stream(
+            unit_groups=ovk_units,
+            **template_shared_args,
+        ).dump(fp)
+
+    print(f'Rendering tags to {tags_path}')
     for tag, tag_units in units_by_tag.items():
         tag_units.sort(key=unit_sort_key)
         output_path = tags_path / f'{tag.uid}.html'
-        print(output_path)
         with output_path.open(**open_args) as fp:
             env.get_template('tag.html').stream(
                 tag=tag,
@@ -179,10 +184,10 @@ def main(unit_ids: list):
     def render_generic_template(unit_map: dict, sub_path: str):
         generic_path = site_path / sub_path
         generic_path.mkdir(exist_ok=True)
+        print(f'Rendering {sub_path.title()} to {generic_path}')
         for k, k_units in unit_map.items():
             k_units.sort(key=unit_sort_key)
             out_path = generic_path / f'{k.value}.html'
-            print(out_path)
             with out_path.open(**open_args) as fp:
                 generic_list_template.stream(
                     page_title=k.name,
@@ -191,21 +196,19 @@ def main(unit_ids: list):
                     **template_shared_args,
                 ).dump(fp)
 
-    # Templates units weapons
     render_generic_template(units_by_weapon, 'weapons')
-    # Templates units elements
     render_generic_template(units_by_element, 'elements')
 
-    # Templates index page
-    units.sort(key=unit_sort_key)
     index_path = site_path / 'index.html'
-    print(index_path)
+    print(f'Rendering {index_path}')
     with index_path.open(**open_args) as fp:
         env.get_template('index.html').stream(
             units=units,
             total=len(units),
             **template_shared_args,
         ).dump(fp)
+
+    print('All pages rendered successfully')
 
 
 if __name__ == '__main__':
