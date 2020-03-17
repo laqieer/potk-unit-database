@@ -1,13 +1,32 @@
 # -*- coding:utf-8 -*-
+import datetime
+import shutil
+import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+import click
+import htmlmin
+from jinja2 import Environment, FileSystemLoader, select_autoescape, Template
 
 from potk_unit_extractor.loader import load_folder
 from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
     ClassChangeType, UnitTagKind, Element, Skill, SkillType
+
+
+class Progress:
+    def __init__(self, total: int):
+        self.total = total
+        self.curr = 0
+        self.last = time.time()
+
+    def inc(self):
+        self.curr += 1
+        now = time.time()
+        if now - self.last > 5:
+            print(f'  {self.curr}/{self.total}')
+            self.last = now
 
 
 def unit_sort_key(unit):
@@ -40,7 +59,20 @@ def get_skill_icon_name(skill: Skill) -> Optional[str]:
         return f'{rid}'
 
 
-def main(unit_ids: list):
+def render(template: Template, out: Path, minify: bool, **render_args):
+    html = template.render(**render_args)
+    if minify:
+        html = htmlmin.minify(html)
+    with out.open(mode='w', encoding='utf-8', newline='\n') as fp:
+        fp.write(html)
+
+
+@click.command()
+@click.option('--minify', is_flag=True, default=False)
+@click.option('--clean', is_flag=True, default=False)
+@click.argument('unit_ids', nargs=-1)
+def main(minify: bool, clean: bool, unit_ids: list):
+    exec_start = datetime.datetime.now()
     print('Loading Units...')
     loader = load_folder(Path('cache'))
     env = Environment(
@@ -52,13 +84,20 @@ def main(unit_ids: list):
 
     site_path = Path('site')
     site_path.mkdir(exist_ok=True)
+
     units_path = site_path / 'units'
-    units_path.mkdir(exist_ok=True)
     tags_path = site_path / 'tags'
-    tags_path.mkdir(exist_ok=True)
-    weapons_path = site_path / 'weapons'
-    weapons_path.mkdir(exist_ok=True)
     skills_path = site_path / 'skills'
+
+    if clean:
+        shutil.rmtree(units_path, ignore_errors=True)
+        shutil.rmtree(tags_path, ignore_errors=True)
+        shutil.rmtree(skills_path, ignore_errors=True)
+        shutil.rmtree(site_path / 'weapons', ignore_errors=True)
+        shutil.rmtree(site_path / 'elements', ignore_errors=True)
+
+    units_path.mkdir(exist_ok=True)
+    tags_path.mkdir(exist_ok=True)
     skills_path.mkdir(exist_ok=True)
 
     stars = {
@@ -144,40 +183,46 @@ def main(unit_ids: list):
         'skill_icons':     skill_icons,
     }
 
-    open_args = {
-        'mode':     'w',
-        'encoding': 'utf-8',
-        'newline':  '\n',
-    }
-
     print(f'Rendering Units to {units_path}')
+    progress = Progress(len(units))
+    unit_template = env.get_template('unit.html')
     for unit in units:
         output_path = units_path / f'{unit.ID}.html'
-        with output_path.open(**open_args) as fp:
-            env.get_template('unit.html').stream(
-                unit=unit,
-                **template_shared_args,
-            ).dump(fp)
+        render(
+            template=unit_template,
+            out=output_path,
+            minify=minify,
+            unit=unit,
+            **template_shared_args,
+        )
+        progress.inc()
 
     print(f'Rendering Skills lists to {skills_path}')
     ovk_path = skills_path / 'overkillers.html'
-    with ovk_path.open(**open_args) as fp:
-        env.get_template('ovk-skill-list.html').stream(
-            unit_groups=ovk_units,
-            **template_shared_args,
-        ).dump(fp)
+    render(
+        template=env.get_template('ovk-skill-list.html'),
+        out=ovk_path,
+        minify=minify,
+        unit_groups=ovk_units,
+        **template_shared_args,
+    )
 
-    print(f'Rendering tags to {tags_path}')
+    print(f'Rendering Tags to {tags_path}')
+    tag_template = env.get_template('tag.html')
+    progress = Progress(len(units_by_tag.items()))
     for tag, tag_units in units_by_tag.items():
         tag_units.sort(key=unit_sort_key)
         output_path = tags_path / f'{tag.uid}.html'
-        with output_path.open(**open_args) as fp:
-            env.get_template('tag.html').stream(
-                tag=tag,
-                units=tag_units,
-                total=len(tag_units),
-                **template_shared_args,
-            ).dump(fp)
+        render(
+            template=tag_template,
+            out=output_path,
+            minify=minify,
+            tag=tag,
+            units=tag_units,
+            total=len(tag_units),
+            **template_shared_args,
+        )
+        progress.inc()
 
     generic_list_template = env.get_template('generic-unit-list.html')
 
@@ -185,33 +230,42 @@ def main(unit_ids: list):
         generic_path = site_path / sub_path
         generic_path.mkdir(exist_ok=True)
         print(f'Rendering {sub_path.title()} to {generic_path}')
+        progress = Progress(len(unit_map.items()))
         for k, k_units in unit_map.items():
             k_units.sort(key=unit_sort_key)
             out_path = generic_path / f'{k.value}.html'
-            with out_path.open(**open_args) as fp:
-                generic_list_template.stream(
-                    page_title=k.name,
-                    total=len(k_units),
-                    units=k_units,
-                    **template_shared_args,
-                ).dump(fp)
+            render(
+                template=generic_list_template,
+                out=out_path,
+                minify=minify,
+                page_title=k.name,
+                total=len(k_units),
+                units=k_units,
+                **template_shared_args,
+            )
+            progress.inc()
 
     render_generic_template(units_by_weapon, 'weapons')
     render_generic_template(units_by_element, 'elements')
 
     index_path = site_path / 'index.html'
     print(f'Rendering {index_path}')
-    with index_path.open(**open_args) as fp:
-        env.get_template('index.html').stream(
-            units=units,
-            total=len(units),
-            **template_shared_args,
-        ).dump(fp)
+    render(
+        template=env.get_template('index.html'),
+        out=index_path,
+        minify=minify,
+        units=units,
+        total=len(units),
+        **template_shared_args,
+    )
 
-    print('All pages rendered successfully')
+    elapsed_time = datetime.datetime.now() - exec_start
+    count_ovk = sum(len(units) for _, units in ovk_units)
+    print(f'\nAll pages rendered successfully in {elapsed_time}')
+    print(f'{len(units)} Units')
+    print(f'{len(units_by_tag.keys())} Tags')
+    print(f'{count_ovk} Overkiller Skills')
 
 
 if __name__ == '__main__':
-    import sys
-
-    main(sys.argv[1:])
+    main()
