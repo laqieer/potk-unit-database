@@ -15,7 +15,7 @@
 	<h1>Overkiller Skills</h1>
 	{% for name, units in unit_groups %}
 	<h2>{{ name | title }}</h2>
-	<table class="table table-bordered table-hover">
+	<table class="table table-bordered">
 		<tbody>
 		{% for unit in units %}
 		{% set ovk = unit.skills.ovk %}
