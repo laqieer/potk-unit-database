@@ -35,6 +35,7 @@ class MasterData(Enum):
     UnitGroupLargeCategory = (auto(), parse_unit_group_category)
     UnitGroupSmallCategory = (auto(), parse_unit_group_category)
     OverkillersSkillRelease = (auto(), parse_ovk_skill_release)
+    AwakeSkillCategory = (auto(), parse_awake_skill_category)
 
     def __init__(self, iid: int, parser: callable):
         self.iid = iid

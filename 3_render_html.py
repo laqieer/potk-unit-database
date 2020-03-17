@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape, Template
 
 from potk_unit_extractor.loader import load_folder
 from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
-    ClassChangeType, UnitTagKind, Element, Skill, SkillType
+    ClassChangeType, UnitTagKind, Element, Skill, SkillType, SkillAwakeCategory
 
 
 class Progress:
@@ -148,6 +148,19 @@ def main(minify: bool, clean: bool, unit_ids: list):
         Element.DARK:    'badge-dark',
     }
 
+    category_desc = {
+        SkillAwakeCategory.TRUST:         'Trust',
+        SkillAwakeCategory.GENERIC_RS:    'Global RS',
+        SkillAwakeCategory.CHAOS_RS:      'Chaos RS',
+        SkillAwakeCategory.HARMONIA_RS:   'Harmonia RS',
+        SkillAwakeCategory.TREISEMA_RS:   'Treisema RS',
+        SkillAwakeCategory.TYRHELM_RS:    'Tyrhelm RS',
+        SkillAwakeCategory.COMMAND_RS:    'Command Gear',
+        SkillAwakeCategory.INTEGRAL_GEAR: 'Integral Gear',
+        SkillAwakeCategory.SCHOOL_GEAR:   'School Gear',
+        SkillAwakeCategory.IMITATE_GEAR:  'Imitate Gear',
+    }
+
     if unit_ids:
         units = [loader.load_unit(int(u)) for u in unit_ids]
     else:
@@ -167,20 +180,33 @@ def main(minify: bool, clean: bool, unit_ids: list):
     ovk_units = group_units(ovk_units, key=lambda u: u.any_name)
     ovk_units = sorted((name, units) for name, units in ovk_units.items())
 
+    rs_units = {
+        c: sorted(
+            (u for u in units
+             if u.rarity == UnitRarityStars.SIX  # FIXME
+             if u.skills.relationship
+             if u.skills.relationship.category == c),
+            key=unit_sort_key
+        )
+        for c in SkillAwakeCategory
+    }
+
     template_shared_args = {
-        'StatType':        StatType,
-        'UnitType':        UnitType,
-        'ClassChangeType': ClassChangeType,
-        'stars':           stars,
-        'jp_types':        jp_types,
-        'jp_stats':        jp_stats,
-        'cc_desc':         cc_desc,
-        'badge_tag':       badge_tag,
-        'badge_element':   badge_element,
-        'tags':            sorted(units_by_tag.keys()),
-        'weapons':         sorted(units_by_weapon.keys()),
-        'elements':        sorted(units_by_element.keys()),
-        'skill_icons':     skill_icons,
+        'StatType':           StatType,
+        'UnitType':           UnitType,
+        'ClassChangeType':    ClassChangeType,
+        'SkillAwakeCategory': SkillAwakeCategory,
+        'stars':              stars,
+        'jp_types':           jp_types,
+        'jp_stats':           jp_stats,
+        'cc_desc':            cc_desc,
+        'category_desc':      category_desc,
+        'badge_tag':          badge_tag,
+        'badge_element':      badge_element,
+        'tags':               sorted(units_by_tag.keys()),
+        'weapons':            sorted(units_by_weapon.keys()),
+        'elements':           sorted(units_by_element.keys()),
+        'skill_icons':        skill_icons,
     }
 
     print(f'Rendering Units to {units_path}')
@@ -198,14 +224,30 @@ def main(minify: bool, clean: bool, unit_ids: list):
         progress.inc()
 
     print(f'Rendering Skills lists to {skills_path}')
+    progress = Progress(len(rs_units.keys()) + 1)
     ovk_path = skills_path / 'overkillers.html'
     render(
         template=env.get_template('ovk-skill-list.html'),
         out=ovk_path,
         minify=minify,
+        cd_root='..',
         unit_groups=ovk_units,
         **template_shared_args,
     )
+    progress.inc()
+    generic_rs_list_template = env.get_template('rs-skill-list.html')
+    for category, cat_units in rs_units.items():
+        cat_path = skills_path / f'{category.name.lower()}.html'
+        render(
+            template=generic_rs_list_template,
+            out=cat_path,
+            minify=minify,
+            cd_root='..',
+            category=category,
+            units=cat_units,
+            **template_shared_args,
+        )
+        progress.inc()
 
     print(f'Rendering Tags to {tags_path}')
     tag_template = env.get_template('tag.html')

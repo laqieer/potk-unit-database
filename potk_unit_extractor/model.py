@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from functools import lru_cache, cached_property
 from itertools import chain
-from typing import List, Optional, Dict, Tuple, Iterable
+from typing import List, Optional, Dict, Tuple, Iterable, Set
 
 DV_CAP = 99
 
@@ -326,6 +326,25 @@ class SkillTarget(IntEnum):
     PANEL_SINGLE = 9
 
 
+class SkillAwakeCategory(IntEnum):
+    # 1 == NONE, NORMAL
+    # 2 == DRESS. Whatever it is, no units seem to have it.
+    TRUST = 3
+    GENERIC_RS = 4
+    CHAOS_RS = 5
+    HARMONIA_RS = 6
+    TREISEMA_RS = 7
+    TYRHELM_RS = 8
+    COMMAND_RS = 9
+    INTEGRAL_GEAR = 10
+    SCHOOL_GEAR = 11
+    IMITATE_GEAR = 12
+
+    @classmethod
+    def all_gear_hack_skill(cls) -> Set[SkillAwakeCategory]:
+        return {c for c in cls} - {cls.TRUST, cls.SCHOOL_GEAR}
+
+
 @dataclass(eq=True, frozen=True, order=True)
 class SkillDesc:
     name: str
@@ -343,6 +362,7 @@ class Skill:
     genres: Tuple[SkillGenre]
     target: SkillTarget
     element: Element
+    category: Optional[SkillAwakeCategory]
     use_count: int
     cooldown_turns: int
     max_use_per_quest: int
@@ -413,6 +433,10 @@ class UnitTag:
     @property
     def uid(self) -> str:
         return f'{self.kind.value}-{self.ID}'
+
+    @property
+    def iid(self) -> Tuple[UnitTagKind, int]:
+        return self.kind, self.ID
 
 
 @dataclass(eq=True, frozen=True)
@@ -496,6 +520,7 @@ class UnitData:
     job: UnitJob
     cost: int
     is_awakened: bool
+    can_equip_all_rs: bool
     stats: UnitStats
     cc: Dict[ClassChangeType, UnitJob]
     tags: Tuple[UnitTag]
@@ -546,3 +571,37 @@ class UnitData:
             (ct, j) for ct, j in self.cc.items()
             if ct != ClassChangeType.NORMAL
         ))
+
+    @cached_property
+    def equipable_categories(self) -> Tuple[SkillAwakeCategory]:
+        cats: Set[SkillAwakeCategory] = set()
+        if self.can_equip_all_rs:
+            cats = cats | SkillAwakeCategory.all_gear_hack_skill()
+
+        tags = {t.iid for t in self.tags}
+        if (UnitTagKind.LARGE, 2) in tags:  # Gaku
+            cats.add(SkillAwakeCategory.SCHOOL_GEAR)
+        if (UnitTagKind.LARGE, 4) in tags:  # PoL
+            cats.add(SkillAwakeCategory.TRUST)
+        if {(UnitTagKind.LARGE, 5), (UnitTagKind.LARGE, 7)} & tags:  # LR/IN
+            cats.add(SkillAwakeCategory.GENERIC_RS)
+        if (UnitTagKind.SMALL, 10) in tags:
+            cats.add(SkillAwakeCategory.HARMONIA_RS)
+        if (UnitTagKind.SMALL, 11) in tags:
+            cats.add(SkillAwakeCategory.CHAOS_RS)
+        if (UnitTagKind.SMALL, 12) in tags:
+            cats.add(SkillAwakeCategory.TREISEMA_RS)
+        if (UnitTagKind.SMALL, 13) in tags:
+            cats.add(SkillAwakeCategory.TYRHELM_RS)
+        if (UnitTagKind.SMALL, 16) in tags:
+            cats.add(SkillAwakeCategory.COMMAND_RS)
+        if (UnitTagKind.SMALL, 17) in tags:
+            cats.add(SkillAwakeCategory.INTEGRAL_GEAR)
+        if (UnitTagKind.SMALL, 18) in tags:
+            cats.add(SkillAwakeCategory.IMITATE_GEAR)
+
+        # Silver tape to deal with SS LR, IN, etc.
+        if SkillAwakeCategory.all_gear_hack_skill() & cats:
+            cats.add(SkillAwakeCategory.GENERIC_RS)
+
+        return tuple(sorted(cats))

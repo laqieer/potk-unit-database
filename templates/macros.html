@@ -214,6 +214,9 @@
 				<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Skills</a>
 				<div class="dropdown-menu">
 					<a class="dropdown-item" href="{{cd_root}}/skills/overkillers.html">Overkillers</a>
+					{% for c in SkillAwakeCategory %}
+					<a class="dropdown-item" href="{{cd_root}}/skills/{{c.name | lower}}.html">{{category_desc[c]}}</a>
+					{% endfor %}
 				</div>
 			</li>
 		</ul>

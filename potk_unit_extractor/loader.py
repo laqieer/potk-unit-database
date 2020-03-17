@@ -78,6 +78,7 @@ class Loader:
             job=self.job_repo.get_job(unit['job_UnitJob']),
             cost=unit['cost'],
             is_awakened=(1 == unit['awake_unit_flag']),
+            can_equip_all_rs=(4 == unit['awake_special_skill_category_id']),
             stats=self.stats_repo.load_stats(unit_id),
             cc=self.cc_repo.unit_cc(unit_id),
             tags=self.tag_repo.tags_of(unit_id),

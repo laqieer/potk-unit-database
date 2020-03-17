@@ -6,7 +6,7 @@ from typing import Optional, List, Tuple, Dict
 from . import UnitMetadata
 from ..master_data import MasterDataRepo, MasterData
 from ..model import Skill, SkillType, SkillDesc, SkillGenre, SkillTarget, \
-    Element, SkillEvo, UnitSkills, OvkSkill
+    Element, SkillEvo, UnitSkills, OvkSkill, SkillAwakeCategory
 
 
 class SkillsRepo:
@@ -88,6 +88,8 @@ class SkillsRepo:
 
     @staticmethod
     def _create_skill(skill: dict) -> Skill:
+        category_id = skill['awake_skill_category_id']
+        category = SkillAwakeCategory(category_id) if category_id > 1 else None
         return Skill(
             type=SkillType(skill['skill_type_BattleskillSkillType']),
             ID=skill['ID'],
@@ -105,6 +107,7 @@ class SkillsRepo:
             )),
             target=SkillTarget(skill['target_type_BattleskillTargetType']),
             element=Element(skill['element_CommonElement']),
+            category=category,
             use_count=skill['use_count'],
             cooldown_turns=skill['charge_turn'],
             max_use_per_quest=skill['max_use_count'],

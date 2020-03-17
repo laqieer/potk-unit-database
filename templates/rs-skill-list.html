@@ -4,21 +4,19 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<title>Overkiller Skills List - PotK Unit Database</title>
-	<meta property="og:title" content="Overkiller Skills List - PotK Unit Database"/>
-	<meta property="og:description" content="Browse all available Overkiller Skills, ordered by unit"/>
+	<title>{{ category_desc[category] }} Skills - PotK Unit Database</title>
+	<meta property="og:title" content="{{ category_desc[category] }} - PotK Unit Database"/>
+	<meta property="og:description" content="Browse all available {{ category_desc[category] }}, ordered by Unit"/>
 </head>
 <body>
 {% import 'macros.html' as macros with context %}
 <div class="container">
 	{{- macros.nav_bar(cd_root='..', active='') -}}
-	<h1>Overkiller Skills</h1>
-	{% for name, units in unit_groups %}
-	<h2>{{ name | title }}</h2>
+	<h1>{{ category_desc[category] }}</h1>
+	<p>Browse all available {{ category_desc[category] }}, ordered by Unit</p>
 	<table class="table table-bordered">
 		<tbody>
 		{% for unit in units %}
-		{% set ovk = unit.skills.ovk %}
 		<tr>
 			<td rowspan="2">
 				<a href="{{cd_root}}/units/{{unit.ID}}.html">
@@ -30,21 +28,16 @@
 				</a>
 			</td>
 			<th class="bg-light text-dark">
-				<img src="{{ cd_root }}/images/skills/{{ skill_icons[ovk.skill.ID] }}.png" style="zoom: 0.75">
-				{{ ovk.skill.jp_desc.name }}
-			</th>
-			<th class="bg-light text-dark">
-				DV
+				<img src="{{ cd_root }}/images/skills/{{ skill_icons[unit.skills.relationship.ID] }}.png" style="zoom: 0.75">
+				{{ unit.skills.relationship.jp_desc.name }}
 			</th>
 		</tr>
 		<tr>
-			<td>{{ ovk.skill.jp_desc.full }}</td>
-			<td>{{ ovk.req_dv }}</td>
+			<td>{{ unit.skills.relationship.jp_desc.full }}</td>
 		</tr>
 		{% endfor %}
 		</tbody>
 	</table>
-	{% endfor %}
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>

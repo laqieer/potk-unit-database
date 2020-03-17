@@ -101,7 +101,7 @@ class UnitCCInitialTest(unittest.TestCase):
     test_ini_cases = [
         # 6* Zwei
         (603013, ClassChangeType.VERTEX1, {
-            StatType.HP: 130,
+            StatType.HP:  130,
             StatType.MGC: 23,
         }),
     ]
@@ -121,7 +121,7 @@ class UnitCCMasterTest(unittest.TestCase):
     test_master_cases = [
         # 6* Zwei
         (603013, ClassChangeType.VERTEX1, {
-            StatType.HP: 100,
+            StatType.HP:  100,
             StatType.TEC: 10,
         }),
     ]
@@ -157,6 +157,67 @@ class UnitUDTest(unittest.TestCase):
                 with self.subTest(unit=unit.h_id, stat=stat):
                     actual_ud = unit.stats.bal.of(stat).ud.max
                     self.assertEqual(expected_ud, actual_ud)
+
+
+class UnitRSTest(unittest.TestCase):
+    cases = [
+        # 6* Zwei (No RS slot)
+        (603013, tuple()),
+        # 4* Ais (DanMachi Collab, All RS).
+        (3104411, SkillAwakeCategory.all_gear_hack_skill()),
+        # 6* Gaku Naegling
+        (100653, (
+            SkillAwakeCategory.SCHOOL_GEAR,
+        )),
+        # 6* SS Naegling
+        (2100613, (
+            SkillAwakeCategory.TRUST,
+        )),
+        # 6* LR Naegling
+        (3100613, (
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.HARMONIA_RS
+        )),
+        # 4* Helena
+        (3302811, (
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.CHAOS_RS,
+        )),
+        # 4* LR Yata no Kagami
+        (3500311, (
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.TREISEMA_RS,
+        )),
+        # 5* CK Suiha
+        (3401712, (
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.COMMAND_RS,
+        )),
+        # 6* SS Chalice
+        (2602513, (
+            SkillAwakeCategory.TRUST,
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.HARMONIA_RS,
+        )),
+        # 4* IK Almace
+        (5103831, (
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.INTEGRAL_GEAR,
+        )),
+        # 6* ImK Suiha
+        (5401723, (
+            SkillAwakeCategory.GENERIC_RS,
+            SkillAwakeCategory.IMITATE_GEAR,
+        )),
+    ]
+
+    def test_expected_rs(self):
+        for u_id, u_rs in self.cases:
+            unit = loader.load_unit(u_id)
+            with self.subTest(unit=unit.h_id):
+                expected = tuple(sorted(u_rs))
+                actual = unit.equipable_categories
+                self.assertEqual(expected, actual)
 
 
 if __name__ == '__main__':

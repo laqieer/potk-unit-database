@@ -336,3 +336,10 @@ def parse_ovk_skill_release(reader: MasterDataReader, item: dict):
     item['ID'] = reader.ReadInt()
     item['unity_value'] = reader.ReadInt()
     item['skill_BattleskillSkill'] = reader.ReadInt()
+
+
+def parse_awake_skill_category(reader: MasterDataReader, item: dict):
+    item['ID'] = reader.ReadInt()
+    item['name'] = reader.ReadString(True)
+    item['description'] = reader.ReadString(True)
+    item['start_at'] = reader.ReadDateTimeOrNull()
