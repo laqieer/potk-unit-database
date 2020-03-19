@@ -70,7 +70,7 @@ def main(paths_fp, ids: list):
     loader = load_folder(Path('cache'))
 
     download_skills(
-        (s.skill_icon for s in loader.skills_repo.all_skills),
+        (s.resource_id or s.ID for s in loader.skills_repo.all_skills),
         env,
         asset_bundle)
 
