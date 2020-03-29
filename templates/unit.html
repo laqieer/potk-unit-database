@@ -212,8 +212,8 @@
 		<h3 class="text-muted">Class Change Skills</h3>
 		{% for cc_type, job in unit.sorted_vertex %}
 		<h4 class="text-muted">
-			{{ job.name }} <br class="d-sm-none"/>
 			<small class="badge badge-dark">{{ cc_desc[cc_type] }}</small>
+			<br class="d-sm-none"/> {{ job.name }}
 		</h4>
 		{% for skill in job.skills %}
 		<div class="mb-3">
