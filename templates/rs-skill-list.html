@@ -6,14 +6,14 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<title>{{ category_desc[category] }} Skills - PotK Unit Database</title>
 	<meta property="og:title" content="{{ category_desc[category] }} - PotK Unit Database"/>
-	<meta property="og:description" content="Browse all available {{ category_desc[category] }}, ordered by Unit"/>
+	<meta property="og:description" content="{{ category_comment[category] }}"/>
 </head>
 <body>
 {% import 'macros.html' as macros with context %}
 <div class="container">
 	{{- macros.nav_bar(cd_root='..', active='') -}}
 	<h1>{{ category_desc[category] }}</h1>
-	<p>Browse all available {{ category_desc[category] }}, ordered by Unit</p>
+	<p>{{ category_comment[category] }}</p>
 	<table class="table table-bordered">
 		<tbody>
 		{% for unit in units %}

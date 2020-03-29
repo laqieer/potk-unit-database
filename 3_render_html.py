@@ -161,6 +161,44 @@ def main(minify: bool, clean: bool, unit_ids: list):
         SkillAwakeCategory.IMITATE_GEAR:  'Imitate Gear',
     }
 
+    category_comment = {
+        SkillAwakeCategory.TRUST:
+            ("Trust Skills are obtained from PoL Units. "
+             "They're not faction locked, and can only be used by PoL Units."),
+        SkillAwakeCategory.GENERIC_RS:
+            ("Global Resonance Skills available to every unit that has an "
+             "RS Slot. Cannot be used by pure PoL Units, but can be used by "
+             "LR PoL units."),
+        SkillAwakeCategory.CHAOS_RS:
+            ("Resonance Skills obtained from Lost Ragnarok units of the "
+             "Chaos Lion Empire faction. "
+             "Can only be use by Special units and Chaos Lion units."),
+        SkillAwakeCategory.HARMONIA_RS:
+            ("Resonance Skills obtained from Lost Ragnarok units of the "
+             "Harmonia Pontificate faction. "
+             "Can only be use by Special units and Harmonia units."),
+        SkillAwakeCategory.TREISEMA_RS:
+            ("Resonance Skills obtained from Lost Ragnarok units of the "
+             "Treisema Republic faction. "
+             "Can only be use by Special units and Treisema units."),
+        SkillAwakeCategory.TYRHELM_RS:
+            ("Resonance Skills obtained from Lost Ragnarok units of the "
+             "Tyrhelm faction. "
+             "Can only be use by Special units and Tyrhelm units."),
+        SkillAwakeCategory.COMMAND_RS:
+            ("Resonance Skills obtained from Command Killers. "
+             "Can only be use by Special units and Command Killers."),
+        SkillAwakeCategory.INTEGRAL_GEAR:
+            ("Gear Skills obtained from Integral Killers. "
+             "Can only be use by Special units and Integral Killers."),
+        SkillAwakeCategory.SCHOOL_GEAR:
+            ("Gear Skills obtained from School Units. "
+             "Can only be use by School Units."),
+        SkillAwakeCategory.IMITATE_GEAR:
+            ("Gear Skills obtained from Imitate Killers. "
+             "Can only be use by Special units and Imitate Killers."),
+    }
+
     if unit_ids:
         units = [loader.load_unit(int(u)) for u in unit_ids]
     else:
@@ -201,6 +239,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
         'jp_stats':           jp_stats,
         'cc_desc':            cc_desc,
         'category_desc':      category_desc,
+        'category_comment':   category_comment,
         'badge_tag':          badge_tag,
         'badge_element':      badge_element,
         'tags':               sorted(units_by_tag.keys()),
