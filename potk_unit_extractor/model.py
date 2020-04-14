@@ -533,7 +533,8 @@ class UnitData:
 
     @cached_property
     def h_id(self) -> str:
-        return f'<{self.ID} {self.rarity.stars} {self.any_name}>'
+        tags = ', '.join(t.desc.short_label_name for t in self.tags if t.desc.name)
+        return f'<{self.ID} {self.rarity.stars} {self.any_name} ({tags})>'
 
     @cached_property
     def short_title(self) -> str:

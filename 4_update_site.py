@@ -1,14 +1,18 @@
 # -*- coding:utf-8 -*-
 import hashlib
 import json
+import re
 from pathlib import Path
-from typing import Tuple, Set
+from typing import Tuple, Set, Optional
 
 import click
 import requests
 
+from potk_unit_extractor.loader import load_folder
+
 CHECKSUMS_FN = 'checksums.json'
-REMOTE_SUMS_URL = 'https://potk-fan-database.neocities.org/' + CHECKSUMS_FN
+REMOTE_SITE = 'https://potk-fan-database.neocities.org'
+REMOTE_SUMS_URL = f'{REMOTE_SITE}/{CHECKSUMS_FN}'
 
 
 class Uploader:
@@ -25,6 +29,26 @@ class Uploader:
         )
         r.raise_for_status()
         return r
+
+
+class UploadNarrator:
+    def __init__(self):
+        self._loader = load_folder(Path('cache'))
+        self._unit_page_re = re.compile('^units/([0-9]+).html$')
+
+    def echo(self, local, remote, is_dry=False, *args, **kwargs):
+        local_desc = self._desc(local)
+        msg = f'Uploading {local_desc} to {REMOTE_SITE}/{remote}... '
+        if is_dry:
+            click.echo(f'[DRY-RUN] {msg}', *args, **kwargs)
+        else:
+            click.echo(msg, *args, **kwargs)
+
+    def _desc(self, fn) -> Optional[str]:
+        m = self._unit_page_re.match(str(fn))
+        if m:
+            return self._loader.load_unit(int(m.group(1))).h_id
+        return str(fn)
 
 
 def compute_local_sums(site_path: Path) -> Set[Tuple[str, str]]:
@@ -79,9 +103,11 @@ def main(site_path: str, api_key: str, dry_run: bool):
         click.echo('Nothing to upload, site is up to date')
         return
 
+    narrator = UploadNarrator()
+
     if dry_run:
         for fn, new_md5 in sorted(changed):
-            click.echo(f'[DRY-RUN] Upload {fn}')
+            narrator.echo(fn, fn, is_dry=True)
         click.echo(f'[DRY-RUN] Uploaded {len(changed)} files')
         return
 
@@ -89,7 +115,7 @@ def main(site_path: str, api_key: str, dry_run: bool):
     for fn, _ in sorted(changed):
         local = site_path / fn
         remote = Path(fn).as_posix()
-        click.echo(f'Uploading {local} to {remote}...  ', nl=False)
+        narrator.echo(local, remote, nl=False)
         r = uploader.upload(local, remote)
         click.echo(f'{r.status_code} {r.json()["result"].upper()}')
 
