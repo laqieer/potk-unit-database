@@ -169,6 +169,8 @@ class UnitRSTest(unittest.TestCase):
         (100653, (
             SkillAwakeCategory.SCHOOL_GEAR,
         )),
+        # 6* CCS Naegling
+        (100663, tuple()),
         # 6* SS Naegling
         (2100613, (
             SkillAwakeCategory.TRUST,

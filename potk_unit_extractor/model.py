@@ -575,6 +575,10 @@ class UnitData:
 
     @cached_property
     def equipable_categories(self) -> Tuple[SkillAwakeCategory]:
+        if not self.skills.relationship:
+            # noinspection PyTypeChecker
+            return ()
+
         cats: Set[SkillAwakeCategory] = set()
         if self.can_equip_all_rs:
             cats = cats | SkillAwakeCategory.all_gear_hack_skill()
