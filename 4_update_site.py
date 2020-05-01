@@ -45,7 +45,7 @@ class UploadNarrator:
             click.echo(msg, *args, **kwargs)
 
     def _desc(self, fn) -> Optional[str]:
-        m = self._unit_page_re.match(str(fn))
+        m = self._unit_page_re.search(str(fn))
         if m:
             return self._loader.load_unit(int(m.group(1))).h_id
         return str(fn)
