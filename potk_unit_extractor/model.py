@@ -3,10 +3,11 @@ from __future__ import annotations
 import math
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import date
 from enum import Enum, IntEnum
 from functools import lru_cache, cached_property
 from itertools import chain
-from typing import List, Optional, Dict, Tuple, Iterable, Set
+from typing import List, Optional, Dict, Tuple, Set
 
 DV_CAP = 99
 
@@ -525,6 +526,7 @@ class UnitData:
     cc: Dict[ClassChangeType, UnitJob]
     tags: Tuple[UnitTag]
     skills: UnitSkills
+    published_at: date
     _cache: dict = field(init=False, default_factory=dict)
 
     @cached_property

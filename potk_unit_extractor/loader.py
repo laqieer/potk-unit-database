@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 from typing import Tuple
 
@@ -57,12 +58,14 @@ class Loader:
         for unit_id in generator:
             unit = self.load_unit(unit_id)
             # Some weird tyr versions are mixed in the fatom range.
-            if unit.element != Element.NONE:
+            # Also exclude a few unreleased (?) units.
+            if unit.element != Element.NONE and unit.published_at.year < 2030:
                 yield unit
 
     def load_unit(self, unit_id: int) -> UnitData:
         unit = self.units[unit_id]
         skills = self.skills_repo.skills_of(unit_id)
+        published_at = datetime.datetime.strptime(unit['published_at'][0:10], '%Y-%m-%d').date()
 
         return UnitData(
             ID=unit_id,
@@ -83,6 +86,7 @@ class Loader:
             cc=self.cc_repo.unit_cc(unit_id),
             tags=self.tag_repo.tags_of(unit_id),
             skills=skills,
+            published_at=published_at,
         )
 
 

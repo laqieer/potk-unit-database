@@ -3,6 +3,7 @@ import datetime
 import shutil
 import time
 from collections import defaultdict
+from operator import attrgetter
 from pathlib import Path
 from typing import Optional
 
@@ -29,8 +30,13 @@ class Progress:
             self.last = now
 
 
-def unit_sort_key(unit):
-    return unit.any_name, unit.ID
+def sort_units(units: list):
+    # Python sorting preserves original order.
+    # Python sorting also is efficient on consecutive sorting.
+    units.sort(key=attrgetter('ID'), reverse=True)
+    units.sort(key=attrgetter('tags', 'any_name'))
+    units.sort(key=attrgetter('published_at'), reverse=True)
+    return units
 
 
 def group_units(units: list, key: callable, iter_key: bool = False) -> dict:
@@ -43,6 +49,12 @@ def group_units(units: list, key: callable, iter_key: bool = False) -> dict:
         else:
             result[key_val].append(unit)
     return result
+
+
+def compute_latest_units(units: list) -> list:
+    last_release = max(u.published_at for u in units)
+    result = [u for u in units if u.published_at == last_release]
+    return sort_units(result)
 
 
 def get_skill_icon_name(skill: Skill) -> Optional[str]:
@@ -207,10 +219,11 @@ def main(minify: bool, clean: bool, unit_ids: list):
     print(f'Loaded {len(units)} units successfully')
 
     print(f'Computing groups...')
-    units.sort(key=unit_sort_key)
+    sort_units(units)
     units_by_tag = group_units(units, key=lambda u: u.tags, iter_key=True)
     units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
     units_by_element = group_units(units, key=lambda u: u.element)
+    latest_units = compute_latest_units(units)
     skill_icons = {s.ID: get_skill_icon_name(s)
                    for s in loader.skills_repo.all_skills}
 
@@ -224,7 +237,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
              if u.rarity == UnitRarityStars.SIX  # FIXME
              if u.skills.relationship
              if u.skills.relationship.category == c),
-            key=unit_sort_key
+            key=attrgetter('any_name', 'ID')
         )
         for c in SkillAwakeCategory
     }
@@ -292,7 +305,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
     tag_template = env.get_template('tag.html')
     progress = Progress(len(units_by_tag.items()))
     for tag, tag_units in units_by_tag.items():
-        tag_units.sort(key=unit_sort_key)
+        sort_units(tag_units)
         output_path = tags_path / f'{tag.uid}.html'
         render(
             template=tag_template,
@@ -313,7 +326,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
         print(f'Rendering {sub_path.title()} to {generic_path}')
         progress = Progress(len(unit_map.items()))
         for k, k_units in unit_map.items():
-            k_units.sort(key=unit_sort_key)
+            sort_units(k_units)
             out_path = generic_path / f'{k.value}.html'
             render(
                 template=generic_list_template,
@@ -336,6 +349,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
         out=index_path,
         minify=minify,
         units=units,
+        latest_units=latest_units,
         total=len(units),
         **template_shared_args,
     )
