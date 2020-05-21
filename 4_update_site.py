@@ -44,11 +44,18 @@ class UploadNarrator:
         else:
             click.echo(msg, *args, **kwargs)
 
-    def _desc(self, fn) -> Optional[str]:
-        m = self._unit_page_re.search(str(fn))
+    def _desc(self, fn) -> str:
+        m = self._unit_page_re.search(self._fn_to_str(fn))
         if m:
             return self._loader.load_unit(int(m.group(1))).h_id
         return str(fn)
+
+    @staticmethod
+    def _fn_to_str(fn) -> str:
+        try:
+            return fn.as_posix()
+        except AttributeError:
+            return str(fn)
 
 
 def compute_local_sums(site_path: Path) -> Set[Tuple[str, str]]:
