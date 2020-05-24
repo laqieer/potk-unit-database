@@ -148,6 +148,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
         UnitTagKind.SMALL:      'badge-warning',
         UnitTagKind.CLOTHING:   'badge-primary',
         UnitTagKind.GENERATION: 'badge-dark',
+        UnitTagKind.CUSTOM:     'badge-success',
     }
 
     badge_element = {

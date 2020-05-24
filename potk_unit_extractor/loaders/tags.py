@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from functools import lru_cache
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Set
 
+from . import UnitMetadata
 from ..master_data import MasterDataRepo, MasterData
-from ..model import UnitTag, UnitTagKind, UnitTagDesc
+from ..model import UnitTag, UnitTagKind, UnitTagDesc, CustomTags
 from ..translations import TAGS
 
 GROUP_FIELD_TAG_KIND = {
@@ -30,20 +31,27 @@ GROUP_RES_TAG_KIND = {
 class TagRepo:
     def __init__(self, repo: MasterDataRepo):
         self._repo = repo
+        self._units: Dict[int, UnitMetadata] = {
+            u.ID: u
+            for u in map(UnitMetadata, repo.read(MasterData.UnitUnit))
+        }
         self._unit_groups = repo.index(key='unit_id', res=MasterData.UnitGroup)
         self._tags: Dict[UnitTagKind, Dict[int, UnitTag]] = {
-            k: self._create_tags(k) for k in UnitTagKind
+            k: self._create_tags(k) for k in GROUP_RES_TAG_KIND
         }
 
     @lru_cache(maxsize=None)
     def tags_of(self, unit_id: int) -> Tuple[UnitTag]:
+        result: Set[UnitTag] = set()
+        if self._units[unit_id].is_awake:
+            result.add(CustomTags.AWAKENED.value)
         group = self._unit_groups.get(unit_id)
-        if not group:
-            return tuple()
-        return tuple(sorted(
-            self._tags[kind][group[field]]
-            for field, kind in GROUP_FIELD_TAG_KIND.items()
-        ))
+        if group:
+            result |= {
+                self._tags[kind][group[field]]
+                for field, kind in GROUP_FIELD_TAG_KIND.items()
+            }
+        return tuple(sorted(result))
 
     def _create_tags(self, kind: UnitTagKind) -> Dict[int, UnitTag]:
         res = GROUP_RES_TAG_KIND[kind]

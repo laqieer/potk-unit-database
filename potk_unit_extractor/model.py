@@ -4,7 +4,7 @@ import math
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, unique
 from functools import lru_cache, cached_property
 from itertools import chain
 from typing import List, Optional, Dict, Tuple, Set
@@ -411,6 +411,7 @@ class UnitTagKind(IntEnum):
     SMALL = 2
     CLOTHING = 3
     GENERATION = 4
+    CUSTOM = 23999  # Does not exists in game
 
 
 @dataclass(eq=True, frozen=True, order=True)
@@ -438,6 +439,21 @@ class UnitTag:
     @property
     def iid(self) -> Tuple[UnitTagKind, int]:
         return self.kind, self.ID
+
+
+@unique
+class CustomTags(Enum):
+    """Custom Unit tags, Not actually tags in game"""
+    AWAKENED = UnitTag(
+        kind=UnitTagKind.CUSTOM,
+        ID=1,
+        # Abusing JP being relied on as default.
+        desc_jp=UnitTagDesc(
+            name="Awakened",
+            short_label_name="Awakened",
+            description="Awakened Units",
+        ),
+    )
 
 
 @dataclass(eq=True, frozen=True)
