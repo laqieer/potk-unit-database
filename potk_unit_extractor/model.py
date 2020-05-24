@@ -454,6 +454,15 @@ class CustomTags(Enum):
             description="Awakened Units",
         ),
     )
+    REVO_KILLERS = UnitTag(
+        kind=UnitTagKind.CUSTOM,
+        ID=2,
+        desc_jp=UnitTagDesc(
+            name="Revolutionary Killers",
+            short_label_name="Revo",
+            description="Any Saint / Karma / Order Killers",
+        ),
+    )
 
 
 @dataclass(eq=True, frozen=True)

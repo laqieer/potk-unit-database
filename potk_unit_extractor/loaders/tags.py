@@ -39,6 +39,11 @@ class TagRepo:
         self._tags: Dict[UnitTagKind, Dict[int, UnitTag]] = {
             k: self._create_tags(k) for k in GROUP_RES_TAG_KIND
         }
+        self._implications: Dict[UnitTag, UnitTag] = {
+            self._tags[UnitTagKind.CLOTHING][15]: CustomTags.REVO_KILLERS.value,  # Karma
+            self._tags[UnitTagKind.CLOTHING][16]: CustomTags.REVO_KILLERS.value,  # Saint
+            self._tags[UnitTagKind.CLOTHING][17]: CustomTags.REVO_KILLERS.value,  # Order
+        }
 
     @lru_cache(maxsize=None)
     def tags_of(self, unit_id: int) -> Tuple[UnitTag]:
@@ -51,6 +56,9 @@ class TagRepo:
                 self._tags[kind][group[field]]
                 for field, kind in GROUP_FIELD_TAG_KIND.items()
             }
+        for tag, implied in self._implications.items():
+            if tag in result:
+                result.add(implied)
         return tuple(sorted(result))
 
     def _create_tags(self, kind: UnitTagKind) -> Dict[int, UnitTag]:
