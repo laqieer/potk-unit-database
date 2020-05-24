@@ -4,12 +4,12 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<title>{{ unit.short_title | title }} - PotK Unit Database</title>
-	<meta property="og:title" content="{{ unit.short_title | title }}"/>
+	<title>{{ final_unit.short_title | title }} - PotK Unit Database</title>
+	<meta property="og:title" content="{{ final_unit.short_title | title }}"/>
 	<meta property="og:description"
-		  content="{{unit.rarity.stars}}, {{unit.element.name | title}}, {{unit.gear_kind.name | title}}, {{unit.cost}} cost unit. Follow the link for more details."/>
-	<meta property="og:url" content="https://potk-fan-database.neocities.org/units/{{unit.ID}}.html"/>
-	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/{{unit.resource_id}}/unit_hires.png">
+		  content="{{final_unit.rarity.stars}}, {{final_unit.element.name | title}}, {{final_unit.gear_kind.name | title}}, {{final_unit.cost}} cost unit. Follow the link for more details."/>
+	<meta property="og:url" content="https://potk-fan-database.neocities.org/units/{{final_unit.ID}}.html"/>
+	<meta property="og:image" content="https://potk-fan-database.neocities.org/images/units/{{final_unit.resource_id}}/unit_hires.png">
 	<style>
 		dl.skill-attribute-list, dl.skill-attribute-list > dd {
 			margin-bottom: 0;
@@ -29,241 +29,267 @@
 {% import 'macros.html' as macros with context %}
 <div class="container">
 	{{ macros.nav_bar(cd_root='..', active='') }}
-	<h1>
-		{{ unit.eng_name | title }} <small>{{ stars[unit.rarity] }}</small><br/>
-		<small class="text-muted">{{ unit.jp_name }}</small>
-	</h1>
-	<div id="unit-info">
-		<img class="img-fluid"
-			 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
-		<h2>Unit Information</h2>
-		<dl class="row">
-			<dt class="col-sm-3">Element</dt>
-			<dd class="col-sm-9">{{ unit.element.name | title }}</dd>
-			<dt class="col-sm-3">Weapon Type</dt>
-			<dd class="col-sm-9">{{ unit.gear_kind.name | title }}</dd>
-			<dt class="col-sm-3">Rarity</dt>
-			<dd class="col-sm-9">{{ stars[unit.rarity] }}</dd>
-			<dt class="col-sm-3">Cost</dt>
-			<dd class="col-sm-9">{{ unit.cost }}</dd>
-			<dt class="col-sm-3">Level</dt>
-			<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}</dd>
-			<dt class="col-sm-3">Job</dt>
-			<dd class="col-sm-9">{{ unit.job.name }}</dd>
-			<dt class="col-sm-3">Movement</dt>
-			<dd class="col-sm-9">{{ unit.job.movement }}</dd>
-			{% if unit.tags %}
-			<dt class="col-sm-3">Tags</dt>
-			<dd class="col-sm-9">
-				{% for tag in unit.tags %}
-				<a class="badge badge-pill {{badge_tag[tag.kind]}}" href="../tags/{{tag.uid}}.html">
-					{{- tag.desc.short_label_name -}}
-				</a>
-				{% endfor %}
-			</dd>
-			{% endif %}
-			{% if unit.equipable_categories %}
-			<dt class="col-sm-3">Equipable RS</dt>
-			<dd class="col-sm-9">
-				{% for category in unit.equipable_categories %}
-				<a class="badge badge-pill badge-primary" href="../skills/{{ category.name | lower }}.html">
-					{{- category_desc[category] -}}
-				</a>
-				{% endfor %}
-			</dd>
-			{% endif %}
-			<dt class="col-sm-3">Release Date</dt>
-			<dd class="col-sm-9">{{ unit.published_at }}</dd>
-		</dl>
-	</div>
-	<div id="stats-caps">
-		<h2>Stats Caps</h2>
-		{% if unit.is_awakened %}
-		<div class="alert alert-warning" role="alert">
-			<p><strong>The stats for this unit are incorrect.</strong></p>
-			<p>
-				The growth column value is lower than the actual in-game value.
-				We've been unable to find an authoritative source for the
-				correct values.
-			</p>
-		</div>
-		{% endif %}
-		{% if not unit.cc %}
-		{{- macros.unit_stats_tab_pane('main', unit.stats, False) -}}
-		{% else %}
-		<div id="cc-info">
-			<ul class="nav nav-pills mb-3" role="tablist">
-				{% for cc_type in ClassChangeType %}
-				{% if cc_type in unit.cc %}
-				<li class="nav-item">
-					<a class="nav-link{% if loop.first %} active{% endif %}"
-					   role="tab"
-					   data-toggle="pill"
-					   href="#cc-tab-{{cc_type.name}}">
-						{{ cc_desc[cc_type] }}
-					</a>
-				</li>
-				{% endif %}
-				{% endfor %}
-			</ul>
-			<div class="tab-content">
-				{% for cc_type in ClassChangeType %}
-				{% if cc_type in unit.cc %}
-				<div id="cc-tab-{{cc_type.name}}"
-					 class="tab-pane fade{% if loop.first %} active show{% endif %}"
-					 role="tabpanel">
-					{% set stats = unit.cc_stats(cc_type) %}
-					{{- macros.unit_stats_tab_pane(cc_type.name, stats, True) -}}
+	<ul class="sticky-top nav nav-pills mb-3 bg-white" role="tablist">
+		{% for unit in units %}
+		<li class="nav-item">
+			<a class="nav-link {% if loop.last %}active{% endif %}"
+			   role="tab"
+			   data-toggle="pill"
+			   href="#tab-{{unit.ID}}">
+				<h5>{{unit.qualifier}}</h5>
+			</a>
+		</li>
+		{% endfor %}
+	</ul>
+	<div class="tab-content">
+		{% for unit in units %}
+		<div class="tab-pane fade {% if loop.last %}show active{% endif %}"
+			 id="tab-{{unit.ID}}"
+			 role="tabpanel">
+			<h1>
+				{{unit.eng_name | title}} <small>{{stars(unit, final_unit)}}</small><br/>
+				<small class="text-muted">{{unit.jp_name}}</small>
+			</h1>
+			<div id="unit-info-{{unit.ID}}">
+				<img class="img-fluid"
+					 src="../images/units/{{unit.resource_id}}/unit_hires.png"/>
+				<h2>Unit Information</h2>
+				<dl class="row">
+					<dt class="col-sm-3">Element</dt>
+					<dd class="col-sm-9">{{ unit.element.name | title }}</dd>
+					<dt class="col-sm-3">Weapon Type</dt>
+					<dd class="col-sm-9">{{ unit.gear_kind.name | title }}</dd>
+					<dt class="col-sm-3">Rarity</dt>
+					<dd class="col-sm-9">{{ stars(unit, final_unit) }}</dd>
+					<dt class="col-sm-3">Cost</dt>
+					<dd class="col-sm-9">{{ unit.cost }}</dd>
+					<dt class="col-sm-3">Level</dt>
+					<dd class="col-sm-9">{{ unit.level.ini }} - {{ unit.level.max }}</dd>
+					<dt class="col-sm-3">Job</dt>
+					<dd class="col-sm-9">{{ unit.job.name }}</dd>
+					<dt class="col-sm-3">Movement</dt>
+					<dd class="col-sm-9">{{ unit.job.movement }}</dd>
+					{% if unit.tags %}
+					<dt class="col-sm-3">Tags</dt>
+					<dd class="col-sm-9">
+						{% for tag in unit.tags %}
+						<a class="badge badge-pill {{badge_tag[tag.kind]}}" href="../tags/{{tag.uid}}.html">
+							{{- tag.desc.short_label_name -}}
+						</a>
+						{% endfor %}
+					</dd>
+					{% endif %}
+					{% if unit.equipable_categories %}
+					<dt class="col-sm-3">Equipable RS</dt>
+					<dd class="col-sm-9">
+						{% for category in unit.equipable_categories %}
+						<a class="badge badge-pill badge-primary" href="../skills/{{ category.name | lower }}.html">
+							{{- category_desc[category] -}}
+						</a>
+						{% endfor %}
+					</dd>
+					{% endif %}
+					<dt class="col-sm-3">Release Date</dt>
+					<dd class="col-sm-9">{{ unit.published_at }}</dd>
+				</dl>
+			</div>
+			<div id="stats-caps-{{unit.ID}}">
+				<h2>Stats Caps</h2>
+				{% if unit.is_awakened %}
+				<div class="alert alert-warning" role="alert">
+					<p><strong>The stats for this unit are incorrect.</strong></p>
+					<p>
+						The growth column value is lower than the actual in-game value.
+						We've been unable to find an authoritative source for the
+						correct values.
+					</p>
 				</div>
 				{% endif %}
-				{% endfor %}
+				{% if not unit.cc %}
+				{{- macros.unit_stats_tab_pane('main', unit, unit.stats, False) -}}
+				{% else %}
+				<div id="cc-info-{{unit.ID}}">
+					<ul class="nav nav-pills mb-3" role="tablist">
+						{% for cc_type in ClassChangeType %}
+						{% if cc_type in unit.cc %}
+						<li class="nav-item">
+							<a class="nav-link{% if loop.first %} active{% endif %}"
+							   role="tab"
+							   data-toggle="pill"
+							   href="#cc-tab-{{cc_type.name}}-{{unit.ID}}">
+								{{ cc_desc[cc_type] }}
+							</a>
+						</li>
+						{% endif %}
+						{% endfor %}
+					</ul>
+					<div class="tab-content">
+						{% for cc_type in ClassChangeType %}
+						{% if cc_type in unit.cc %}
+						<div id="cc-tab-{{cc_type.name}}-{{unit.ID}}"
+							 class="tab-pane fade{% if loop.first %} active show{% endif %}"
+							 role="tabpanel">
+							{% set stats = unit.cc_stats(cc_type) %}
+							{{- macros.unit_stats_tab_pane(cc_type.name, unit, stats, True) -}}
+						</div>
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+				{% endif %}
 			</div>
-		</div>
-		{% endif %}
-	</div>
-	{% if unit.has_ud %}
-	<div id="ud-info">
-		<h2>
-			Unleashed Domain (UD)
-			<button class="btn btn-secondary" data-toggle="collapse" data-target="#ud-content">
-				Hide/Show
-			</button>
-		</h2>
-		<div id="ud-content" class="collapse">
-			<table class="table table-sm table-bordered table-hover table-condensed">
-				<thead>
-				<tr>
-					<td rowspan="2"></td>
-					<th scope="col" colspan="8" class="text-center">
-						Necessary DV to Reach the UD Bonus Cap
-					</th>
-				</tr>
-				<tr>
-					{% for stat in StatType %}
-					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
-					{% endfor %}
-				</tr>
-				</thead>
-				<tbody>
-				<tr>
-					<th scope="row" class="text-right">DV</th>
-					{% for stat in StatType %}
-					<td class="text-right">
-						{{- unit.stats.bal.of(stat).ud.dv_for_cap | default('-', true) -}}
-					</td>
-					{% endfor %}
-				</tr>
-				</tbody>
-			</table>
-			<table class="table table-sm table-bordered table-hover table-condensed">
-				<thead>
-				<tr>
-					<td></td>
-					<th scope="col" colspan="8" class="text-center">Total Bonus</th>
-				</tr>
-				<tr>
-					<th scope="col" class="text-right">DV</th>
-					{% for stat in StatType %}
-					<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat] }}</th>
-					{% endfor %}
-				</tr>
-				</thead>
-				<tbody>
-				{# UD isn't affected by unit type, so we just use bal #}
-				{% set stats = unit.stats.bal %}
-				{% for milestone in stats.ud_milestones %}
-				<tr>
-					<td class="text-right">{{ milestone }}</td>
-					{% for stat in StatType %}
-					<td class="text-right">
-						{% set ud = stats.of(stat).ud %}
-						{% set bonus = ud.bonus(milestone) %}
-						{% set inc = ud.inc_by_milestone[milestone] %}
-						{% if inc %}<small class="text-muted">(+{{- inc }})</small>&nbsp;{% endif %}
-						{{- bonus | default('-', true) -}}
-					</td>
-					{% endfor %}
-				</tr>
-				{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	</div>
-	{% endif %}
-	<div id="skills-info">
-		<h2>Skills</h2>
-
-		{% if unit.skills.ovk %}
-		<h3 class="text-muted">Overkiller Skill</h3>
-		<div class="mb-3">
-			{{- macros.unit_skill(unit.skills.ovk.skill, '..', req_dv=unit.skills.ovk.req_dv) -}}
-		</div>
-		{% endif %}
-
-		{% if unit.skills.relationship %}
-		<h3 class="text-muted">
-			Relationship Skill <br/>
-			<small>Unlocked by improving relationship (a.k.a. RS/TS/GS)</small>
-		</h3>
-		<div class="mb-3">
-			{{- macros.unit_skill(unit.skills.relationship, '..') -}}
-		</div>
-		{% endif %}
-
-		{% if unit.cc %}
-		<h3 class="text-muted">Class Change Skills</h3>
-		{% for cc_type, job in unit.sorted_vertex %}
-		<h4 class="text-muted">
-			<small class="badge badge-dark">{{ cc_desc[cc_type] }}</small>
-			<br class="d-sm-none"/> {{ job.name }}
-		</h4>
-		{% for skill in job.skills %}
-		<div class="mb-3">
-			{{- macros.unit_skill(skill, '..', is_cc=True) -}}
-		</div>
-		{% endfor %}
-		{% endfor %}
-		{% endif -%}
-
-		{% if unit.skills.leader %}
-		<h3 class="text-muted">Leader Skill</h3>
-		<div class="mb-3">
-			{{- macros.unit_skill(unit.skills.leader, '..') -}}
-		</div>
-		{% endif %}
-
-		{% if unit.skills.multi_skill %}
-		<h3 class="text-muted">
-			Multi Skill <br/>
-			<small>Unlocked by raising intimacy with other units</small>
-		</h3>
-		<div class="mb-3">
-			{% set mds = unit.skills.multi_skill %}
-			{{- macros.unit_skill(mds, '..', need_cq=(mds == unit.skills.harmony)) -}}
-		</div>
-		{% endif %}
-
-		{% if unit.skills.types %}
-		<h3 class="text-muted">Type Skills</h3>
-		<div id="type-skills">
-			{% for type, skill in unit.skills.types.items() %}
-			<div class="mb-3">
-				{{- macros.unit_skill(skill, '..', type) -}}
+			{% if unit.has_ud %}
+			<div id="ud-info-{{unit.ID}}">
+				<h2>
+					Unleashed Domain (UD)
+					<button class="btn btn-secondary" data-toggle="collapse" data-target="#ud-content-{{unit.ID}}">
+						Hide/Show
+					</button>
+				</h2>
+				<div id="ud-content-{{unit.ID}}" class="collapse">
+					<table class="table table-sm table-bordered table-hover table-condensed">
+						<thead>
+						<tr>
+							<td rowspan="2"></td>
+							<th scope="col" colspan="8" class="text-center">
+								Necessary DV to Reach the UD Bonus Cap
+							</th>
+						</tr>
+						<tr>
+							{% for stat in StatType %}
+							<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat]
+								}}
+							</th>
+							{% endfor %}
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<th scope="row" class="text-right">DV</th>
+							{% for stat in StatType %}
+							<td class="text-right">
+								{{- unit.stats.bal.of(stat).ud.dv_for_cap | default('-', true) -}}
+							</td>
+							{% endfor %}
+						</tr>
+						</tbody>
+					</table>
+					<table class="table table-sm table-bordered table-hover table-condensed">
+						<thead>
+						<tr>
+							<td></td>
+							<th scope="col" colspan="8" class="text-center">Total Bonus</th>
+						</tr>
+						<tr>
+							<th scope="col" class="text-right">DV</th>
+							{% for stat in StatType %}
+							<th scope="col" class="text-right">{{ stat.name }}<br/>{{ jp_stats[stat]
+								}}
+							</th>
+							{% endfor %}
+						</tr>
+						</thead>
+						<tbody>
+						{# UD isn't affected by unit type, so we just use bal #}
+						{% set stats = unit.stats.bal %}
+						{% for milestone in stats.ud_milestones %}
+						<tr>
+							<td class="text-right">{{ milestone }}</td>
+							{% for stat in StatType %}
+							<td class="text-right">
+								{% set ud = stats.of(stat).ud %}
+								{% set bonus = ud.bonus(milestone) %}
+								{% set inc = ud.inc_by_milestone[milestone] %}
+								{% if inc %}<small class="text-muted">(+{{- inc }})</small>&nbsp;{%
+								endif %}
+								{{- bonus | default('-', true) -}}
+							</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
 			</div>
-			{% endfor %}
-		</div>
-		{% endif %}
-
-		<h3 class="text-muted">Common Skills</h3>
-		{% for skill in unit.skills.basic %}
-		<div class="mb-3">
-			{% if skill in unit.skills.evolutions %}
-			{##}{% set evo = unit.skills.evolutions[skill] %}
-			{##}{{- macros.unit_skill(evo.from_skill, '..') -}}
-			{##}{{- macros.unit_skill(evo.to_skill, '..', req_lv=evo.req_level) -}}
-			{% else %}
-			{##}{{- macros.unit_skill(skill, '..', need_cq=(skill in unit.skills.cq)) -}}
 			{% endif %}
+			<div id="skills-info-{{unit.ID}}">
+				<h2>Skills</h2>
+
+				{% if unit.skills.ovk %}
+				<h3 class="text-muted">Overkiller Skill</h3>
+				<div class="mb-3">
+					{{- macros.unit_skill(unit.skills.ovk.skill, '..',
+					req_dv=unit.skills.ovk.req_dv) -}}
+				</div>
+				{% endif %}
+
+				{% if unit.skills.relationship %}
+				<h3 class="text-muted">
+					Relationship Skill <br/>
+					<small>Unlocked by improving relationship (a.k.a. RS/TS/GS)</small>
+				</h3>
+				<div class="mb-3">
+					{{- macros.unit_skill(unit.skills.relationship, '..') -}}
+				</div>
+				{% endif %}
+
+				{% if unit.cc %}
+				<h3 class="text-muted">Class Change Skills</h3>
+				{% for cc_type, job in unit.sorted_vertex %}
+				<h4 class="text-muted">
+					<small class="badge badge-dark">{{ cc_desc[cc_type] }}</small>
+					<br class="d-sm-none"/> {{ job.name }}
+				</h4>
+				{% for skill in job.skills %}
+				<div class="mb-3">
+					{{- macros.unit_skill(skill, '..', is_cc=True) -}}
+				</div>
+				{% endfor %}
+				{% endfor %}
+				{% endif -%}
+
+				{% if unit.skills.leader %}
+				<h3 class="text-muted">Leader Skill</h3>
+				<div class="mb-3">
+					{{- macros.unit_skill(unit.skills.leader, '..') -}}
+				</div>
+				{% endif %}
+
+				{% if unit.skills.multi_skill %}
+				<h3 class="text-muted">
+					Multi Skill <br/>
+					<small>Unlocked by raising intimacy with other units</small>
+				</h3>
+				<div class="mb-3">
+					{% set mds = unit.skills.multi_skill %}
+					{{- macros.unit_skill(mds, '..', need_cq=(mds == unit.skills.harmony)) -}}
+				</div>
+				{% endif %}
+
+				{% if unit.skills.types %}
+				<h3 class="text-muted">Type Skills</h3>
+				<div id="type-skills-{{unit.ID}}">
+					{% for type, skill in unit.skills.types.items() %}
+					<div class="mb-3">
+						{{- macros.unit_skill(skill, '..', type) -}}
+					</div>
+					{% endfor %}
+				</div>
+				{% endif %}
+
+				<h3 class="text-muted">Common Skills</h3>
+				{% for skill in unit.skills.basic %}
+				<div class="mb-3">
+					{% if skill in unit.skills.evolutions %}
+					{##}{% set evo = unit.skills.evolutions[skill] %}
+					{##}{{- macros.unit_skill(evo.from_skill, '..') -}}
+					{##}{{- macros.unit_skill(evo.to_skill, '..', req_lv=evo.req_level) -}}
+					{% else %}
+					{##}{{- macros.unit_skill(skill, '..', need_cq=(skill in unit.skills.cq)) -}}
+					{% endif %}
+				</div>
+				{% endfor %}
+			</div>
 		</div>
 		{% endfor %}
 	</div>

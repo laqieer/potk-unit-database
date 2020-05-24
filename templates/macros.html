@@ -1,12 +1,12 @@
-{% macro unit_stats_tab_pane(prefix, stats, has_cc) %}
-<div id="{{prefix}}-stat-info">
+{% macro unit_stats_tab_pane(prefix, unit, stats, has_cc) %}
+<div id="{{prefix}}-{{unit.ID}}-stat-info">
 	<ul class="nav nav-pills mb-3" role="tablist">
 		{% for type in UnitType %}
 		<li class="nav-item">
 			<a class="nav-link{% if loop.first %} active{% endif %}"
 			   role="tab"
 			   data-toggle="pill"
-			   href="#{{prefix}}-tab-{{ type.name | lower }}">
+			   href="#{{prefix}}-{{unit.ID}}-tab-{{ type.name | lower }}">
 				<h5>{{ type.name }}&nbsp;{{ jp_types[type] }}</h5>
 			</a>
 		</li>
@@ -15,7 +15,7 @@
 	<div class="tab-content">
 		{% for type in UnitType %}
 		<div class="tab-pane fade {% if loop.first %}show active{%endif%}"
-			 id="{{prefix}}-tab-{{ type.name | lower }}"
+			 id="{{prefix}}-{{unit.ID}}-tab-{{ type.name | lower }}"
 			 role="tabpanel">
 			<table class="table table-bordered table-hover table-condensed">
 				<thead>

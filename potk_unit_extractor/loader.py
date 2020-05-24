@@ -1,6 +1,7 @@
 import datetime
+from functools import lru_cache
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Dict, Optional
 
 from .loaders.class_changes import CCRepo
 from .loaders.jobs import JobsRepo
@@ -29,6 +30,11 @@ class Loader:
         self.stats_repo = StatsRepo(repo, self.job_repo)
         self.units = repo.index(
             key='ID', res=MasterData.UnitUnit)
+        self._reverse_evo_pattern: Dict[int, int] = {
+            p['target_unit_UnitUnit']: p['unit_UnitUnit']
+            for p in repo.read(MasterData.UnitEvolutionPattern)
+        }
+        self._can_evolve_units = set(self._reverse_evo_pattern.values())
 
     def load_playable_units(self):
         """
@@ -62,6 +68,7 @@ class Loader:
             if unit.element != Element.NONE and unit.published_at.year < 2030:
                 yield unit
 
+    @lru_cache(maxsize=None)
     def load_unit(self, unit_id: int) -> UnitData:
         unit = self.units[unit_id]
         skills = self.skills_repo.skills_of(unit_id)
@@ -87,7 +94,15 @@ class Loader:
             tags=self.tag_repo.tags_of(unit_id),
             skills=skills,
             published_at=published_at,
+            evolved_from=self._source_or_none(unit_id),
+            can_evolve=unit_id in self._can_evolve_units,
         )
+
+    def _source_or_none(self, unit_id: int) -> Optional[UnitData]:
+        if unit_id in self._reverse_evo_pattern:
+            return self.load_unit(self._reverse_evo_pattern[unit_id])
+        else:
+            return None
 
 
 def _compute_element(skills: Tuple[Skill]) -> Element:

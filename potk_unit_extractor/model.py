@@ -227,18 +227,22 @@ class UnitRarityStars(IntEnum):
 
     @cached_property
     def stars(self) -> str:
+        return f'{self.stars_count}★'
+
+    @cached_property
+    def stars_count(self) -> int:
         if self == self.ONE:
-            return '1★'
+            return 1
         elif self == self.TWO:
-            return '2★'
+            return 2
         elif self == self.THREE:
-            return '3★'
+            return 3
         elif self == self.FOUR:
-            return '4★'
+            return 4
         elif self == self.FIVE:
-            return '5★'
+            return 5
         elif self == self.SIX:
-            return '6★'
+            return 6
 
 
 class GearKind(IntEnum):
@@ -561,6 +565,8 @@ class UnitData:
     tags: Tuple[UnitTag]
     skills: UnitSkills
     published_at: date
+    evolved_from: Optional[UnitData]
+    can_evolve: bool
     _cache: dict = field(init=False, default_factory=dict)
 
     @cached_property
@@ -576,6 +582,15 @@ class UnitData:
     def short_title(self) -> str:
         return f'{self.rarity.stars} {self.any_name} ({self.element.name}) ' \
                f'[{self.ID}]'
+
+    @cached_property
+    def qualifier(self) -> str:
+        if self.is_awakened:
+            return self.rarity.stars + ' Awakened'
+        elif self.evolved_from and self.rarity == self.evolved_from.rarity:
+            return self.rarity.stars + '+'
+        else:
+            return self.rarity.stars
 
     @cached_property
     def has_ud(self) -> bool:

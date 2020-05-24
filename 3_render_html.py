@@ -5,7 +5,7 @@ import time
 from collections import defaultdict
 from operator import attrgetter
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import click
 import htmlmin
@@ -13,7 +13,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape, Template
 
 from potk_unit_extractor.loader import load_folder
 from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
-    ClassChangeType, UnitTagKind, Element, Skill, SkillType, SkillAwakeCategory
+    ClassChangeType, UnitTagKind, Element, Skill, SkillType, SkillAwakeCategory, UnitData
 
 
 class Progress:
@@ -49,6 +49,14 @@ def group_units(units: list, key: callable, iter_key: bool = False) -> dict:
         else:
             result[key_val].append(unit)
     return result
+
+
+def expand_unit(unit: UnitData) -> List[UnitData]:
+    result: List[UnitData] = [unit]
+    while unit.evolved_from:
+        result.append(unit.evolved_from)
+        unit = unit.evolved_from
+    return list(reversed(result))
 
 
 def compute_latest_units(units: list) -> list:
@@ -112,15 +120,10 @@ def main(minify: bool, clean: bool, unit_ids: list):
     tags_path.mkdir(exist_ok=True)
     skills_path.mkdir(exist_ok=True)
 
-    stars = {
-        # ★☆
-        UnitRarityStars.ONE:   '★',
-        UnitRarityStars.TWO:   '★★',
-        UnitRarityStars.THREE: '★★★',
-        UnitRarityStars.FOUR:  '★★★★',
-        UnitRarityStars.FIVE:  '★★★★★',
-        UnitRarityStars.SIX:   '★★★★★★',
-    }
+    def stars(unit: UnitData, final: UnitData) -> str:
+        """★☆"""
+        blank = final.rarity.stars_count - unit.rarity.stars_count
+        return '★' * unit.rarity.stars_count + '☆' * blank
 
     # TODO Remove and use t.jp_ch directly
     jp_types = {t: t.jp_ch for t in UnitType}
@@ -215,7 +218,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
     if unit_ids:
         units = [loader.load_unit(int(u)) for u in unit_ids]
     else:
-        units = list(loader.load_playable_units())
+        units = [u for u in loader.load_playable_units() if not u.can_evolve]
 
     print(f'Loaded {len(units)} units successfully')
 
@@ -235,7 +238,6 @@ def main(minify: bool, clean: bool, unit_ids: list):
     rs_units = {
         c: sorted(
             (u for u in units
-             if u.rarity == UnitRarityStars.SIX  # FIXME
              if u.skills.relationship
              if u.skills.relationship.category == c),
             key=attrgetter('any_name', 'ID')
@@ -271,7 +273,8 @@ def main(minify: bool, clean: bool, unit_ids: list):
             template=unit_template,
             out=output_path,
             minify=minify,
-            unit=unit,
+            final_unit=unit,
+            units=expand_unit(unit),
             **template_shared_args,
         )
         progress.inc()
