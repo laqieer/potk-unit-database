@@ -463,6 +463,15 @@ class CustomTags(Enum):
             description="Any Saint / Karma / Order Killers",
         ),
     )
+    MALE_KILLERS = UnitTag(
+        kind=UnitTagKind.CUSTOM,
+        ID=3,
+        desc_jp=UnitTagDesc(
+            name="Male Killers",
+            short_label_name="Male",
+            description="Also known as Killer Princes.",
+        ),
+    )
 
 
 @dataclass(eq=True, frozen=True)

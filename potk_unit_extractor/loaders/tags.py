@@ -48,17 +48,22 @@ class TagRepo:
     @lru_cache(maxsize=None)
     def tags_of(self, unit_id: int) -> Tuple[UnitTag]:
         result: Set[UnitTag] = set()
-        if self._units[unit_id].is_awake:
-            result.add(CustomTags.AWAKENED.value)
+        # Tags from unit group.
         group = self._unit_groups.get(unit_id)
         if group:
             result |= {
                 self._tags[kind][group[field]]
                 for field, kind in GROUP_FIELD_TAG_KIND.items()
             }
+        # Custom Tags & Implications - Handled one by one.
+        if self._units[unit_id].is_awake:
+            result.add(CustomTags.AWAKENED.value)
+        if unit_id in range(50000000, 59999999):
+            result.add(CustomTags.MALE_KILLERS.value)
         for tag, implied in self._implications.items():
             if tag in result:
                 result.add(implied)
+        # Pack the result
         return tuple(sorted(result))
 
     def _create_tags(self, kind: UnitTagKind) -> Dict[int, UnitTag]:
