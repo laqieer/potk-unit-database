@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
 import datetime
+import heapq
 import shutil
 import time
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from operator import attrgetter
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Dict, Tuple, Iterable
 
 import click
 import htmlmin
@@ -59,10 +60,10 @@ def expand_unit(unit: UnitData) -> List[UnitData]:
     return list(reversed(result))
 
 
-def compute_latest_units(units: list) -> list:
-    last_release = max(u.published_at for u in units)
-    result = [u for u in units if u.published_at == last_release]
-    return sort_units(result)
+def compute_latest_releases(sorted_units: List[UnitData]) -> Iterable[Tuple]:
+    releases = group_units(sorted_units, key=attrgetter('published_at'))
+    last_3 = heapq.nlargest(3, releases.keys())
+    return zip(last_3, (releases[k] for k in last_3))
 
 
 def get_skill_icon_name(skill: Skill) -> Optional[str]:
@@ -227,7 +228,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
     units_by_tag = group_units(units, key=lambda u: u.tags, iter_key=True)
     units_by_weapon = group_units(units, key=lambda u: u.gear_kind)
     units_by_element = group_units(units, key=lambda u: u.element)
-    latest_units = compute_latest_units(units)
+    latest_releases = compute_latest_releases(units)
     skill_icons = {s.ID: get_skill_icon_name(s)
                    for s in loader.skills_repo.all_skills}
 
@@ -353,7 +354,7 @@ def main(minify: bool, clean: bool, unit_ids: list):
         out=index_path,
         minify=minify,
         units=units,
-        latest_units=latest_units,
+        latest_releases=latest_releases,
         total=len(units),
         **template_shared_args,
     )

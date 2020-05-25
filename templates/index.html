@@ -55,11 +55,14 @@
 	<div id="latest" class="row mb-3">
 		<div class="col">
 			<h2>Latest Units</h2>
+			{% for date, units in latest_releases %}
+			<h4>{{date}}</h4>
 			<ul>
-				{% for unit in latest_units %}
+				{% for unit in units %}
 				<li>{{- macros.unit_link(unit, hidden=False, cd_root='.', small=True) -}}</li>
 				{% endfor %}
 			</ul>
+			{% endfor %}
 		</div>
 	</div>
 	<div id="browse-row" class="row mb-3">
