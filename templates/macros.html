@@ -5,6 +5,7 @@
 		<li class="nav-item">
 			<a class="nav-link{% if loop.first %} active{% endif %}"
 			   role="tab"
+			   data-unit-type="{{type.name | lower}}"
 			   data-toggle="pill"
 			   href="#{{prefix}}-{{unit.ID}}-tab-{{ type.name | lower }}">
 				<h5>{{ type.name }}&nbsp;{{ jp_types[type] }}</h5>
