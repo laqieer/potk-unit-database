@@ -223,5 +223,5 @@ class UnitRSTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    loader = load_folder(Path('cache'))
+    loader = load_folder(Path('cache', 'current'))
     unittest.main()

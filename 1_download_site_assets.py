@@ -67,7 +67,7 @@ def main(paths_fp, ids: list):
     streaming_assets: dict = paths['StreamingAssets']
     asset_bundle: dict = paths['AssetBundle']
 
-    loader = load_folder(Path('cache'))
+    loader = load_folder(Path('cache', 'current'))
 
     download_skills(
         (s.resource_id or s.ID for s in loader.skills_repo.all_skills),

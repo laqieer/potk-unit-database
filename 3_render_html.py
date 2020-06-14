@@ -95,7 +95,7 @@ def render(template: Template, out: Path, minify: bool, **render_args):
 def main(minify: bool, clean: bool, unit_ids: list):
     exec_start = datetime.datetime.now()
     print('Loading Units...')
-    loader = load_folder(Path('cache'))
+    loader = load_folder(Path('cache', 'current'))
     env = Environment(
         loader=FileSystemLoader('templates'),
         autoescape=select_autoescape(['html']),

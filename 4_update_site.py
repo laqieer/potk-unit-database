@@ -33,7 +33,7 @@ class Uploader:
 
 class UploadNarrator:
     def __init__(self):
-        self._loader = load_folder(Path('cache'))
+        self._loader = load_folder(Path('cache', 'current'))
         self._unit_page_re = re.compile('units/([0-9]+).html$')
 
     def echo(self, local, remote, is_dry=False, *args, **kwargs):
