@@ -62,6 +62,7 @@ def parse_unit_unit(reader: MasterDataReader, item: dict):
     item['exist_overkillers_skill'] = reader.ReadBool()
     item['overkillers_parameter'] = reader.ReadInt()
     item['expire_date_UnitExpireDate'] = reader.ReadIntOrNull()
+    item['is_exp_material'] = reader.ReadBool()
 
 
 def parse_unit_parameters(reader: MasterDataReader, item: dict):
@@ -142,6 +143,7 @@ def parse_unit_job(reader: MasterDataReader, item: dict):
     item['new_cost'] = reader.ReadInt()
     item['variable_magic_bullet_name'] = reader.ReadString(True)
     item['rendering_pattern_UnitRenderingPattern'] = reader.ReadIntOrNull()
+    item['start_at'] = reader.ReadDateTimeOrNull()
 
 
 def parse_unit_type_parameter(reader: MasterDataReader, item: dict):
@@ -221,6 +223,12 @@ def parse_job_change_pattern(reader: MasterDataReader, item: dict):
     item['materials3_JobChangeMaterials'] = reader.ReadIntOrNull()
     item['job4_UnitJob'] = reader.ReadIntOrNull()
     item['materials4_JobChangeMaterials'] = reader.ReadIntOrNull()
+    item['job5_UnitJob'] = reader.ReadIntOrNull()
+    item['materials5_JobChangeMaterials'] = reader.ReadIntOrNull()
+    item['job6_UnitJob'] = reader.ReadIntOrNull()
+    item['materials6_JobChangeMaterials'] = reader.ReadIntOrNull()
+    item['job7_UnitJob'] = reader.ReadIntOrNull()
+    item['materials7_JobChangeMaterials'] = reader.ReadIntOrNull()
 
 
 def parse_job_characteristics(reader: MasterDataReader, item: dict):
@@ -228,8 +236,12 @@ def parse_job_characteristics(reader: MasterDataReader, item: dict):
     item['skill_BattleskillSkill'] = reader.ReadInt()
     item['skill2_BattleskillSkill'] = reader.ReadIntOrNull()
     item['level_pattern_id'] = reader.ReadStringOrNull(True)
-    item['levelmax_bonus_JobCharacteristicsLevelmaxBonus'] = reader.ReadInt()
-    item['levelmax_bonus_value'] = reader.ReadInt()
+    for s in ('', 2, 3):
+        item[f'levelmax_bonus{s}_JobCharacteristicsLevelmaxBonus'] = reader.ReadInt()
+        item[f'levelmax_bonus_value{s}'] = reader.ReadInt()
+    item['normal_description'] = reader.ReadStringOrNull(True)
+    item['lvmax_description'] = reader.ReadStringOrNull(True)
+    item['xlevel_limits_XLevelLimits'] = reader.ReadIntOrNull()
 
 
 def parse_unit_skill(reader: MasterDataReader, item: dict):

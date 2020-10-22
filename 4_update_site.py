@@ -79,6 +79,14 @@ def fetch_remote_sums(remote_sums_url: str) -> Set[Tuple[str, str]]:
     return {tuple(item) for item in resp.json()}
 
 
+def merge_sums(local, remote) -> Set[Tuple[str, str]]:
+    # Set of tuple -> dict
+    remote = {k: v for k, v in remote}
+    local = {k: v for k, v in local}
+    remote.update(local)
+    return {tuple(i) for i in remote.items()}
+
+
 @click.command()
 @click.option('--site-path', default='./site')
 @click.option('--api-key', '-k', default='')
@@ -93,18 +101,20 @@ def main(site_path: str, api_key: str, dry_run: bool):
         except FileNotFoundError:
             click.echo(f'[WARNING] Unable to read api key ({api_key})')
             api_key = ''
-    local_sums_path = site_path / CHECKSUMS_FN
+    final_sums_path = site_path / CHECKSUMS_FN
 
     click.echo('Computing local checksums...')
     local_sums = compute_local_sums(site_path)
-    with local_sums_path.open(mode='w', encoding='utf-8') as fp:
-        json.dump(sorted(local_sums), fp, ensure_ascii=False)
 
     click.echo('Fetching remote checksums...')
     remote_sums = fetch_remote_sums(REMOTE_SUMS_URL)
 
     changed = local_sums - remote_sums
     click.echo(f'{len(changed)} files to be uploaded')
+
+    final_sums = merge_sums(local_sums, remote_sums)
+    with final_sums_path.open(mode='w', encoding='utf-8') as fp:
+        json.dump(sorted(final_sums), fp, ensure_ascii=False)
 
     if not changed:
         click.echo('Nothing to upload, site is up to date')
@@ -129,7 +139,7 @@ def main(site_path: str, api_key: str, dry_run: bool):
     click.echo(
         'Files uploaded successfully. Updating remote checksums file...  ',
         nl=False)
-    r = uploader.upload(local_sums_path, CHECKSUMS_FN)
+    r = uploader.upload(final_sums_path, CHECKSUMS_FN)
     click.echo(f'{r.status_code} {r.json()["result"].upper()}')
     click.echo('Site updated successfully')
 

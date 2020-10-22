@@ -161,8 +161,8 @@ class UnitUDTest(unittest.TestCase):
 
 class UnitRSTest(unittest.TestCase):
     cases = [
-        # 6* Zwei (No RS slot)
-        (603013, tuple()),
+        # 4* Naegling (No RS slot)
+        (100613, tuple()),
         # 4* Ais (DanMachi Collab, All RS).
         (3104411, SkillAwakeCategory.all_gear_hack_skill()),
         # 6* Gaku Naegling
@@ -222,6 +222,6 @@ class UnitRSTest(unittest.TestCase):
                 self.assertEqual(expected, actual)
 
 
+loader = load_folder(Path('cache', 'current'))
 if __name__ == '__main__':
-    loader = load_folder(Path('cache', 'current'))
     unittest.main()

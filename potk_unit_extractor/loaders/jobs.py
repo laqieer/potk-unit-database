@@ -3,7 +3,7 @@ from typing import Tuple, Dict
 
 from .skills import SkillsRepo
 from ..master_data import MasterDataRepo, MasterData
-from ..model import UnitJob, JobCharacteristic, StatType
+from ..model import UnitJob, JobCharacteristic, JobCharacteristicBonus, StatType
 
 # Based on JobCharacteristicsLevelmaxBonus Enum.
 JOB_CH_BONUS_TO_STAT = {
@@ -64,13 +64,20 @@ class JobsRepo:
         )
 
     def _create_job_skill(self, ch: dict) -> JobCharacteristic:
-        raw_stat = ch['levelmax_bonus_JobCharacteristicsLevelmaxBonus']
-        stat = JOB_CH_BONUS_TO_STAT.get(raw_stat)
         return JobCharacteristic(
             ID=ch['ID'],
             # skill2, when present, is always a hidden stat buff passive.
             # But these are already mentioned in the first skill description.
             skill=self._skills.get_skill(ch['skill_BattleskillSkill']),
-            stat=stat,
-            plus_value=ch['levelmax_bonus_value'],
+            bonuses=self._create_bonuses(ch)
         )
+
+    @staticmethod
+    def _create_bonuses(ch: dict) -> Tuple[JobCharacteristicBonus]:
+        result = []
+        for s in ('', 2, 3):
+            raw_stat = ch[f'levelmax_bonus{s}_JobCharacteristicsLevelmaxBonus']
+            plus_value = ch[f'levelmax_bonus_value{s}']
+            stat = JOB_CH_BONUS_TO_STAT.get(raw_stat)
+            result.append(JobCharacteristicBonus(stat, plus_value))
+        return tuple(result)

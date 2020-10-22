@@ -479,11 +479,16 @@ class CustomTags(Enum):
 
 
 @dataclass(eq=True, frozen=True)
+class JobCharacteristicBonus:
+    stat: StatType
+    plus_value: int
+
+
+@dataclass(eq=True, frozen=True)
 class JobCharacteristic:
     ID: int
     skill: Skill
-    stat: StatType
-    plus_value: int
+    bonuses: Tuple[JobCharacteristicBonus]
 
 
 @dataclass(eq=True, frozen=True)
@@ -512,7 +517,8 @@ class UnitJob:
     @lru_cache(maxsize=None)
     def get_skill_master_bonus(self, stat_type: StatType) -> int:
         return sum(mb.plus_value
-                   for mb in self.characteristics
+                   for ch in self.characteristics
+                   for mb in ch.bonuses
                    if mb.stat == stat_type)
 
 
@@ -521,6 +527,9 @@ class ClassChangeType(IntEnum):
     VERTEX1 = 2
     VERTEX2 = 3
     VERTEX3 = 4
+    VERTEX4 = 5
+    VERTEX5 = 6
+    VERTEX6 = 7
 
 
 @dataclass(eq=True, frozen=True)
