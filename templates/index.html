@@ -113,11 +113,24 @@
 		</div>
 	</div>
 </div>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.6.22/dist/flexsearch.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 <script>
 // Set some globals for readability; Kids, don't do this at home.
 units = document.getElementById("unit-list").getElementsByClassName("list-group-item");
 searchBox = document.getElementById("myInput");
 anyShown = false;
+index = FlexSearch.create();
+
+fetch('./search/units.index.txt')
+	.then(response => response.text())
+	.then((data) => {
+		console.log('data received');
+		index.import(data);
+		console.log('data loaded');
+	});
 
 function checkEnter(event) {
 	if (event.keyCode == 13) {
@@ -134,12 +147,13 @@ function toggleAll() {
 }
 
 function searchUnit() {
-	var input, i, name;
-	input = searchBox.value.toUpperCase();
+	var to_show, i, name;
+	to_show = index.search(searchBox.value);
+	console.log(to_show);
 
 	for (i = 0; i < units.length; i++) {
-		name = units[i].dataset.unitName;
-		if (name.toUpperCase().indexOf(input) > -1) {
+		unit_id = +units[i].dataset.unitId;
+		if (to_show.indexOf(unit_id) > -1) {
 			units[i].style.display = "";
 			anyShown = true;
 		} else {
@@ -147,10 +161,6 @@ function searchUnit() {
 		}
 	}
 }
-
 </script>
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 </body>
 </html>

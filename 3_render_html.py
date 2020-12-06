@@ -3,18 +3,19 @@ import datetime
 import heapq
 import shutil
 import time
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from operator import attrgetter
 from pathlib import Path
-from typing import Optional, List, Dict, Tuple, Iterable
+from typing import Optional, List, Tuple, Iterable
 
 import click
 import htmlmin
+import js2py  # To pre-compute the FlexSearch index.
 from jinja2 import Environment, FileSystemLoader, select_autoescape, Template
 
 from potk_unit_extractor.loader import load_folder
-from potk_unit_extractor.model import StatType, UnitType, UnitRarityStars, \
-    ClassChangeType, UnitTagKind, Element, Skill, SkillType, SkillAwakeCategory, UnitData
+from potk_unit_extractor.model import StatType, UnitType, ClassChangeType, UnitTagKind, Element, Skill, SkillType, \
+    SkillAwakeCategory, UnitData
 
 
 class Progress:
@@ -109,17 +110,20 @@ def main(minify: bool, clean: bool, unit_ids: list):
     units_path = site_path / 'units'
     tags_path = site_path / 'tags'
     skills_path = site_path / 'skills'
+    flex_search_path = site_path / 'search'
 
     if clean:
         shutil.rmtree(units_path, ignore_errors=True)
         shutil.rmtree(tags_path, ignore_errors=True)
         shutil.rmtree(skills_path, ignore_errors=True)
+        shutil.rmtree(flex_search_path, ignore_errors=True)
         shutil.rmtree(site_path / 'weapons', ignore_errors=True)
         shutil.rmtree(site_path / 'elements', ignore_errors=True)
 
     units_path.mkdir(exist_ok=True)
     tags_path.mkdir(exist_ok=True)
     skills_path.mkdir(exist_ok=True)
+    flex_search_path.mkdir(exist_ok=True)
 
     def stars(unit: UnitData, final: UnitData) -> str:
         """★☆"""
@@ -245,6 +249,16 @@ def main(minify: bool, clean: bool, unit_ids: list):
         )
         for c in SkillAwakeCategory
     }
+
+    print(f'Computing search index...')
+    with open('./js/flexsearch-0.6.22.min.js', mode='r', encoding='utf-8') as fd:
+        flex_js_code = fd.read()
+    flex_search = js2py.eval_js(flex_js_code + '; FlexSearch')
+    search_index = flex_search.create()
+    for unit in units:
+        search_index.add(unit.ID, unit.h_id)
+    with (flex_search_path / 'units.index.txt').open(mode='w', encoding='utf-8') as fd:
+        fd.write(search_index.export())
 
     template_shared_args = {
         'StatType':           StatType,

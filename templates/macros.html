@@ -60,7 +60,7 @@
 {% endmacro %}
 
 {% macro unit_link(unit, hidden, cd_root, small=False) %}
-<a href="{{cd_root}}/units/{{unit.ID}}.html" {% if not small %} id="unit-{{unit.ID}}" data-unit-name="{{unit.h_id}}" class="list-group-item list-group-item-action" style="{% if hidden %} display: none {% endif %}" {% endif %}>
+<a href="{{cd_root}}/units/{{unit.ID}}.html" {% if not small %} id="unit-{{unit.ID}}" data-unit-id="{{unit.ID}}" class="list-group-item list-group-item-action" style="{% if hidden %} display: none {% endif %}" {% endif %}>
 	{% if not small -%}
 	<img src="{{cd_root}}/images/units/{{unit.resource_id}}/c_thum.png" style="zoom: 0.5;"/>
 	{%- endif %}
