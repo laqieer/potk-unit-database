@@ -295,6 +295,8 @@ def parse_battle_skill(reader: MasterDataReader, item: dict):
     item['description'] = reader.ReadString(True)
     item['shortDescription'] = reader.ReadString(True)
     item['shortDescriptionEnemy'] = reader.ReadString(True)
+    item['viewShortDescription'] = reader.ReadString(True)
+    item['viewShortDescriptionEnemy'] = reader.ReadString(True)
     item['skill_type_BattleskillSkillType'] = reader.ReadInt()
     item['element_CommonElement'] = reader.ReadInt()
     item['genre1_BattleskillGenre'] = reader.ReadIntOrNull()
