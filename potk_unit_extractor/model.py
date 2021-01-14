@@ -256,7 +256,7 @@ class GearKind(IntEnum):
     GUN = 5
     STAFF = 6
     SHIELD = 7
-    UNIQUE_WEAPON = 8
+    UNIQUE = 8
     SMITH = 9
     ACCESSORIES = 10
     DRILLING = 11

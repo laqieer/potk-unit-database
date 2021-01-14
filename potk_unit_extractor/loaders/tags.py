@@ -58,7 +58,7 @@ class TagRepo:
         # Custom Tags & Implications - Handled one by one.
         if self._units[unit_id].is_awake:
             result.add(CustomTags.AWAKENED.value)
-        if unit_id in range(50000000, 59999999):
+        if unit_id in range(50000000, 51999999):
             result.add(CustomTags.MALE_KILLERS.value)
         for tag, implied in self._implications.items():
             if tag in result:
