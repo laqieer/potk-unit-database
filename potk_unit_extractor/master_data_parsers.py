@@ -173,6 +173,7 @@ def parse_unit_evolution_pattern(reader: MasterDataReader, item: dict):
     item['unit_UnitUnit'] = reader.ReadInt()
     item['target_unit_UnitUnit'] = reader.ReadInt()
     item['threshold_level'] = reader.ReadInt()
+    item['threshold_unity_value'] = reader.ReadInt()
     item['money'] = reader.ReadInt()
 
 
