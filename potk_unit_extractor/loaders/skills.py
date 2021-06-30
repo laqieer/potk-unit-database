@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from collections import defaultdict
 from functools import lru_cache, cached_property
 from typing import Optional, List, Tuple, Dict
@@ -7,6 +8,8 @@ from . import UnitMetadata
 from ..master_data import MasterDataRepo, MasterData
 from ..model import Skill, SkillType, SkillDesc, SkillGenre, SkillTarget, \
     Element, SkillEvo, UnitSkills, OvkSkill, SkillAwakeCategory
+
+logger = logging.getLogger(__name__)
 
 
 class SkillsRepo:
@@ -89,7 +92,11 @@ class SkillsRepo:
     @staticmethod
     def _create_skill(skill: dict) -> Skill:
         category_id = skill['awake_skill_category_id']
-        category = SkillAwakeCategory(category_id) if category_id > 1 else None
+        try:
+            category = SkillAwakeCategory(category_id) if category_id > 1 else None
+        except ValueError:
+            logger.warning('ignored unmapped category for skill %d (category_id: %d)', skill['ID'], category_id)
+            category = None
         return Skill(
             type=SkillType(skill['skill_type_BattleskillSkillType']),
             ID=skill['ID'],
