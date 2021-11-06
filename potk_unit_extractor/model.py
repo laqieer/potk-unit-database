@@ -304,6 +304,7 @@ class SkillType(IntEnum):
     ATTACK_CLASS = 11
     ATTACK_ELEMENT = 12
     ATTACK_METHOD = 13
+    CALL = 14
 
 
 class SkillGenre(IntEnum):
