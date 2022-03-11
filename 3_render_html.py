@@ -170,16 +170,17 @@ def main(minify: bool, clean: bool, unit_ids: list):
     }
 
     category_desc = {
-        SkillAwakeCategory.TRUST:         'Trust',
-        SkillAwakeCategory.GENERIC_RS:    'Global RS',
-        SkillAwakeCategory.CHAOS_RS:      'Chaos RS',
-        SkillAwakeCategory.HARMONIA_RS:   'Harmonia RS',
-        SkillAwakeCategory.TREISEMA_RS:   'Treisema RS',
-        SkillAwakeCategory.TYRHELM_RS:    'Tyrhelm RS',
-        SkillAwakeCategory.COMMAND_RS:    'Command Gear',
-        SkillAwakeCategory.INTEGRAL_GEAR: 'Integral Gear',
-        SkillAwakeCategory.SCHOOL_GEAR:   'School Gear',
-        SkillAwakeCategory.IMITATE_GEAR:  'Imitate Gear',
+        SkillAwakeCategory.TRUST:           'Trust',
+        SkillAwakeCategory.GENERIC_RS:      'Global RS',
+        SkillAwakeCategory.CHAOS_RS:        'Chaos RS',
+        SkillAwakeCategory.HARMONIA_RS:     'Harmonia RS',
+        SkillAwakeCategory.TREISEMA_RS:     'Treisema RS',
+        SkillAwakeCategory.TYRHELM_RS:      'Tyrhelm RS',
+        SkillAwakeCategory.COMMAND_RS:      'Command Gear',
+        SkillAwakeCategory.INTEGRAL_GEAR:   'Integral Gear',
+        SkillAwakeCategory.SCHOOL_GEAR:     'School Gear',
+        SkillAwakeCategory.IMITATE_GEAR:    'Imitate Gear',
+        SkillAwakeCategory.FOURTH_RAGNAROK: 'Fourth Ragnarok',
     }
 
     category_comment = {

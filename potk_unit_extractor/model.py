@@ -305,6 +305,7 @@ class SkillType(IntEnum):
     ATTACK_ELEMENT = 12
     ATTACK_METHOD = 13
     CALL = 14
+    SEA = 15
 
 
 class SkillGenre(IntEnum):
@@ -345,6 +346,7 @@ class SkillAwakeCategory(IntEnum):
     INTEGRAL_GEAR = 10
     SCHOOL_GEAR = 11
     IMITATE_GEAR = 12
+    FOURTH_RAGNAROK = 13
 
     @classmethod
     def all_gear_hack_skill(cls) -> Set[SkillAwakeCategory]:
