@@ -18,10 +18,10 @@ import js2py
 import requests
 from jinja2 import Template, FileSystemLoader, select_autoescape, Environment as JinjaEnv
 
-from potk_unit_extractor.api import Environment
-from potk_unit_extractor.loader import load_folder
-from potk_unit_extractor.master_data import MasterDataRepo, MasterData
-from potk_unit_extractor.model import SkillType, Skill, UnitData, StatType, UnitType, ClassChangeType, \
+from .api import Environment
+from .loader import load_folder
+from .master_data import MasterDataRepo, MasterData
+from .model import SkillType, Skill, UnitData, StatType, UnitType, ClassChangeType, \
     SkillAwakeCategory, UnitTagKind, Element
 
 

@@ -5,3 +5,4 @@ requests>=2.23.0,<3
 click>=7.0,<7.1
 htmlmin==0.1.4
 js2py==0.70
+markupsafe==2.0.1
