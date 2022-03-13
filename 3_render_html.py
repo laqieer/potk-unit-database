@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
+import os
 
 import click
 
-from potk_unit_extractor.site import render_site
+from potk_unit_extractor.site import SiteManager
 
 
 @click.command()
@@ -10,7 +11,8 @@ from potk_unit_extractor.site import render_site
 @click.option('--clean', is_flag=True, default=False)
 @click.argument('unit_ids', nargs=-1)
 def main(minify: bool, clean: bool, unit_ids: list):
-    render_site(minify, clean, unit_ids)
+    mgr = SiteManager(work='.', sources=os.path.dirname(__file__))
+    mgr.render_site(minify, clean, unit_ids)
 
 
 if __name__ == '__main__':

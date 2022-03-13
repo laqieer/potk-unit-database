@@ -4,13 +4,16 @@
 #
 # Takes the paths.json file as an argument.
 # Saves the downloaded assets into ./cache/
-from potk_unit_extractor.site import download_to_cache
+import os.path
+
+from potk_unit_extractor.site import SiteManager
 
 if __name__ == "__main__":
     import sys
 
     try:
-        download_to_cache(sys.argv[1])
+        mgr = SiteManager(work='.', sources=os.path.dirname(__file__))
+        mgr.download_to_cache(sys.argv[1])
     except ValueError as ex:
         print(ex, file=sys.stderr)
         exit(1)
