@@ -45,7 +45,7 @@ class MasterData(Enum):
 class MasterDataRepo:
     def __init__(self, root: Path):
         self.root = root
-        self.root.mkdir(exist_ok=True)
+        self.root.mkdir(exist_ok=True, parents=True)
 
     def path_of(self, res: MasterData) -> Path:
         return self.root / f'{res.name}.unity3d'
