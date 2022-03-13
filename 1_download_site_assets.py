@@ -16,8 +16,12 @@ from potk_unit_extractor.site import SiteManager
 @click.argument('unit_ids', nargs=-1)
 @click.option('--no-remote', is_flag=True, default=False)
 def main(paths_fp, unit_ids: list, no_remote: bool = False):
-    mgr = SiteManager(work='.', sources=os.path.dirname(__file__))
-    mgr.download_assets(paths_fp, unit_ids, no_remote, click.echo)
+    mgr = SiteManager(
+        work='.',
+        sources=os.path.dirname(__file__),
+        printer=click.echo,
+    )
+    mgr.download_assets(paths_fp, unit_ids, no_remote)
 
 
 if __name__ == "__main__":

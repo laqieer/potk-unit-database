@@ -11,7 +11,11 @@ from potk_unit_extractor.site import SiteManager
 @click.option('--clean', is_flag=True, default=False)
 @click.argument('unit_ids', nargs=-1)
 def main(minify: bool, clean: bool, unit_ids: list):
-    mgr = SiteManager(work='.', sources=os.path.dirname(__file__))
+    mgr = SiteManager(
+        work='.',
+        sources=os.path.dirname(__file__),
+        printer=click.echo,
+    )
     mgr.render_site(minify, clean, unit_ids)
 
 

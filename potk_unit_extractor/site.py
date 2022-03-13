@@ -49,16 +49,17 @@ class Uploader:
 
 
 class Progress:
-    def __init__(self, total: int):
+    def __init__(self, total: int, printer):
         self.total = total
         self.curr = 0
         self.last = time.time()
+        self._printer = printer
 
     def inc(self):
         self.curr += 1
         now = time.time()
         if now - self.last > 5:
-            print(f'  {self.curr}/{self.total}')
+            self._printer(f'  {self.curr}/{self.total}')
             self.last = now
 
 
@@ -91,15 +92,16 @@ class UploadNarrator:
 
 
 class SiteManager:
-    def __init__(self, work, sources):
+    def __init__(self, work, sources, printer=print):
         self._work = work
         self._sources = sources
+        self._printer = printer
 
     def download_to_cache(self, paths_fp):
-        print("Loading file: " + paths_fp)
+        self._printer("Loading file: " + paths_fp)
         with open(paths_fp, mode='rb') as fd:
             paths = json.load(fd)
-        print("File loaded successfully")
+        self._printer("File loaded successfully")
         env = Environment(paths, True)
 
         root_path = Path(self._work, 'cache', 'current')
@@ -109,18 +111,18 @@ class SiteManager:
 
         for md in MasterData:
             md_path = repo.path_of(md)
-            print(f'Saving {md.name} to {md_path}...')
+            self._printer(f'Saving {md.name} to {md_path}...')
             env.save_master_data(res=md, out=md_path)
 
-        print('All files downloaded')
+        self._printer('All files downloaded')
 
         paths_date = os.path.getmtime(paths_fp)
         history_path = Path(self._work, 'cache', str(math.trunc(paths_date)))
         if history_path.exists():
-            print('WARNING: History path already exists, no backup will be created')
+            self._printer('WARNING: History path already exists, no backup will be created')
             return
         shutil.copytree(root_path, history_path)
-        print(f'History backup at: {history_path}')
+        self._printer(f'History backup at: {history_path}')
 
     @staticmethod
     def fetch_remote_files_set(remote_sums_url: str):
@@ -175,20 +177,20 @@ class SiteManager:
                 env.save_streaming_asset(
                     streaming_assets[hires_key], hires_key, unit_asset_path, True)
 
-    def download_assets(self, paths_fp, unit_ids: list, no_remote: bool, printer):
-        printer("Loading file: " + paths_fp)
+    def download_assets(self, paths_fp, unit_ids: list, no_remote: bool):
+        self._printer("Loading file: " + paths_fp)
         with open(paths_fp, mode='rb') as fd:
             paths = json.load(fd)
 
-        printer("Loading current cache")
+        self._printer("Loading current cache")
         loader = load_folder(Path(self._work, 'cache', 'current'))
 
         if not no_remote:
-            printer("Fetching remote file lists")
+            self._printer("Fetching remote file lists")
             remote_files = self.fetch_remote_files_set(
                 'https://potk-fan-database.neocities.org/checksums.json')
         else:
-            printer("Skipping remote file lists (--no-remote)")
+            self._printer("Skipping remote file lists (--no-remote)")
             remote_files = set()
 
         remote_skills_ids = {
@@ -206,18 +208,18 @@ class SiteManager:
         streaming_assets: dict = paths['StreamingAssets']
         asset_bundle: dict = paths['AssetBundle']
 
-        printer("Downloading Skills")
+        self._printer("Downloading Skills")
         skills = (s.resource_id or s.ID for s in loader.skills_repo.all_skills)
         self.download_skills(skills, env, asset_bundle, remote_skills_ids)
 
-        printer("Downloading Units Assets")
+        self._printer("Downloading Units Assets")
         if unit_ids:
             units_gen = (loader.load_unit(int(i)) for i in unit_ids)
         else:
             units_gen = loader.load_playable_units()
         self.download_units(units_gen, env, streaming_assets, remote_units_ids)
 
-        printer('All files downloaded')
+        self._printer('All files downloaded')
 
     @staticmethod
     def sort_units(units: list):
@@ -277,7 +279,7 @@ class SiteManager:
 
     def render_site(self, minify: bool, clean: bool, unit_ids: list):
         exec_start = datetime.datetime.now()
-        print('Loading Units...')
+        self._printer('Loading Units...')
         loader = load_folder(Path(self._work, 'cache', 'current'))
         env = JinjaEnv(
             loader=FileSystemLoader(
@@ -409,9 +411,9 @@ class SiteManager:
         else:
             units = [u for u in loader.load_playable_units() if not u.can_evolve]
 
-        print(f'Loaded {len(units)} units successfully')
+        self._printer(f'Loaded {len(units)} units successfully')
 
-        print(f'Computing groups...')
+        self._printer(f'Computing groups...')
         self.sort_units(units)
         units_by_tag = self.group_units(units, key=lambda u: u.tags, iter_key=True)
         units_by_weapon = self.group_units(units, key=lambda u: u.gear_kind)
@@ -434,7 +436,7 @@ class SiteManager:
             for c in SkillAwakeCategory
         }
 
-        print(f'Computing search index...')
+        self._printer(f'Computing search index...')
         flex_js_path = os.path.join(self._sources, 'js', 'flexsearch-0.6.22.min.js')
         with open(flex_js_path, mode='r', encoding='utf-8') as fd:
             flex_js_code = fd.read()
@@ -464,8 +466,8 @@ class SiteManager:
             'skill_icons':        skill_icons,
         }
 
-        print(f'Rendering Units to {units_path}')
-        progress = Progress(len(units))
+        self._printer(f'Rendering Units to {units_path}')
+        progress = Progress(len(units), self._printer)
         unit_template = env.get_template('unit.html')
         for unit in units:
             output_path = units_path / f'{unit.ID}.html'
@@ -479,8 +481,8 @@ class SiteManager:
             )
             progress.inc()
 
-        print(f'Rendering Skills lists to {skills_path}')
-        progress = Progress(len(rs_units.keys()) + 1)
+        self._printer(f'Rendering Skills lists to {skills_path}')
+        progress = Progress(len(rs_units.keys()) + 1, self._printer)
         ovk_path = skills_path / 'overkillers.html'
         self.render(
             template=env.get_template('ovk-skill-list.html'),
@@ -505,9 +507,9 @@ class SiteManager:
             )
             progress.inc()
 
-        print(f'Rendering Tags to {tags_path}')
+        self._printer(f'Rendering Tags to {tags_path}')
         tag_template = env.get_template('tag.html')
-        progress = Progress(len(units_by_tag.items()))
+        progress = Progress(len(units_by_tag.items()), self._printer)
         for tag, tag_units in units_by_tag.items():
             self.sort_units(tag_units)
             output_path = tags_path / f'{tag.uid}.html'
@@ -527,8 +529,9 @@ class SiteManager:
         def render_generic_template(unit_map: dict, sub_path: str):
             generic_path = site_path / sub_path
             generic_path.mkdir(exist_ok=True)
-            print(f'Rendering {sub_path.title()} to {generic_path}')
-            progress = Progress(len(unit_map.items()))
+            self._printer(f'Rendering {sub_path.title()} to {generic_path}')
+            # noinspection PyShadowingNames
+            progress = Progress(len(unit_map.items()), self._printer)
             for k, k_units in unit_map.items():
                 self.sort_units(k_units)
                 out_path = generic_path / f'{k.value}.html'
@@ -547,7 +550,7 @@ class SiteManager:
         render_generic_template(units_by_element, 'elements')
 
         index_path = site_path / 'index.html'
-        print(f'Rendering {index_path}')
+        self._printer(f'Rendering {index_path}')
         self.render(
             template=env.get_template('index.html'),
             out=index_path,
@@ -560,10 +563,10 @@ class SiteManager:
 
         elapsed_time = datetime.datetime.now() - exec_start
         count_ovk = sum(len(units) for _, units in ovk_units)
-        print(f'\nAll pages rendered successfully in {elapsed_time}')
-        print(f'{len(units)} Units')
-        print(f'{len(units_by_tag.keys())} Tags')
-        print(f'{count_ovk} Overkiller Skills')
+        self._printer(f'\nAll pages rendered successfully in {elapsed_time}')
+        self._printer(f'{len(units)} Units')
+        self._printer(f'{len(units_by_tag.keys())} Tags')
+        self._printer(f'{count_ovk} Overkiller Skills')
 
     @staticmethod
     def compute_local_sums(site_path: Path) -> Set[Tuple[str, str]]:
@@ -594,7 +597,7 @@ class SiteManager:
         remote.update(local)
         return {tuple(i) for i in remote.items()}
 
-    def upload_site(self, site_path: str, api_key: str, dry_run: bool, printer):
+    def upload_site(self, site_path: str, api_key: str, dry_run: bool):
         # Change parameters types.
         site_path: Path = Path(site_path)
         if not api_key:
@@ -602,33 +605,34 @@ class SiteManager:
             try:
                 api_key = api_key.read_text(encoding='utf-8')
             except FileNotFoundError:
-                printer(f'[WARNING] Unable to read api key ({api_key})')
+                self._printer(f'[WARNING] Unable to read api key ({api_key})')
                 api_key = ''
         final_sums_path = site_path / CHECKSUMS_FN
 
-        printer('Computing local checksums...')
+        self._printer('Computing local checksums...')
         local_sums = self.compute_local_sums(site_path)
 
-        printer('Fetching remote checksums...')
+        self._printer('Fetching remote checksums...')
         remote_sums = self.fetch_remote_sums(REMOTE_SUMS_URL)
 
         changed = local_sums - remote_sums
-        printer(f'{len(changed)} files to be uploaded')
+        self._printer(f'{len(changed)} files to be uploaded')
 
         final_sums = self.merge_sums(local_sums, remote_sums)
         with final_sums_path.open(mode='w', encoding='utf-8') as fp:
             json.dump(sorted(final_sums), fp, ensure_ascii=False)
 
         if not changed:
-            printer('Nothing to upload, site is up to date')
+            self._printer('Nothing to upload, site is up to date')
             return
 
-        narrator = UploadNarrator(printer, self._work)
+        narrator = UploadNarrator(self._printer, self._work)
 
         if dry_run:
             for fn, new_md5 in sorted(changed):
+                # noinspection PyTypeChecker
                 narrator.echo(fn, fn, is_dry=True)
-            printer(f'[DRY-RUN] Uploaded {len(changed)} files')
+            self._printer(f'[DRY-RUN] Uploaded {len(changed)} files')
             return
 
         uploader = Uploader(base_url='https://neocities.org/', api_key=api_key)
@@ -637,11 +641,12 @@ class SiteManager:
             remote = Path(fn).as_posix()
             narrator.echo(local, remote, nl=False)
             r = uploader.upload(local, remote)
-            printer(f'{r.status_code} {r.json()["result"].upper()}')
+            self._printer(f'{r.status_code} {r.json()["result"].upper()}')
 
-        printer(
+        # noinspection PyArgumentList
+        self._printer(
             'Files uploaded successfully. Updating remote checksums file...  ',
             nl=False)
         r = uploader.upload(final_sums_path, CHECKSUMS_FN)
-        printer(f'{r.status_code} {r.json()["result"].upper()}')
-        printer('Site updated successfully')
+        self._printer(f'{r.status_code} {r.json()["result"].upper()}')
+        self._printer('Site updated successfully')
