@@ -102,7 +102,7 @@ class SiteManager:
         with open(paths_fp, mode='rb') as fd:
             paths = json.load(fd)
         self._printer("File loaded successfully")
-        env = Environment(paths, True)
+        env = Environment(paths, True, printer=self._printer)
 
         root_path = Path(self._work, 'cache', 'current')
         if root_path.exists():  # FIXME Ask for forgiveness
@@ -204,7 +204,7 @@ class SiteManager:
             if m
         }
 
-        env = Environment(review_app_connect=True)
+        env = Environment(review_app_connect=True, printer=self._printer)
         streaming_assets: dict = paths['StreamingAssets']
         asset_bundle: dict = paths['AssetBundle']
 

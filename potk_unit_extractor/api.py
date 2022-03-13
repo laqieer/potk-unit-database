@@ -12,7 +12,8 @@ class Environment:
     def dlc_url_base(self):
         return "/{0}".format("2018")  # Application.unityVersion.Split('.')[0])
 
-    def __init__(self, paths: dict = None, review_app_connect=False):
+    def __init__(self, paths: dict = None, review_app_connect=False, printer=print):
+        self._printer = printer
         self.paths = paths
         self.dlc_path = "https://{0}.gu3.jp/dlc/production{1}/{2}/".format(
             "punk-dlc-review" if review_app_connect else "punk-dlc",
@@ -50,8 +51,7 @@ class Environment:
         if skip_existing and target_fp.exists():
             return
 
-        # FIXME no printing in API calls.
-        print(f'Saving "{key}" to "{target_fp}"...')
+        self._printer(f'Saving "{key}" to "{target_fp}"...')
         with target_fp.open(mode='wb') as fd:
             fd.write(self._download_asset('sa', download_fn))
 
@@ -60,7 +60,7 @@ class Environment:
         """Download and extract icons from unity3d bundles"""
         if skip_existing and icon_path.exists():
             return
-        print(f'Saving {fn} to {icon_path}...')
+        self._printer(f'Saving {fn} to {icon_path}...')
         with tempfile.TemporaryFile() as fp:
             fp.write(self._download_asset('ab', fn))
             fp.seek(0)
