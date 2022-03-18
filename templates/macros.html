@@ -87,7 +87,9 @@
 				{% if req_lv %}
 				<small class="font-weight-bold">Evolves at Skill lv&nbsp;{{ req_lv }}</small> <br/>
 				{% endif %}
-				{{ skill.jp_desc.name }}
+				<span data-skill-field="name" data-skill-id="{{skill.ID}}">
+					{{ skill.jp_desc.name }}
+				</span>
 				{% if req_dv %}
 				<br/> <span class="badge badge-danger">Required DV: {{ req_dv }}</span>
 				{% endif %}
@@ -118,7 +120,9 @@
 				{% endfor %}
 			</div>
 		</div>
-		<p class="card-text mb-0">{{ skill.jp_desc.full }}</p>
+		<p class="card-text mb-0" data-skill-field="desc" data-skill-id="{{skill.ID}}">
+			{{ skill.jp_desc.full }}
+		</p>
 		<dl class="skill-attribute-list">
 			{% if skill.type.value == 5 %}{# Magic #}
 			<dt>Element</dt>
@@ -223,6 +227,14 @@
 				</div>
 			</li>
 		</ul>
+	</div>
+	<div id="toggle-lang" class="btn-group btn-group-toggle m-1" data-toggle="buttons" hidden>
+		<label class="btn btn-secondary btn-sm active">
+			<input type="radio" name="lang" id="lang-jp" checked> JP
+		</label>
+		<label class="btn btn-secondary btn-sm">
+			<input type="radio" name="lang" id="lang-en" disabled> EN
+		</label>
 	</div>
 	<div class="mt-2 mt-sm-0">
 		<a href="https://discord.gg/5JrCu3K" rel="noreferrer noopener" target="_blank">

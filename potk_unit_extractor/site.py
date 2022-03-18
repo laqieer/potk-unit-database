@@ -296,12 +296,14 @@ class SiteManager:
         tags_path = site_path / 'tags'
         skills_path = site_path / 'skills'
         flex_search_path = site_path / 'search'
+        js_path = site_path / 'js'
 
         if clean:
             shutil.rmtree(units_path, ignore_errors=True)
             shutil.rmtree(tags_path, ignore_errors=True)
             shutil.rmtree(skills_path, ignore_errors=True)
             shutil.rmtree(flex_search_path, ignore_errors=True)
+            shutil.rmtree(js_path, ignore_errors=True)
             shutil.rmtree(site_path / 'weapons', ignore_errors=True)
             shutil.rmtree(site_path / 'elements', ignore_errors=True)
 
@@ -309,6 +311,7 @@ class SiteManager:
         tags_path.mkdir(exist_ok=True)
         skills_path.mkdir(exist_ok=True)
         flex_search_path.mkdir(exist_ok=True)
+        js_path.mkdir(exist_ok=True)
 
         def stars(unit: UnitData, final: UnitData) -> str:
             """★☆"""
@@ -465,6 +468,12 @@ class SiteManager:
             'elements':           sorted(units_by_element.keys()),
             'skill_icons':        skill_icons,
         }
+
+        js_src = Path(os.path.join(self._sources, 'js', 'src'))
+        for fp in js_src.glob('*.js'):
+            fpd = js_path / fp.name
+            self._printer(f'Copying {fp} to {fpd}...')
+            shutil.copy(fp, fpd)
 
         self._printer(f'Rendering Units to {units_path}')
         progress = _Progress(len(units), self._printer)
