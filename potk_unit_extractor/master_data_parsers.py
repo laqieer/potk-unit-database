@@ -63,6 +63,7 @@ def parse_unit_unit(reader: MasterDataReader, item: dict):
     item['overkillers_parameter'] = reader.ReadInt()
     item['expire_date_UnitExpireDate'] = reader.ReadIntOrNull()
     item['is_exp_material'] = reader.ReadBool()
+    item['upper_attribute_flag'] = reader.ReadBool()
 
 
 def parse_unit_parameters(reader: MasterDataReader, item: dict):
