@@ -541,7 +541,7 @@ class UnitSkills:
     leader: Optional[Skill]
     intimate: Optional[Skill]  # Multi DS
     harmony: Optional[Skill]  # Multi DS that requires CQ.
-    types: Dict[UnitType, Skill]
+    types: Dict[UnitType, Tuple[Skill]]
     evolutions: Dict[Skill, SkillEvo]
     cq: Tuple[Skill]
     native: Tuple[Skill]

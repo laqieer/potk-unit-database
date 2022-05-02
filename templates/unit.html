@@ -271,10 +271,12 @@
 				{% if unit.skills.types %}
 				<h3 class="text-muted">Type Skills</h3>
 				<div id="type-skills-{{unit.ID}}">
-					{% for type, skill in unit.skills.types.items() %}
+					{% for type, skills in unit.skills.types.items() %}
+					{% for skill in skills %}
 					<div class="mb-3">
 						{{- macros.unit_skill(skill, '..', type) -}}
 					</div>
+					{% endfor %}
 					{% endfor %}
 				</div>
 				{% endif %}

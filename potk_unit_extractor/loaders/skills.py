@@ -67,12 +67,16 @@ class SkillsRepo:
         unit = self._units[unit_id]
         evolutions = {s.from_skill: s for s in self._evolutions[unit.ID]}
         native = self._list_skills(unit_id, self._unit_skill)
+        types = defaultdict(list)
+        for s in native:
+            if s.unit_type:
+                types[s.unit_type].append(s)
         return UnitSkills(
             relationship=self._find_skill(unit.same_id, self._unit_rs),
             leader=self._find_skill(unit.ID, self._unit_ls),
             intimate=self._find_skill(unit.ID, self._unit_is),
             harmony=self._find_skill(unit.char_id, self._unit_hq),
-            types={s.unit_type: s for s in native if s.unit_type},
+            types={t: tuple(sorted(l)) for t, l in types.items()},
             evolutions=evolutions,
             cq=tuple(sorted(self._list_skills(unit_id, self._unit_cq))),
             native=tuple(sorted(s for s in native if not s.unit_type)),
