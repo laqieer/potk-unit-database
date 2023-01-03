@@ -7,7 +7,7 @@ from typing import Optional, List, Tuple, Dict
 from . import UnitMetadata
 from ..master_data import MasterDataRepo, MasterData
 from ..model import Skill, SkillType, SkillDesc, SkillGenre, SkillTarget, \
-    Element, SkillEvo, UnitSkills, OvkSkill, SkillAwakeCategory
+    Element, SkillEvo, UnitSkills, OvkSkill, SkillAwakeCategory, try_parse_skill_enum
 
 logger = logging.getLogger(__name__)
 
@@ -95,14 +95,12 @@ class SkillsRepo:
 
     @staticmethod
     def _create_skill(skill: dict) -> Skill:
-        category_id = skill['awake_skill_category_id']
-        try:
-            category = SkillAwakeCategory(category_id) if category_id > 1 else None
-        except ValueError:
-            logger.warning('ignored unmapped category for skill %d (category_id: %d)', skill['ID'], category_id)
-            category = None
+        category = try_parse_skill_enum(SkillAwakeCategory, skill, 'awake_skill_category_id', skip_if=lambda v: v < 3)
+        target = try_parse_skill_enum(SkillTarget, skill, 'target_type_BattleskillTargetType')
+        skill_type = try_parse_skill_enum(
+            SkillType, skill, 'skill_type_BattleskillSkillType', default=SkillType.UNKNOWN)
         return Skill(
-            type=SkillType(skill['skill_type_BattleskillSkillType']),
+            type=skill_type,
             ID=skill['ID'],
             jp_desc=SkillDesc(
                 name=skill['name'],
@@ -116,7 +114,7 @@ class SkillsRepo:
                 for k in ['genre1_BattleskillGenre', 'genre2_BattleskillGenre']
                 if skill[k]
             )),
-            target=SkillTarget(skill['target_type_BattleskillTargetType']),
+            target=target,
             element=Element(skill['element_CommonElement']),
             category=category,
             use_count=skill['use_count'],

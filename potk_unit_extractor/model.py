@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import logging
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
@@ -10,6 +11,7 @@ from itertools import chain
 from typing import List, Optional, Dict, Tuple, Set
 
 DV_CAP = 99
+logger = logging.getLogger(__name__)
 
 
 class UD:
@@ -291,6 +293,7 @@ class Element(IntEnum):
 
 class SkillType(IntEnum):
     """From MasterDataTable.BattleskillSkillType enum"""
+    UNKNOWN = -1
     COMMAND = 1
     RELEASE = 2
     PASSIVE = 3
@@ -368,7 +371,7 @@ class Skill:
     en_desc: Optional[SkillDesc]
     max_lv: int
     genres: Tuple[SkillGenre]
-    target: SkillTarget
+    target: Optional[SkillTarget]
     element: Element
     category: Optional[SkillAwakeCategory]
     use_count: int
@@ -673,3 +676,18 @@ class UnitData:
             cats.add(SkillAwakeCategory.GENERIC_RS)
 
         return tuple(sorted(cats))
+
+
+def try_parse_skill_enum(output_type, source: dict, key, default=None, skip_if=None):
+    value = source[key]
+    if skip_if is not None and skip_if(value):
+        return None
+    try:
+        return output_type(value)
+    except ValueError:
+        source_id = source.get('ID')
+        logger.warning(
+            "ignored unmapped %s for skill['ID']=%d (skill['%s']=%s)",
+            str(output_type), source_id, str(key), str(value)
+        )
+        return default
