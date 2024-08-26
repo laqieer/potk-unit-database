@@ -44,7 +44,7 @@ class Environment:
         if not asset:
             raise ValueError(key + " has empty bundle")
 
-        download_fn = asset[0]
+        download_fn = asset['FileName']
         target_fn = key.split('/')[-1]
         ext = asset[1]
         target_fp = target / f'{target_fn}{ext}'
