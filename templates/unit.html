@@ -28,6 +28,11 @@
 <body>
 {% import 'macros.html' as macros with context %}
 <div class="container">
+	<div class="breadcrumb">
+                <a class="breadcrumb-link" href="https://potk-fan-database.neocities.org/">Main</a>
+                <span class="breadcrumb-gt">&gt;</span>
+                <span class="breadcrumb-child">{{ unit.eng_name | title }}</span>
+        </div>
 	<div class="sticky-top bg-white">
 		{{ macros.nav_bar(cd_root='..', active='', sticky=False) }}
 		<ul class="nav nav-pills mb-3 bg-white" role="tablist">
