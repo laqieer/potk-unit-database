@@ -46,7 +46,7 @@ class Environment:
 
         download_fn = asset['FileName']
         target_fn = key.split('/')[-1]
-        ext = asset[1]
+        ext = asset['Extension']
         target_fp = target / f'{target_fn}{ext}'
         if skip_existing and target_fp.exists():
             return
