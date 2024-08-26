@@ -9,7 +9,7 @@ This is a collection of python scripts to:
 
 ## Requisites
 
-* Python 3.8+
+* Python 3.10+
 * Access to an updated `paths.json` file from the game.
 
 ## Quickstart (Windows)

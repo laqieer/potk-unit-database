@@ -145,13 +145,13 @@ class SiteManager:
             key = f'BattleSkills/{res_id}/skill_icon'
             if key in assets:
                 icon_path = target / f'{res_id}.png'
-                env.save_asset_icon(fn=assets[key][0], icon_path=icon_path)
+                env.save_asset_icon(fn=assets[key]['FileName'], icon_path=icon_path)
 
         for extra in ['ability', 'def', 'leader', 'supply']:
             key = f'BattleSkills/{extra}_skill_icon'
             if key in assets:
                 path = target / f'{extra}.png'
-                env.save_asset_icon(fn=assets[key][0], icon_path=path)
+                env.save_asset_icon(fn=assets[key]['FileName'], icon_path=path)
 
     def _download_units(self, units: Iterable, env: Environment, streaming_assets: dict, existing_ids: set = None):
         target = Path(self._work, 'site', 'images', 'units')

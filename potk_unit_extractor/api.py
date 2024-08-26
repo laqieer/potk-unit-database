@@ -32,7 +32,7 @@ class Environment:
             raise ValueError(res)
 
         with out.open(mode='wb') as fd:
-            fd.write(self._download_asset('ab', bundle[0]))
+            fd.write(self._download_asset('ab', bundle['FileName']))
 
     def save_streaming_asset(
             self,
