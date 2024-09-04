@@ -586,7 +586,7 @@ class UnitData:
 
     @cached_property
     def any_name(self) -> str:
-        return self.eng_name if self.eng_name else self.jp_name
+        return self.eng_name + ' ' + self.jp_name
 
     @cached_property
     def h_id(self) -> str:
