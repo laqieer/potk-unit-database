@@ -18,7 +18,7 @@ This is a collection of python scripts to:
 
 * Find your `paths.json` file.
 * Drag And Drop it over [`update_local.bat`](update_local.bat).
-* Browse it at [`site/index.html`](site/index.html).
+* Browse it at [`docs/index.html`](docs/index.html).
 
 ## Quickstart (elsewhere)
 
@@ -26,7 +26,7 @@ This is a collection of python scripts to:
 * Drag&Drop the `paths.json` file into [`0_download_master_data.py`](0_download_master_data.py).
 * Drag&Drop the `paths.json` file into [`1_download_site_assets.py`](1_download_site_assets.py).
 * Render the site locally with [`3_render_html.py`](3_render_html.py).
-* Browse it at [`site/index.html`](site/index.html).
+* Browse it at [`docs/index.html`](docs/index.html).
 
 ## Uploading
 

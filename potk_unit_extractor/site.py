@@ -133,7 +133,7 @@ class SiteManager:
         return {i[0] for i in resp.json()}
 
     def _download_skills(self, ids: Iterable, env: Environment, assets: dict, existing_ids: set = None):
-        target = Path(self._work, 'site', 'images', 'skills')
+        target = Path(self._work, 'docs', 'images', 'skills')
         target.mkdir(exist_ok=True, parents=True)
 
         seen = set(existing_ids) if existing_ids else set()
@@ -154,7 +154,7 @@ class SiteManager:
                 env.save_asset_icon(fn=assets[key]['FileName'], icon_path=path)
 
     def _download_units(self, units: Iterable, env: Environment, streaming_assets: dict, existing_ids: set = None):
-        target = Path(self._work, 'site', 'images', 'units')
+        target = Path(self._work, 'docs', 'images', 'units')
         target.mkdir(exist_ok=True, parents=True)
 
         seen = set(existing_ids) if existing_ids else set()
@@ -289,7 +289,7 @@ class SiteManager:
             lstrip_blocks=True,
         )
 
-        site_path = Path(self._work, 'site')
+        site_path = Path(self._work, 'docs')
         site_path.mkdir(exist_ok=True)
 
         units_path = site_path / 'units'

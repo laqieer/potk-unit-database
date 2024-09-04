@@ -7,7 +7,7 @@ from potk_unit_extractor.site import SiteManager
 
 
 @click.command()
-@click.option('--site-path', default='./site')
+@click.option('--site-path', default='./docs')
 @click.option('--api-key', '-k', default='')
 @click.option('--dry-run', '-n', type=bool, default=False, is_flag=True)
 def main(site_path: str, api_key: str, dry_run: bool):
