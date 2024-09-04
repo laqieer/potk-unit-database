@@ -122,7 +122,13 @@
 units = document.getElementById("unit-list").getElementsByClassName("list-group-item");
 searchBox = document.getElementById("myInput");
 anyShown = false;
-index = FlexSearch.create();
+index = FlexSearch.create({
+	tokenize: function(str){
+		const cjkItems = str.replace(/[\x00-\x7F]/g, " ").split(/\s+/);
+		const asciiItems = str.split(/\W+/);
+		return cjkItems.concat(asciiItems);
+	}
+});
 
 fetch('./search/units.index.txt')
 	.then(response => response.text())
